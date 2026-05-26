@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Controle SST</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <svg class="sprite" aria-hidden="true" focusable="false">
+      <symbol id="icon-dashboard" viewBox="0 0 24 24">
+        <path d="M4 13h6v7H4zM14 4h6v16h-6zM4 4h6v5H4z"></path>
+      </symbol>
+      <symbol id="icon-task" viewBox="0 0 24 24">
+        <path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"></path>
+      </symbol>
+      <symbol id="icon-team" viewBox="0 0 24 24">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9.5" cy="7" r="4"></circle>
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </symbol>
+      <symbol id="icon-help" viewBox="0 0 24 24">
+        <path d="M12 18h.01"></path>
+        <path d="M9.1 9a3 3 0 1 1 4.9 2.3c-.9.56-1.5 1.24-1.5 2.7"></path>
+        <circle cx="12" cy="12" r="10"></circle>
+      </symbol>
+      <symbol id="icon-plus" viewBox="0 0 24 24">
+        <path d="M12 5v14M5 12h14"></path>
+      </symbol>
+      <symbol id="icon-check" viewBox="0 0 24 24">
+        <path d="m20 6-11 11-5-5"></path>
+      </symbol>
+      <symbol id="icon-download" viewBox="0 0 24 24">
+        <path d="M12 3v12m0 0 4-4m-4 4-4-4"></path>
+        <path d="M4 17v3h16v-3"></path>
+      </symbol>
+      <symbol id="icon-upload" viewBox="0 0 24 24">
+        <path d="M12 15V3m0 0 4 4m-4-4-4 4"></path>
+        <path d="M4 17v3h16v-3"></path>
+      </symbol>
+      <symbol id="icon-trash" viewBox="0 0 24 24">
+        <path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15"></path>
+      </symbol>
+      <symbol id="icon-clock" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M12 6v6l4 2"></path>
+      </symbol>
+    </svg>
+
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navegação principal">
+        <div class="brand">
+          <div class="brand-mark">SST</div>
+          <div>
+            <strong>Controle SST</strong>
+            <span>tarefas e apoio</span>
+          </div>
+        </div>
+
+        <nav class="nav-tabs" aria-label="Áreas do programa">
+          <button class="nav-button active" type="button" data-view="dashboard">
+            <svg><use href="#icon-dashboard"></use></svg>
+            Dashboard
+          </button>
+          <button class="nav-button" type="button" data-view="tasks">
+            <svg><use href="#icon-task"></use></svg>
+            Tarefas
+          </button>
+          <button class="nav-button" type="button" data-view="team">
+            <svg><use href="#icon-team"></use></svg>
+            Equipe
+          </button>
+          <button class="nav-button" type="button" data-view="help">
+            <svg><use href="#icon-help"></use></svg>
+            Ajuda
+          </button>
+        </nav>
+
+        <div class="sidebar-tools">
+          <button class="ghost-button" type="button" id="exportData">
+            <svg><use href="#icon-download"></use></svg>
+            Exportar
+          </button>
+          <button class="ghost-button" type="button" id="importDataButton">
+            <svg><use href="#icon-upload"></use></svg>
+            Importar
+          </button>
+          <button class="ghost-button danger" type="button" id="resetData">
+            <svg><use href="#icon-trash"></use></svg>
+            Restaurar demo
+          </button>
+          <input id="importData" type="file" accept="application/json" hidden>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow" id="todayLabel"></p>
+            <h1>Plano semanal da equipe de SST</h1>
+          </div>
+          <div class="top-actions">
+            <label class="week-filter">
+              Semana
+              <input id="globalWeekFilter" type="week">
+            </label>
+            <button class="primary-button" type="button" data-view-shortcut="tasks">
+              <svg><use href="#icon-plus"></use></svg>
+              Nova tarefa
+            </button>
+          </div>
+        </header>
+
+        <section id="dashboardView" class="view active" data-view-panel="dashboard">
+          <div class="metric-grid" id="metricGrid"></div>
+
+          <div class="content-grid two-columns">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2>Carga por pessoa</h2>
+                  <p>Horas estimadas em tarefas abertas na semana selecionada.</p>
+                </div>
+              </div>
+              <div class="workload-list" id="workloadList"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2>Status das tarefas</h2>
+                  <p>Visão rápida por situação e tipo de demanda.</p>
+                </div>
+              </div>
+              <div class="split-chart" id="statusChart"></div>
+              <div class="type-chart" id="typeChart"></div>
+            </section>
+          </div>
+
+          <div class="content-grid three-columns">
+            <section class="panel">
+              <h2>Mais pedem ajuda</h2>
+              <div class="ranking-list" id="helpRanking"></div>
+            </section>
+            <section class="panel">
+              <h2>Entregas no prazo</h2>
+              <div class="ranking-list" id="onTimeRanking"></div>
+            </section>
+            <section class="panel">
+              <h2>Atrasos</h2>
+              <div class="ranking-list" id="delayRanking"></div>
+            </section>
+          </div>
+        </section>
+
+        <section id="tasksView" class="view" data-view-panel="tasks">
+          <div class="content-grid task-layout">
+            <section class="panel task-form-panel">
+              <div class="panel-header">
+                <div>
+                  <h2>Inserir tarefa da semana</h2>
+                  <p>Registre responsável, tipo de tarefa e prazo de entrega.</p>
+                </div>
+              </div>
+
+              <form id="taskForm" class="stacked-form">
+                <label>
+                  Título
+                  <input id="taskTitle" type="text" maxlength="90" placeholder="Ex.: Revisar APR da manutenção" required>
+                </label>
+                <label>
+                  Responsável
+                  <select id="taskOwner" required></select>
+                </label>
+                <div class="form-row">
+                  <label>
+                    Semana
+                    <input id="taskWeek" type="week" required>
+                  </label>
+                  <label>
+                    Prazo
+                    <input id="taskDueDate" type="date" required>
+                  </label>
+                </div>
+                <div class="form-row">
+                  <label>
+                    Tipo
+                    <select id="taskType" required>
+                      <option value="rotineira">Rotineira</option>
+                      <option value="eventual">Eventual</option>
+                    </select>
+                  </label>
+                  <label>
+                    Prioridade
+                    <select id="taskPriority" required>
+                      <option value="media">Média</option>
+                      <option value="alta">Alta</option>
+                      <option value="critica">Crítica</option>
+                      <option value="baixa">Baixa</option>
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  Horas estimadas
+                  <input id="taskHours" type="number" min="1" max="80" value="4" required>
+                </label>
+                <label>
+                  Observações
+                  <textarea id="taskDescription" rows="4" maxlength="420" placeholder="Detalhe a demanda, local, documento ou área envolvida."></textarea>
+                </label>
+                <button class="primary-button full" type="submit">
+                  <svg><use href="#icon-plus"></use></svg>
+                  Adicionar tarefa
+                </button>
+              </form>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header with-filters">
+                <div>
+                  <h2>Controle de tarefas</h2>
+                  <p>Acompanhe prazos, responsáveis, tipo e apoio.</p>
+                </div>
+                <div class="filters">
+                  <select id="statusFilter" aria-label="Filtrar por status">
+                    <option value="ativas">Ativas</option>
+                    <option value="todas">Todas</option>
+                    <option value="pendente">Pendentes</option>
+                    <option value="em_andamento">Em andamento</option>
+                    <option value="concluida">Concluídas</option>
+                    <option value="atrasada">Atrasadas</option>
+                  </select>
+                  <select id="ownerFilter" aria-label="Filtrar por responsável"></select>
+                  <select id="typeFilter" aria-label="Filtrar por tipo">
+                    <option value="todos">Todos os tipos</option>
+                    <option value="rotineira">Rotineiras</option>
+                    <option value="eventual">Eventuais</option>
+                  </select>
+                </div>
+              </div>
+              <div class="task-list" id="taskList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section id="teamView" class="view" data-view-panel="team">
+          <div class="content-grid team-layout">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2>Equipe</h2>
+                  <p>Capacidade semanal, carga atual e desempenho.</p>
+                </div>
+              </div>
+              <div class="people-grid" id="peopleGrid"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2>Cadastrar pessoa</h2>
+                  <p>Inclua membros da equipe de SST e a capacidade semanal.</p>
+                </div>
+              </div>
+              <form id="personForm" class="stacked-form">
+                <label>
+                  Nome
+                  <input id="personName" type="text" maxlength="70" placeholder="Nome da pessoa" required>
+                </label>
+                <label>
+                  Função
+                  <input id="personRole" type="text" maxlength="70" placeholder="Ex.: Técnica de segurança" required>
+                </label>
+                <label>
+                  Capacidade semanal em horas
+                  <input id="personCapacity" type="number" min="1" max="80" value="32" required>
+                </label>
+                <button class="primary-button full" type="submit">
+                  <svg><use href="#icon-plus"></use></svg>
+                  Adicionar pessoa
+                </button>
+              </form>
+            </section>
+          </div>
+        </section>
+
+        <section id="helpView" class="view" data-view-panel="help">
+          <div class="content-grid two-columns help-layout">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2>Pedir ajuda</h2>
+                  <p>O programa procura primeiro quem está sem tarefa aberta na semana e depois quem tem maior capacidade livre.</p>
+                </div>
+              </div>
+              <form id="helpForm" class="stacked-form">
+                <label>
+                  Tarefa que precisa de apoio
+                  <select id="helpTaskSelect" required></select>
+                </label>
+                <button class="accent-button full" type="submit">
+                  <svg><use href="#icon-help"></use></svg>
+                  Pedir ajuda automática
+                </button>
+              </form>
+              <div class="support-result" id="supportResult"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2>Disponíveis para apoio</h2>
+                  <p>Ordenado por carga livre na semana selecionada.</p>
+                </div>
+              </div>
+              <div class="availability-list" id="availabilityList"></div>
+            </section>
+          </div>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Histórico de ajuda</h2>
+                <p>Pedidos realizados, pessoa solicitante e apoio atribuído.</p>
+              </div>
+            </div>
+            <div class="history-list" id="helpHistory"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
