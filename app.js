@@ -367,6 +367,7 @@ function taskCard(task) {
   const owner = personById(task.ownerId);
   const helper = personById(task.helperId);
   const late = isTaskLate(task);
+  const progressLabel = task.status === "em_andamento" ? "Pausar" : "Iniciar";
   const statusBadge = isDone(task)
     ? `<span class="badge done">Concluída</span>`
     : late
@@ -394,18 +395,19 @@ function taskCard(task) {
       <div class="task-actions">
         <button class="icon-button success" type="button" title="Concluir ou reabrir tarefa" onclick="toggleTaskDone('${task.id}')">
           <svg><use href="#icon-check"></use></svg>
-          ${isDone(task) ? "Reabrir" : "Concluir"}
+          ${isDone(task) ? "Reabrir tarefa" : "Marcar concluída"}
         </button>
         <button class="icon-button help" type="button" title="Pedir ajuda automática" onclick="requestHelp('${task.id}')" ${isDone(task) ? "disabled" : ""}>
           <svg><use href="#icon-help"></use></svg>
-          Ajuda
+          Solicitar apoio
         </button>
         <button class="icon-button" type="button" title="Alternar andamento" onclick="toggleTaskProgress('${task.id}')" ${isDone(task) ? "disabled" : ""}>
           <svg><use href="#icon-clock"></use></svg>
-          Andamento
+          ${progressLabel}
         </button>
         <button class="icon-button danger" type="button" title="Excluir tarefa" onclick="deleteTask('${task.id}')">
           <svg><use href="#icon-trash"></use></svg>
+          Excluir
         </button>
       </div>
     </article>
@@ -572,6 +574,7 @@ function addTask(event) {
 
   saveState();
   render();
+  switchView("execution");
   showToast("Tarefa adicionada ao plano semanal.");
 }
 

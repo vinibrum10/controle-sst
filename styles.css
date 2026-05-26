@@ -130,6 +130,8 @@ svg {
 .ghost-button,
 .primary-button,
 .accent-button,
+.secondary-button,
+.danger-button,
 .icon-button {
   display: inline-flex;
   align-items: center;
@@ -144,9 +146,11 @@ svg {
 .nav-button {
   justify-content: flex-start;
   width: 100%;
+  min-height: 46px;
   padding: 0 12px;
   background: transparent;
   color: #d4e1de;
+  font-weight: 800;
 }
 
 .nav-button:hover,
@@ -155,10 +159,16 @@ svg {
   color: #ffffff;
 }
 
-.sidebar-tools {
-  display: grid;
-  gap: 8px;
-  margin-top: auto;
+.nav-button.active {
+  box-shadow: inset 3px 0 0 #70d7ca;
+}
+
+.nav-group-label {
+  margin: 12px 0 2px;
+  color: #91a39e;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
 .ghost-button {
@@ -258,22 +268,39 @@ p {
 }
 
 .primary-button,
-.accent-button {
+.accent-button,
+.secondary-button,
+.danger-button {
   padding: 0 14px;
-  color: #ffffff;
   font-weight: 800;
 }
 
 .primary-button {
   background: var(--teal);
+  color: #ffffff;
 }
 
 .accent-button {
   background: var(--blue);
+  color: #ffffff;
+}
+
+.secondary-button {
+  border: 1px solid var(--line);
+  background: #ffffff;
+  color: var(--text);
+}
+
+.danger-button {
+  background: #fff0f0;
+  color: var(--red);
+  border: 1px solid rgba(179, 58, 58, 0.25);
 }
 
 .primary-button:hover,
 .accent-button:hover,
+.secondary-button:hover,
+.danger-button:hover,
 .icon-button:hover {
   transform: translateY(-1px);
 }
@@ -342,9 +369,17 @@ p {
   align-items: start;
 }
 
+.form-shell {
+  max-width: 780px;
+}
+
 .team-layout {
   grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
   align-items: start;
+}
+
+.data-layout {
+  max-width: 840px;
 }
 
 .panel {
@@ -488,7 +523,7 @@ textarea:focus {
   flex-wrap: wrap;
   align-content: start;
   justify-content: flex-end;
-  width: 210px;
+  width: 310px;
 }
 
 .icon-button {
@@ -498,6 +533,11 @@ textarea:focus {
   background: #ffffff;
   color: var(--text);
   font-weight: 800;
+}
+
+.task-actions .icon-button {
+  justify-content: flex-start;
+  min-width: 148px;
 }
 
 .icon-button.success {
@@ -755,6 +795,16 @@ textarea:focus {
   display: block;
 }
 
+.data-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.data-actions button {
+  min-width: 190px;
+}
+
 .empty-state {
   padding: 22px;
   border: 1px dashed var(--line);
@@ -817,12 +867,6 @@ textarea:focus {
     width: auto;
   }
 
-  .sidebar-tools {
-    display: flex;
-    margin-top: 0;
-    flex-wrap: wrap;
-  }
-
   .two-columns,
   .three-columns,
   .task-layout,
@@ -871,6 +915,10 @@ textarea:focus {
 
   .task-actions .icon-button {
     flex: 1 1 110px;
+  }
+
+  .data-actions button {
+    width: 100%;
   }
 
   .chart-row {
