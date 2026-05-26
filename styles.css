@@ -64,6 +64,19 @@ svg {
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
   min-height: 100vh;
+  transition: grid-template-columns 0.18s ease;
+}
+
+.app-shell.sidebar-collapsed {
+  grid-template-columns: 0 minmax(0, 1fr);
+}
+
+.app-shell.sidebar-collapsed .sidebar {
+  width: 0;
+  padding-right: 0;
+  padding-left: 0;
+  overflow: hidden;
+  opacity: 0;
 }
 
 .sidebar {
@@ -175,6 +188,18 @@ svg {
   justify-content: space-between;
   gap: 18px;
   margin-bottom: 22px;
+}
+
+.topbar-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.sidebar-toggle {
+  min-width: 44px;
+  background: #ffffff;
 }
 
 .eyebrow {
@@ -539,6 +564,11 @@ textarea:focus {
   color: var(--green);
 }
 
+.badge.helping {
+  background: #e8f1fb;
+  color: var(--blue);
+}
+
 .workload-row,
 .availability-item,
 .ranking-item,
@@ -662,6 +692,55 @@ textarea:focus {
   font-size: 1.1rem;
 }
 
+.person-assignments {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.person-task-group {
+  display: grid;
+  gap: 7px;
+}
+
+.person-task-group > span {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.person-task-item {
+  display: grid;
+  gap: 5px;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #ffffff;
+}
+
+.person-task-item.helping {
+  border-color: rgba(46, 111, 183, 0.25);
+  background: #f4f8fd;
+}
+
+.person-task-item strong {
+  font-size: 0.9rem;
+}
+
+.person-task-item small.late-text {
+  color: var(--red);
+  font-weight: 800;
+}
+
+.person-task-empty {
+  padding: 10px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
 .support-result {
   display: none;
   margin-top: 14px;
@@ -712,6 +791,14 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 
+  .app-shell.sidebar-collapsed {
+    grid-template-columns: 1fr;
+  }
+
+  .app-shell.sidebar-collapsed .sidebar {
+    display: none;
+  }
+
   .sidebar {
     position: static;
     height: auto;
@@ -754,6 +841,10 @@ textarea:focus {
   .panel-header,
   .task-card {
     display: grid;
+  }
+
+  .topbar-title {
+    align-items: start;
   }
 
   .top-actions,
