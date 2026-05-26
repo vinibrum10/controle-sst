@@ -1,4 +1,5 @@
 const STORAGE_KEY = "controle-sst-v1";
+const SIDEBAR_STORAGE_KEY = "controle-sst-sidebar";
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -13,6 +14,7 @@ let filters = {
 
 document.addEventListener("DOMContentLoaded", () => {
   setInitialFormValues();
+  applySidebarState(localStorage.getItem(SIDEBAR_STORAGE_KEY) === "collapsed");
   bindEvents();
   render();
 });
@@ -183,6 +185,7 @@ function bindEvents() {
   $("#taskForm").addEventListener("submit", addTask);
   $("#personForm").addEventListener("submit", addPerson);
   $("#helpForm").addEventListener("submit", requestHelpFromForm);
+  $("#sidebarToggle").addEventListener("click", toggleSidebar);
   $("#exportData").addEventListener("click", exportData);
   $("#importDataButton").addEventListener("click", () => $("#importData").click());
   $("#importData").addEventListener("change", importData);
@@ -415,7 +418,8 @@ function renderPeople() {
     const onTime = completedOnTimeCount(person.id);
     const delayed = delayedCount(person.id);
     const help = helpRequestCount(person.id);
-    const activeTasks = tasksForWeek(filters.week).filter((task) => task.ownerId === person.id && !isDone(task)).length;
+    const ownedTasks = tasksForWeek(filters.week).filter((task) => task.ownerId === person.id && !isDone(task));
+    const helpingTasks = tasksForWeek(filters.week).filter((task) => task.helperId === person.id && !isDone(task));
 
     return `
       <article class="person-card">
@@ -430,20 +434,53 @@ function renderPeople() {
           <div class="bar-fill ${load > person.capacity ? "danger" : load >= person.capacity * 0.8 ? "warn" : ""}" style="width: ${Math.min((load / person.capacity) * 100, 100)}%"></div>
         </div>
         <div class="person-stats">
-          <div><span>Abertas</span><strong>${activeTasks}</strong></div>
-          <div><span>No prazo</span><strong>${onTime}</strong></div>
-          <div><span>Atrasos</span><strong>${delayed}</strong></div>
+          <div><span>Abertas</span><strong>${ownedTasks.length}</strong></div>
+          <div><span>Ajudando</span><strong>${helpingTasks.length}</strong></div>
+          <div><span>Livre</span><strong>${Math.max(person.capacity - load, 0)}h</strong></div>
         </div>
         <div class="person-stats">
+          <div><span>No prazo</span><strong>${onTime}</strong></div>
+          <div><span>Atrasos</span><strong>${delayed}</strong></div>
           <div><span>Ajuda pedida</span><strong>${help}</strong></div>
-          <div><span>Livre</span><strong>${Math.max(person.capacity - load, 0)}h</strong></div>
-          <div><span>Status</span><strong>${load === 0 ? "Vazio" : load > person.capacity ? "Cheio" : "Ok"}</strong></div>
         </div>
+        ${renderPersonAssignments(ownedTasks, helpingTasks)}
       </article>
     `;
   });
 
   $("#peopleGrid").innerHTML = cards.join("") || emptyState("Nenhuma pessoa cadastrada.");
+}
+
+function renderPersonAssignments(ownedTasks, helpingTasks) {
+  const groups = [];
+  if (ownedTasks.length) groups.push(renderPersonTaskGroup("Responsável", ownedTasks, "responsavel"));
+  if (helpingTasks.length) groups.push(renderPersonTaskGroup("Ajudando", helpingTasks, "helping"));
+
+  return `
+    <div class="person-assignments">
+      ${groups.join("") || `<div class="person-task-empty">Sem tarefa aberta na semana selecionada.</div>`}
+    </div>
+  `;
+}
+
+function renderPersonTaskGroup(label, tasks, variant) {
+  return `
+    <div class="person-task-group">
+      <span>${label}</span>
+      ${tasks.map((task) => renderPersonTaskItem(task, label, variant)).join("")}
+    </div>
+  `;
+}
+
+function renderPersonTaskItem(task, label, variant) {
+  const late = isTaskLate(task);
+  return `
+    <div class="person-task-item ${variant}">
+      <span class="badge ${variant === "helping" ? "helping" : task.type}">${label}</span>
+      <strong>${escapeHtml(task.title)}</strong>
+      <small class="${late ? "late-text" : "muted"}">${late ? "Venceu" : "Prazo"}: ${formatDate(task.dueDate)} - ${task.estimatedHours}h</small>
+    </div>
+  `;
 }
 
 function renderHelp() {
@@ -698,6 +735,21 @@ function resetDemo() {
 function switchView(view) {
   $$(".nav-button").forEach((button) => button.classList.toggle("active", button.dataset.view === view));
   $$("[data-view-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.viewPanel === view));
+}
+
+function toggleSidebar() {
+  const shell = $(".app-shell");
+  const collapsed = !shell.classList.contains("sidebar-collapsed");
+  applySidebarState(collapsed);
+  localStorage.setItem(SIDEBAR_STORAGE_KEY, collapsed ? "collapsed" : "expanded");
+}
+
+function applySidebarState(collapsed) {
+  $(".app-shell").classList.toggle("sidebar-collapsed", collapsed);
+  const button = $("#sidebarToggle");
+  button.setAttribute("aria-expanded", String(!collapsed));
+  button.setAttribute("aria-label", collapsed ? "Abrir lateral" : "Ocultar lateral");
+  button.title = collapsed ? "Abrir lateral" : "Ocultar lateral";
 }
 
 function filteredTasks() {
