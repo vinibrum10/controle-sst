@@ -238,6 +238,16 @@
                     </select>
                   </label>
                 </div>
+                <label id="routinePeriodField">
+                  Período da rotina
+                  <select id="taskRoutinePeriod">
+                    <option value="semanal">Semanal</option>
+                    <option value="mensal">Mensal</option>
+                    <option value="trimestral">Trimestral</option>
+                    <option value="semestral">Semestral</option>
+                    <option value="anual">Anual</option>
+                  </select>
+                </label>
                 <label>
                   Horas estimadas
                   <input id="taskHours" type="number" min="1" max="80" value="4" required>
@@ -284,9 +294,20 @@
                   <input id="personRole" type="text" maxlength="70" placeholder="Ex.: Técnica de segurança" required>
                 </label>
                 <label>
+                  E-mail
+                  <input id="personEmail" type="email" maxlength="120" placeholder="nome@empresa.com.br" required>
+                </label>
+                <label>
                   Capacidade semanal em horas
                   <input id="personCapacity" type="number" min="1" max="80" value="32" required>
                 </label>
+                <label>
+                  Foto do TST
+                  <input id="personPhoto" type="file" accept="image/*">
+                </label>
+                <div class="photo-preview" id="personPhotoPreview">
+                  <span>Sem foto</span>
+                </div>
                 <button class="primary-button full" type="submit">
                   <svg><use href="#icon-plus"></use></svg>
                   Adicionar pessoa

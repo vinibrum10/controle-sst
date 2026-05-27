@@ -11,6 +11,7 @@ let filters = {
   type: "todos",
   week: currentWeekValue()
 };
+let personPhotoData = "";
 
 document.addEventListener("DOMContentLoaded", () => {
   setInitialFormValues();
@@ -28,10 +29,26 @@ function loadState() {
     if (!Array.isArray(parsed.people) || !Array.isArray(parsed.tasks)) {
       return demoState();
     }
-    return parsed;
+    return normalizeState(parsed);
   } catch {
     return demoState();
   }
+}
+
+function normalizeState(nextState) {
+  nextState.people = nextState.people.map((person) => ({
+    ...person,
+    email: person.email || "",
+    photo: person.photo || ""
+  }));
+
+  nextState.tasks = nextState.tasks.map((task) => ({
+    ...task,
+    routinePeriod: task.type === "rotineira" ? task.routinePeriod || "semanal" : "",
+    helpRequestLog: getHelpLog(task)
+  }));
+
+  return nextState;
 }
 
 function saveState() {
@@ -42,10 +59,10 @@ function demoState() {
   const week = currentWeekValue();
   return {
     people: [
-      { id: id(), name: "Ana Paula", role: "Técnica de Segurança", capacity: 32 },
-      { id: id(), name: "Bruno Reis", role: "Engenheiro de Segurança", capacity: 30 },
-      { id: id(), name: "Carla Nunes", role: "Analista SST", capacity: 28 },
-      { id: id(), name: "Diego Martins", role: "Técnico de Segurança", capacity: 32 }
+      { id: id(), name: "Ana Paula", role: "Técnica de Segurança", email: "ana.paula@empresa.com.br", capacity: 32, photo: "" },
+      { id: id(), name: "Bruno Reis", role: "Engenheiro de Segurança", email: "bruno.reis@empresa.com.br", capacity: 30, photo: "" },
+      { id: id(), name: "Carla Nunes", role: "Analista SST", email: "carla.nunes@empresa.com.br", capacity: 28, photo: "" },
+      { id: id(), name: "Diego Martins", role: "Técnico de Segurança", email: "diego.martins@empresa.com.br", capacity: 32, photo: "" }
     ],
     tasks: [
       {
@@ -56,6 +73,7 @@ function demoState() {
         week,
         dueDate: shiftDate(2),
         type: "rotineira",
+        routinePeriod: "semanal",
         priority: "alta",
         estimatedHours: 6,
         status: "em_andamento",
@@ -72,6 +90,7 @@ function demoState() {
         week,
         dueDate: shiftDate(4),
         type: "rotineira",
+        routinePeriod: "mensal",
         priority: "media",
         estimatedHours: 5,
         status: "pendente",
@@ -88,6 +107,7 @@ function demoState() {
         week,
         dueDate: shiftDate(-1),
         type: "eventual",
+        routinePeriod: "",
         priority: "critica",
         estimatedHours: 7,
         status: "em_andamento",
@@ -104,6 +124,7 @@ function demoState() {
         week,
         dueDate: shiftDate(-2),
         type: "rotineira",
+        routinePeriod: "mensal",
         priority: "media",
         estimatedHours: 4,
         status: "concluida",
@@ -120,6 +141,7 @@ function demoState() {
         week,
         dueDate: shiftDate(5),
         type: "eventual",
+        routinePeriod: "",
         priority: "alta",
         estimatedHours: 8,
         status: "pendente",
@@ -185,6 +207,8 @@ function bindEvents() {
   $("#taskForm").addEventListener("submit", addTask);
   $("#personForm").addEventListener("submit", addPerson);
   $("#helpForm").addEventListener("submit", requestHelpFromForm);
+  $("#taskType").addEventListener("change", toggleRoutinePeriodField);
+  $("#personPhoto").addEventListener("change", handlePersonPhotoChange);
   $("#sidebarToggle").addEventListener("click", toggleSidebar);
   $("#exportData").addEventListener("click", exportData);
   $("#importDataButton").addEventListener("click", () => $("#importData").click());
@@ -200,6 +224,7 @@ function setInitialFormValues() {
   $("#globalWeekFilter").value = filters.week;
   $("#taskWeek").value = filters.week;
   $("#taskDueDate").value = shiftDate(2);
+  toggleRoutinePeriodField();
 }
 
 function render() {
@@ -346,6 +371,7 @@ function renderRanking(selector, ranking, suffix) {
     .map(({ person, value }, index) => `
       <article class="ranking-item">
         <span class="badge">${index + 1}</span>
+        ${personAvatar(person, "small")}
         <div>
           <strong>${escapeHtml(person.name)}</strong>
           <span class="muted">${escapeHtml(person.role)}</span>
@@ -356,6 +382,24 @@ function renderRanking(selector, ranking, suffix) {
     .join("");
 
   $(selector).innerHTML = html || emptyState("Sem dados suficientes.");
+}
+
+function personAvatar(person, size = "small") {
+  const photo = String(person?.photo || "");
+  if (photo.startsWith("data:image/")) {
+    return `<img class="avatar ${size}" src="${photo}" alt="Foto de ${escapeHtml(person.name)}">`;
+  }
+
+  return `<span class="avatar ${size}" aria-hidden="true">${initials(person?.name || "?")}</span>`;
+}
+
+function initials(name) {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() || "")
+    .join("");
 }
 
 function renderTaskList() {
@@ -374,6 +418,9 @@ function taskCard(task) {
       ? `<span class="badge late">Atrasada</span>`
       : `<span class="badge">${statusLabel(task.status)}</span>`;
   const dueLabel = late && !isDone(task) ? "Venceu" : "Prazo";
+  const routineBadge = task.type === "rotineira"
+    ? `<span class="badge routine-period">${routinePeriodLabel(task.routinePeriod)}</span>`
+    : "";
 
   return `
     <article class="task-card">
@@ -382,6 +429,7 @@ function taskCard(task) {
           <h3>${escapeHtml(task.title)}</h3>
           ${statusBadge}
           <span class="badge ${task.type}">${typeLabel(task.type)}</span>
+          ${routineBadge}
           <span class="badge ${task.priority}">${priorityLabel(task.priority)}</span>
         </div>
         <div class="task-meta">
@@ -393,21 +441,21 @@ function taskCard(task) {
         ${task.description ? `<p class="task-description">${escapeHtml(task.description)}</p>` : ""}
       </div>
       <div class="task-actions">
-        <button class="icon-button success" type="button" title="Concluir ou reabrir tarefa" onclick="toggleTaskDone('${task.id}')">
-          <svg><use href="#icon-check"></use></svg>
-          ${isDone(task) ? "Reabrir tarefa" : "Marcar concluída"}
+        <button class="icon-button" type="button" title="Alternar andamento" onclick="toggleTaskProgress('${task.id}')" ${isDone(task) ? "disabled" : ""}>
+          <svg><use href="#icon-clock"></use></svg>
+          ${progressLabel}
         </button>
         <button class="icon-button help" type="button" title="Pedir ajuda automática" onclick="requestHelp('${task.id}')" ${isDone(task) ? "disabled" : ""}>
           <svg><use href="#icon-help"></use></svg>
           Solicitar apoio
         </button>
-        <button class="icon-button" type="button" title="Alternar andamento" onclick="toggleTaskProgress('${task.id}')" ${isDone(task) ? "disabled" : ""}>
-          <svg><use href="#icon-clock"></use></svg>
-          ${progressLabel}
-        </button>
         <button class="icon-button danger" type="button" title="Excluir tarefa" onclick="deleteTask('${task.id}')">
           <svg><use href="#icon-trash"></use></svg>
           Excluir
+        </button>
+        <button class="icon-button success" type="button" title="Concluir ou reabrir tarefa" onclick="toggleTaskDone('${task.id}')">
+          <svg><use href="#icon-check"></use></svg>
+          ${isDone(task) ? "Reabrir tarefa" : "Marcar concluída"}
         </button>
       </div>
     </article>
@@ -426,9 +474,13 @@ function renderPeople() {
     return `
       <article class="person-card">
         <header>
-          <div>
-            <strong>${escapeHtml(person.name)}</strong>
-            <span class="muted">${escapeHtml(person.role)}</span>
+          <div class="person-heading">
+            ${personAvatar(person, "large")}
+            <div>
+              <strong>${escapeHtml(person.name)}</strong>
+              <span class="muted">${escapeHtml(person.role)}</span>
+              <span class="muted">${escapeHtml(person.email || "E-mail não cadastrado")}</span>
+            </div>
           </div>
           <span class="badge">${load}/${person.capacity}h</span>
         </header>
@@ -476,9 +528,16 @@ function renderPersonTaskGroup(label, tasks, variant) {
 
 function renderPersonTaskItem(task, label, variant) {
   const late = isTaskLate(task);
+  const owner = personById(task.ownerId);
+  const helper = personById(task.helperId);
+  const supportText = variant === "helping"
+    ? `Apoiando: ${owner?.name || "responsável"}`
+    : helper
+      ? `Apoio solicitado: ${helper.name}`
+      : "";
   return `
     <div class="person-task-item ${variant}">
-      <span class="badge ${variant === "helping" ? "helping" : task.type}">${label}</span>
+      <span class="badge ${variant === "helping" ? "helping" : task.type}">${escapeHtml(supportText ? supportText : label)}</span>
       <strong>${escapeHtml(task.title)}</strong>
       <small class="${late ? "late-text" : "muted"}">${late ? "Venceu" : "Prazo"}: ${formatDate(task.dueDate)} - ${task.estimatedHours}h</small>
     </div>
@@ -504,9 +563,12 @@ function renderHelp() {
     return `
       <article class="availability-item">
         <header>
-          <div>
-            <strong>${escapeHtml(person.name)}</strong>
-            <span class="muted">${escapeHtml(person.role)}</span>
+          <div class="person-heading compact">
+            ${personAvatar(person, "small")}
+            <div>
+              <strong>${escapeHtml(person.name)}</strong>
+              <span class="muted">${escapeHtml(person.role)}</span>
+            </div>
           </div>
           <span class="badge">${label}</span>
         </header>
@@ -556,6 +618,7 @@ function addTask(event) {
     week,
     dueDate,
     type: $("#taskType").value,
+    routinePeriod: $("#taskType").value === "rotineira" ? $("#taskRoutinePeriod").value : "",
     priority: $("#taskPriority").value,
     estimatedHours,
     status: "pendente",
@@ -571,10 +634,12 @@ function addTask(event) {
   $("#taskWeek").value = week;
   $("#taskDueDate").value = shiftDate(2);
   $("#taskHours").value = 4;
+  toggleRoutinePeriodField();
 
   saveState();
   render();
   switchView("execution");
+  notifyTaskAssigned(state.tasks[0]);
   showToast("Tarefa adicionada ao plano semanal.");
 }
 
@@ -582,20 +647,80 @@ function addPerson(event) {
   event.preventDefault();
   const name = $("#personName").value.trim();
   const role = $("#personRole").value.trim();
+  const email = $("#personEmail").value.trim();
   const capacity = Number($("#personCapacity").value);
 
-  if (!name || !role || !capacity) {
-    showToast("Preencha nome, função e capacidade.");
+  if (!name || !role || !email || !capacity) {
+    showToast("Preencha nome, função, e-mail e capacidade.");
     return;
   }
 
-  state.people.push({ id: id(), name, role, capacity });
+  state.people.push({ id: id(), name, role, email, capacity, photo: personPhotoData });
   event.target.reset();
   $("#personCapacity").value = 32;
+  personPhotoData = "";
+  renderPhotoPreview();
 
   saveState();
   render();
   showToast("Pessoa adicionada à equipe.");
+}
+
+async function handlePersonPhotoChange(event) {
+  const file = event.target.files?.[0];
+  if (!file) {
+    personPhotoData = "";
+    renderPhotoPreview();
+    return;
+  }
+
+  try {
+    personPhotoData = await resizePersonPhoto(file);
+    renderPhotoPreview();
+  } catch {
+    personPhotoData = "";
+    event.target.value = "";
+    renderPhotoPreview();
+    showToast("Não consegui carregar essa imagem. Tente outra foto.");
+  }
+}
+
+function renderPhotoPreview() {
+  const preview = $("#personPhotoPreview");
+  preview.innerHTML = personPhotoData
+    ? `<img class="avatar large" src="${personPhotoData}" alt="Prévia da foto"><span>Foto carregada</span>`
+    : "<span>Sem foto</span>";
+}
+
+function resizePersonPhoto(file) {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith("image/")) {
+      reject(new Error("Arquivo inválido"));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = () => {
+      const image = new Image();
+      image.onerror = reject;
+      image.onload = () => {
+        const size = 160;
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        canvas.width = size;
+        canvas.height = size;
+
+        const side = Math.min(image.width, image.height);
+        const sourceX = (image.width - side) / 2;
+        const sourceY = (image.height - side) / 2;
+        context.drawImage(image, sourceX, sourceY, side, side, 0, 0, size, size);
+        resolve(canvas.toDataURL("image/jpeg", 0.82));
+      };
+      image.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 function requestHelpFromForm(event) {
@@ -630,7 +755,64 @@ function requestHelp(taskId) {
   const owner = personById(task.ownerId);
   const message = `${helper.name} foi designado para apoiar ${owner?.name || "a pessoa responsável"} na tarefa "${task.title}", com prazo em ${formatDate(task.dueDate)}.`;
   showSupportResult(message);
+  notifyHelpAssigned(task, helper, owner);
   showToast("Ajuda atribuída automaticamente.");
+}
+
+function notifyTaskAssigned(task) {
+  const owner = personById(task.ownerId);
+  if (!owner?.email) {
+    showToast("Tarefa criada. Cadastre o e-mail do responsável para enviar aviso.");
+    return;
+  }
+
+  openEmailDraft(
+    owner.email,
+    `Nova tarefa atribuída: ${task.title}`,
+    [
+      `Olá, ${owner.name}.`,
+      "",
+      "Uma tarefa foi atribuída para você no Controle SST.",
+      "",
+      `Tarefa: ${task.title}`,
+      `Tipo: ${typeLabel(task.type)}${task.type === "rotineira" ? ` (${routinePeriodLabel(task.routinePeriod)})` : ""}`,
+      `Prazo: ${formatDate(task.dueDate)}`,
+      `Horas estimadas: ${task.estimatedHours}h`,
+      task.description ? `Observações: ${task.description}` : "",
+      "",
+      "Acesse o sistema para acompanhar e atualizar o andamento."
+    ].filter(Boolean).join("\n")
+  );
+}
+
+function notifyHelpAssigned(task, helper, owner) {
+  if (!helper?.email) {
+    showToast("Apoio atribuído. Cadastre o e-mail de quem vai ajudar para enviar aviso.");
+    return;
+  }
+
+  openEmailDraft(
+    helper.email,
+    `Pedido de apoio: ${task.title}`,
+    [
+      `Olá, ${helper.name}.`,
+      "",
+      `${owner?.name || "Uma pessoa da equipe"} solicitou seu apoio em uma tarefa de SST.`,
+      "",
+      `Tarefa: ${task.title}`,
+      `Responsável: ${owner?.name || "Não informado"}`,
+      `Tipo: ${typeLabel(task.type)}${task.type === "rotineira" ? ` (${routinePeriodLabel(task.routinePeriod)})` : ""}`,
+      `Prazo: ${formatDate(task.dueDate)}`,
+      `Horas estimadas: ${task.estimatedHours}h`,
+      "",
+      "Acesse o sistema para alinhar a execução do apoio."
+    ].join("\n")
+  );
+}
+
+function openEmailDraft(to, subject, body) {
+  const url = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = url;
 }
 
 function chooseHelper(task) {
@@ -738,6 +920,12 @@ function resetDemo() {
 function switchView(view) {
   $$(".nav-button").forEach((button) => button.classList.toggle("active", button.dataset.view === view));
   $$("[data-view-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.viewPanel === view));
+}
+
+function toggleRoutinePeriodField() {
+  const isRoutine = $("#taskType").value === "rotineira";
+  $("#routinePeriodField").classList.toggle("hidden", !isRoutine);
+  $("#taskRoutinePeriod").disabled = !isRoutine;
 }
 
 function toggleSidebar() {
@@ -868,6 +1056,16 @@ function statusLabel(status) {
 
 function typeLabel(type) {
   return type === "rotineira" ? "Rotineira" : "Eventual";
+}
+
+function routinePeriodLabel(period) {
+  return {
+    semanal: "Semanal",
+    mensal: "Mensal",
+    trimestral: "Trimestral",
+    semestral: "Semestral",
+    anual: "Anual"
+  }[period] || "Semanal";
 }
 
 function priorityLabel(priority) {
