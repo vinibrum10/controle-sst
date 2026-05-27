@@ -14,6 +14,26 @@ let filters = {
 let personPhotoData = "";
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Dark mode
+  const savedTheme = localStorage.getItem("sst-theme");
+  if (savedTheme === "dark") document.documentElement.setAttribute("data-theme", "dark");
+  const themeBtn = $("#themeToggle");
+  if (themeBtn) {
+    themeBtn.addEventListener("click", () => {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      if (isDark) {
+        document.documentElement.removeAttribute("data-theme");
+        localStorage.setItem("sst-theme", "light");
+        themeBtn.querySelector("use").setAttribute("href", "#icon-moon");
+      } else {
+        document.documentElement.setAttribute("data-theme", "dark");
+        localStorage.setItem("sst-theme", "dark");
+        themeBtn.querySelector("use").setAttribute("href", "#icon-sun");
+      }
+    });
+    if (savedTheme === "dark") themeBtn.querySelector("use").setAttribute("href", "#icon-sun");
+  }
+
   setInitialFormValues();
   applySidebarState(localStorage.getItem(SIDEBAR_STORAGE_KEY) === "collapsed");
   bindEvents();
@@ -189,10 +209,13 @@ function bindEvents() {
     render();
   });
 
-  $("#statusFilter").addEventListener("change", (event) => {
-    filters.status = event.target.value;
-    renderTaskList();
-  });
+  const statusFilterEl = $("#statusFilter");
+  if (statusFilterEl) {
+    statusFilterEl.addEventListener("change", (event) => {
+      filters.status = event.target.value;
+      renderTaskList();
+    });
+  }
 
   $("#ownerFilter").addEventListener("change", (event) => {
     filters.owner = event.target.value;
@@ -404,6 +427,30 @@ function initials(name) {
 
 function renderTaskList() {
   const tasks = filteredTasks();
+
+  // Kanban view
+  if ($("#col-pendente")) {
+    const byStatus = { pendente: [], em_andamento: [], concluida: [] };
+    tasks.forEach(t => {
+      const key = isDone(t) ? "concluida" : (t.status === "em_andamento" ? "em_andamento" : "pendente");
+      byStatus[key].push(t);
+    });
+    // Also catch late tasks that are not done
+    tasksForWeek(filters.week)
+      .filter(t => !isDone(t) && !tasks.includes(t))
+      .forEach(t => byStatus[t.status === "em_andamento" ? "em_andamento" : "pendente"].push(t));
+
+    $("#col-pendente").innerHTML    = byStatus.pendente.map(taskCard).join("")    || emptyState("Nenhuma tarefa pendente.");
+    $("#col-em_andamento").innerHTML = byStatus.em_andamento.map(taskCard).join("") || emptyState("Nenhuma tarefa em andamento.");
+    $("#col-concluida").innerHTML    = byStatus.concluida.map(taskCard).join("")    || emptyState("Nenhuma tarefa concluída.");
+    $("#count-pendente").textContent     = byStatus.pendente.length;
+    $("#count-em_andamento").textContent  = byStatus.em_andamento.length;
+    $("#count-concluida").textContent     = byStatus.concluida.length;
+    bindKanbanDnD();
+    return;
+  }
+
+  // Fallback list view
   $("#taskList").innerHTML = tasks.map(taskCard).join("") || emptyState("Nenhuma tarefa encontrada para os filtros.");
 }
 
@@ -423,7 +470,7 @@ function taskCard(task) {
     : "";
 
   return `
-    <article class="task-card">
+    <article class="task-card" draggable="true" data-task-id="${task.id}">
       <div>
         <div class="task-title-row">
           <h3>${escapeHtml(task.title)}</h3>
@@ -1171,3 +1218,45 @@ window.requestHelp = requestHelp;
 window.toggleTaskDone = toggleTaskDone;
 window.toggleTaskProgress = toggleTaskProgress;
 window.deleteTask = deleteTask;
+
+// =============================================
+// KANBAN DRAG AND DROP
+// =============================================
+let _draggedTaskId = null;
+
+function bindKanbanDnD() {
+  $$(".task-card[draggable]").forEach(card => {
+    card.addEventListener("dragstart", (e) => {
+      _draggedTaskId = card.dataset.taskId;
+      card.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+    });
+    card.addEventListener("dragend", () => {
+      card.classList.remove("dragging");
+      _draggedTaskId = null;
+      $$(".kanban-column").forEach(c => c.classList.remove("drag-over"));
+    });
+  });
+
+  $$(".kanban-column").forEach(col => {
+    col.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      col.classList.add("drag-over");
+    });
+    col.addEventListener("dragleave", () => col.classList.remove("drag-over"));
+    col.addEventListener("drop", (e) => {
+      e.preventDefault();
+      col.classList.remove("drag-over");
+      if (!_draggedTaskId) return;
+      const newStatus = col.dataset.status;
+      const task = state.tasks.find(t => t.id === _draggedTaskId);
+      if (task && task.status !== newStatus) {
+        task.status = newStatus;
+        task.completedAt = newStatus === "concluida" ? todayValue() : null;
+        saveState();
+        render();
+        showToast("Tarefa movida para " + statusLabel(newStatus) + ".");
+      }
+    });
+  });
+}

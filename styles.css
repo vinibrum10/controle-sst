@@ -1,5 +1,5 @@
 :root {
-  color-scheme: light;
+  color-scheme: light dark;
   --bg: #f4f7f6;
   --surface: #ffffff;
   --surface-strong: #eef3f1;
@@ -30,7 +30,7 @@ body {
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
-  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-family: "Outfit", Inter, "Segoe UI", Arial, sans-serif;
   letter-spacing: 0;
 }
 
@@ -978,5 +978,160 @@ textarea:focus {
 
   .chart-row {
     grid-template-columns: 92px minmax(0, 1fr) 30px;
+  }
+}
+
+/* =============================================
+   DARK MODE
+   ============================================= */
+[data-theme="dark"] {
+  --bg: #0b1110;
+  --surface: #17201d;
+  --surface-strong: #1e2e2a;
+  --text: #edf2f0;
+  --muted: #91a39e;
+  --line: #2d423d;
+  --teal: #12c9b8;
+  --green: #45c462;
+  --amber: #f2a913;
+  --red: #e35454;
+  --blue: #4a9be8;
+  --violet: #a38cf2;
+  --shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+[data-theme="dark"] .sidebar {
+  background: #080f0e;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background: #1e2e2a;
+  color: var(--text);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .panel,
+[data-theme="dark"] .metric-card,
+[data-theme="dark"] .task-card,
+[data-theme="dark"] .person-card,
+[data-theme="dark"] .type-tile,
+[data-theme="dark"] .history-item,
+[data-theme="dark"] .ranking-item,
+[data-theme="dark"] .availability-item {
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .secondary-button {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .icon-button {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .sidebar-toggle {
+  background: var(--surface);
+}
+
+[data-theme="dark"] .badge {
+  background: var(--surface-strong);
+  color: var(--muted);
+}
+
+[data-theme="dark"] .bar-track {
+  background: var(--surface-strong);
+}
+
+/* =============================================
+   KANBAN BOARD
+   ============================================= */
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
+  margin-top: 14px;
+}
+
+.kanban-column {
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 300px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.kanban-column.drag-over {
+  border-color: var(--teal);
+  background: var(--bg);
+}
+
+.kanban-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 800;
+  font-size: 0.9rem;
+  padding: 0 4px 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.kanban-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.task-card {
+  cursor: default;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.task-card[draggable="true"] {
+  cursor: grab;
+}
+
+.task-card[draggable="true"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.task-card.dragging {
+  opacity: 0.45;
+  transform: scale(0.97);
+}
+
+/* Kanban: estreitar as task-actions */
+.kanban-tasks .task-actions {
+  width: auto;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.kanban-tasks .task-actions .icon-button {
+  min-width: auto;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 900px) {
+  .kanban-board {
+    grid-template-columns: 1fr;
   }
 }
