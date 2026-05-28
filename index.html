@@ -65,6 +65,9 @@
         <circle cx="12" cy="12" r="5"></circle>
         <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
       </symbol>
+      <symbol id="icon-chevron" viewBox="0 0 24 24">
+        <path d="m6 9 6 6 6-6"></path>
+      </symbol>
     </svg>
 
     <div class="app-shell">
@@ -78,32 +81,80 @@
         </div>
 
         <nav class="nav-tabs" aria-label="Áreas do programa">
-          <span class="nav-group-label">Gestão</span>
-          <button class="nav-button active" type="button" data-view="dashboard">
-            <svg><use href="#icon-dashboard"></use></svg>
-            Dashboard
-          </button>
-          <button class="nav-button" type="button" data-view="execution">
-            <svg><use href="#icon-task"></use></svg>
-            Execução de tarefas
-          </button>
-          <button class="nav-button" type="button" data-view="create-task">
-            <svg><use href="#icon-plus"></use></svg>
-            Criação de tarefas
-          </button>
-          <button class="nav-button" type="button" data-view="employees">
-            <svg><use href="#icon-team"></use></svg>
-            Cadastro de funcionários
-          </button>
-          <button class="nav-button" type="button" data-view="help">
-            <svg><use href="#icon-help"></use></svg>
-            Apoio e ajuda
-          </button>
-          <span class="nav-group-label">Administração</span>
-          <button class="nav-button" type="button" data-view="data">
-            <svg><use href="#icon-database"></use></svg>
-            Dados do programa
-          </button>
+          <div class="nav-section open" data-nav-group="dashboard">
+            <button class="nav-group-toggle" type="button" aria-expanded="true" aria-controls="nav-dashboard" data-nav-group-toggle="dashboard">
+              <span><svg><use href="#icon-dashboard"></use></svg>Dashboard</span>
+              <svg class="chevron"><use href="#icon-chevron"></use></svg>
+            </button>
+            <div class="nav-sublist" id="nav-dashboard">
+              <button class="nav-button active" type="button" data-view="dashboard" data-route="/dashboard">
+                Visão geral
+              </button>
+            </div>
+          </div>
+
+          <div class="nav-section open" data-nav-group="tasks">
+            <button class="nav-group-toggle" type="button" aria-expanded="true" aria-controls="nav-tasks" data-nav-group-toggle="tasks">
+              <span><svg><use href="#icon-task"></use></svg>Gestão de Tarefas</span>
+              <svg class="chevron"><use href="#icon-chevron"></use></svg>
+            </button>
+            <div class="nav-sublist" id="nav-tasks">
+              <button class="nav-button" type="button" data-view="execution" data-route="/tarefas/executar">
+                Execução de tarefas
+              </button>
+              <button class="nav-button" type="button" data-view="create-task" data-route="/tarefas/criar">
+                Criação de tarefas
+              </button>
+              <button class="nav-button" type="button" data-view="help" data-route="/tarefas/apoio">
+                Apoio e ajuda
+              </button>
+            </div>
+          </div>
+
+          <div class="nav-section open" data-nav-group="team">
+            <button class="nav-group-toggle" type="button" aria-expanded="true" aria-controls="nav-team" data-nav-group-toggle="team">
+              <span><svg><use href="#icon-team"></use></svg>Equipe</span>
+              <svg class="chevron"><use href="#icon-chevron"></use></svg>
+            </button>
+            <div class="nav-sublist" id="nav-team">
+              <button class="nav-button" type="button" data-view="employees" data-route="/equipe/funcionarios">
+                Cadastro de funcionários
+              </button>
+            </div>
+          </div>
+
+          <div class="nav-section" data-nav-group="programs">
+            <button class="nav-group-toggle" type="button" aria-expanded="false" aria-controls="nav-programs" data-nav-group-toggle="programs">
+              <span><svg><use href="#icon-check"></use></svg>Programas de SST</span>
+              <svg class="chevron"><use href="#icon-chevron"></use></svg>
+            </button>
+            <div class="nav-sublist" id="nav-programs">
+              <button class="nav-button" type="button" data-view="program-route" data-route="/programas/rota-segura">
+                Rota Segura
+              </button>
+              <button class="nav-button" type="button" data-view="program-training" data-route="/programas/treinamentos">
+                Treinamentos
+              </button>
+              <button class="nav-button" type="button" data-view="program-inspections" data-route="/programas/inspecoes">
+                Inspeções e auditorias
+              </button>
+            </div>
+          </div>
+
+          <div class="nav-section" data-nav-group="admin">
+            <button class="nav-group-toggle" type="button" aria-expanded="false" aria-controls="nav-admin" data-nav-group-toggle="admin">
+              <span><svg><use href="#icon-database"></use></svg>Administração</span>
+              <svg class="chevron"><use href="#icon-chevron"></use></svg>
+            </button>
+            <div class="nav-sublist" id="nav-admin">
+              <button class="nav-button" type="button" data-view="data" data-route="/admin/dados">
+                Dados do programa
+              </button>
+              <button class="nav-button" type="button" data-view="settings" data-route="/admin/configuracoes">
+                Configurações
+              </button>
+            </div>
+          </div>
         </nav>
       </aside>
 
@@ -115,7 +166,7 @@
             </button>
             <div>
               <p class="eyebrow" id="todayLabel"></p>
-              <h1>Plano semanal da equipe de SST</h1>
+              <h1 id="pageTitle">Plano semanal da equipe de SST</h1>
             </div>
           </div>
           <div class="top-actions">
@@ -389,6 +440,75 @@
           </section>
         </section>
 
+        <section id="programRouteView" class="view" data-view-panel="program-route">
+          <section class="panel module-page">
+            <div class="panel-header">
+              <div>
+                <h2>Rota Segura</h2>
+                <p>Programa para acompanhamento de rotas, desvios, inspeções de campo e planos de ação.</p>
+              </div>
+            </div>
+            <div class="module-grid">
+              <article class="module-item">
+                <span class="badge">Planejamento</span>
+                <strong>Rotas da semana</strong>
+                <small class="muted">Base preparada para cadastro de rotas e responsáveis.</small>
+              </article>
+              <article class="module-item">
+                <span class="badge">Ações</span>
+                <strong>Desvios encontrados</strong>
+                <small class="muted">Área reservada para vincular ocorrências às tarefas do sistema.</small>
+              </article>
+            </div>
+          </section>
+        </section>
+
+        <section id="programTrainingView" class="view" data-view-panel="program-training">
+          <section class="panel module-page">
+            <div class="panel-header">
+              <div>
+                <h2>Treinamentos</h2>
+                <p>Controle dos treinamentos de SST, validade, público previsto e responsáveis.</p>
+              </div>
+            </div>
+            <div class="module-grid">
+              <article class="module-item">
+                <span class="badge">Agenda</span>
+                <strong>Calendário de treinamentos</strong>
+                <small class="muted">Estrutura pronta para integrar prazos e recorrências.</small>
+              </article>
+              <article class="module-item">
+                <span class="badge">Registros</span>
+                <strong>Evidências e listas</strong>
+                <small class="muted">Espaço reservado para certificados e presença.</small>
+              </article>
+            </div>
+          </section>
+        </section>
+
+        <section id="programInspectionsView" class="view" data-view-panel="program-inspections">
+          <section class="panel module-page">
+            <div class="panel-header">
+              <div>
+                <h2>Inspeções e auditorias</h2>
+                <p>Organização das inspeções planejadas, achados, responsáveis e prazos de correção.</p>
+              </div>
+            </div>
+            <div class="module-grid">
+              <article class="module-item">
+                <span class="badge">Checklists</span>
+                <strong>Inspeções programadas</strong>
+                <small class="muted">Base para criar checklists por área ou unidade.</small>
+              </article>
+              <article class="module-item">
+                <span class="badge">Pendências</span>
+                <strong>Planos de correção</strong>
+                <small class="muted">Preparado para gerar tarefas a partir dos achados.</small>
+              </article>
+            </div>
+          </section>
+        </section>
+
         <section id="dataView" class="view" data-view-panel="data">
           <div class="content-grid data-layout">
             <section class="panel">
@@ -415,6 +535,29 @@
               </div>
             </section>
           </div>
+        </section>
+
+        <section id="settingsView" class="view" data-view-panel="settings">
+          <section class="panel module-page">
+            <div class="panel-header">
+              <div>
+                <h2>Configurações</h2>
+                <p>Preferências gerais, integração e parâmetros de funcionamento do Controle SST.</p>
+              </div>
+            </div>
+            <div class="module-grid">
+              <article class="module-item">
+                <span class="badge">Aparência</span>
+                <strong>Tema claro ou escuro</strong>
+                <small class="muted">O alternador permanece disponível no topo da tela.</small>
+              </article>
+              <article class="module-item">
+                <span class="badge">Integração</span>
+                <strong>OneDrive e planilha</strong>
+                <small class="muted">Base preparada para evoluir os serviços de sincronização.</small>
+              </article>
+            </div>
+          </section>
         </section>
       </main>
     </div>

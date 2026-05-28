@@ -1,5 +1,6 @@
 const STORAGE_KEY = "controle-sst-v1";
 const SIDEBAR_STORAGE_KEY = "controle-sst-sidebar";
+const NAV_GROUP_STORAGE_KEY = "controle-sst-nav-groups";
 
 // =============================================
 // MICROSOFT GRAPH API — ONEDRIVE INTEGRATION
@@ -219,6 +220,20 @@ function updateUserChip(name) {
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 
+const DEFAULT_ROUTE = "/dashboard";
+const NAV_ROUTES = {
+  "/dashboard": { view: "dashboard", title: "Plano semanal da equipe de SST", group: "dashboard" },
+  "/tarefas/executar": { view: "execution", title: "Execução de tarefas", group: "tasks" },
+  "/tarefas/criar": { view: "create-task", title: "Criação de tarefas", group: "tasks" },
+  "/tarefas/apoio": { view: "help", title: "Apoio e ajuda", group: "tasks" },
+  "/equipe/funcionarios": { view: "employees", title: "Equipe e cadastro", group: "team" },
+  "/programas/rota-segura": { view: "program-route", title: "Rota Segura", group: "programs" },
+  "/programas/treinamentos": { view: "program-training", title: "Treinamentos", group: "programs" },
+  "/programas/inspecoes": { view: "program-inspections", title: "Inspeções e auditorias", group: "programs" },
+  "/admin/dados": { view: "data", title: "Dados do programa", group: "admin" },
+  "/admin/configuracoes": { view: "settings", title: "Configurações", group: "admin" }
+};
+
 let state = loadState();
 let filters = {
   status: "ativas",
@@ -252,8 +267,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Inicializa o app com dados locais (rápido)
   setInitialFormValues();
   applySidebarState(localStorage.getItem(SIDEBAR_STORAGE_KEY) === "collapsed");
+  applyNavGroupState();
   bindEvents();
   render();
+  syncRouteFromHash();
 
   // Inicializa MSAL e verifica se já há sessão ativa
   msalInstance = initMSAL();
@@ -466,13 +483,19 @@ function hydrateDemoAssignments() {
 }
 
 function bindEvents() {
-  $$(".nav-button").forEach((button) => {
-    button.addEventListener("click", () => switchView(button.dataset.view));
+  $$("[data-nav-group-toggle]").forEach((button) => {
+    button.addEventListener("click", () => toggleNavGroup(button.dataset.navGroupToggle));
+  });
+
+  $$(".nav-button[data-route]").forEach((button) => {
+    button.addEventListener("click", () => navigateToRoute(button.dataset.route));
   });
 
   $$("[data-view-shortcut]").forEach((button) => {
-    button.addEventListener("click", () => switchView(button.dataset.viewShortcut));
+    button.addEventListener("click", () => navigateToView(button.dataset.viewShortcut));
   });
+
+  window.addEventListener("hashchange", syncRouteFromHash);
 
   $("#globalWeekFilter").addEventListener("change", (event) => {
     filters.week = event.target.value || currentWeekValue();
@@ -956,7 +979,7 @@ function addTask(event) {
 
   saveState();
   render();
-  switchView("execution");
+  navigateToView("execution");
   notifyTaskAssigned(state.tasks[0]);
   showToast("Tarefa adicionada ao plano semanal.");
 }
@@ -1235,9 +1258,95 @@ function resetDemo() {
   showToast("Dados de demonstração restaurados.");
 }
 
-function switchView(view) {
-  $$(".nav-button").forEach((button) => button.classList.toggle("active", button.dataset.view === view));
-  $$("[data-view-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.viewPanel === view));
+function navigateToRoute(route) {
+  const nextRoute = NAV_ROUTES[route] ? route : DEFAULT_ROUTE;
+  const nextHash = `#${nextRoute}`;
+  if (window.location.hash === nextHash) {
+    syncRouteFromHash();
+    return;
+  }
+  window.location.hash = nextHash;
+}
+
+function navigateToView(view) {
+  navigateToRoute(routeForView(view));
+}
+
+function syncRouteFromHash() {
+  let route = window.location.hash.replace(/^#/, "") || DEFAULT_ROUTE;
+  if (!route.startsWith("/")) route = `/${route}`;
+  if (!NAV_ROUTES[route]) route = DEFAULT_ROUTE;
+
+  if (window.location.hash !== `#${route}`) {
+    history.replaceState(null, "", `#${route}`);
+  }
+
+  switchView(NAV_ROUTES[route].view, route);
+}
+
+function switchView(view, route = routeForView(view)) {
+  const routeConfig = NAV_ROUTES[route] || NAV_ROUTES[DEFAULT_ROUTE];
+
+  $$(".nav-button[data-route]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.route === route);
+  });
+  $$("[data-view-panel]").forEach((panel) => {
+    panel.classList.toggle("active", panel.dataset.viewPanel === view);
+  });
+  $$(".nav-section").forEach((section) => {
+    section.classList.toggle("active", Boolean(section.querySelector(".nav-button.active")));
+  });
+
+  const pageTitle = $("#pageTitle");
+  if (pageTitle) pageTitle.textContent = routeConfig.title;
+  openNavGroup(routeConfig.group);
+}
+
+function routeForView(view) {
+  return Object.entries(NAV_ROUTES).find(([, config]) => config.view === view)?.[0] || DEFAULT_ROUTE;
+}
+
+function applyNavGroupState() {
+  const saved = readNavGroupState();
+  $$(".nav-section").forEach((section) => {
+    const group = section.dataset.navGroup;
+    const open = Object.prototype.hasOwnProperty.call(saved, group)
+      ? saved[group]
+      : section.classList.contains("open");
+    setNavGroupState(group, open, false);
+  });
+}
+
+function toggleNavGroup(group) {
+  const section = $(`[data-nav-group="${group}"]`);
+  if (!section) return;
+  setNavGroupState(group, !section.classList.contains("open"));
+}
+
+function openNavGroup(group) {
+  setNavGroupState(group, true);
+}
+
+function setNavGroupState(group, open, persist = true) {
+  const section = $(`[data-nav-group="${group}"]`);
+  if (!section) return;
+  section.classList.toggle("open", open);
+  const button = section.querySelector("[data-nav-group-toggle]");
+  if (button) button.setAttribute("aria-expanded", String(open));
+
+  if (persist) {
+    const nextState = readNavGroupState();
+    nextState[group] = open;
+    localStorage.setItem(NAV_GROUP_STORAGE_KEY, JSON.stringify(nextState));
+  }
+}
+
+function readNavGroupState() {
+  try {
+    return JSON.parse(localStorage.getItem(NAV_GROUP_STORAGE_KEY)) || {};
+  } catch {
+    return {};
+  }
 }
 
 function toggleRoutinePeriodField() {
