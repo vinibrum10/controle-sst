@@ -221,18 +221,61 @@ const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 
 const DEFAULT_ROUTE = "/dashboard";
-const NAV_ROUTES = {
-  "/dashboard": { view: "dashboard", title: "Plano semanal da equipe de SST", group: "dashboard" },
-  "/tarefas/executar": { view: "execution", title: "Execução de tarefas", group: "tasks" },
-  "/tarefas/criar": { view: "create-task", title: "Criação de tarefas", group: "tasks" },
-  "/tarefas/apoio": { view: "help", title: "Apoio e ajuda", group: "tasks" },
-  "/equipe/funcionarios": { view: "employees", title: "Equipe e cadastro", group: "team" },
-  "/programas/rota-segura": { view: "program-route", title: "Rota Segura", group: "programs" },
-  "/programas/treinamentos": { view: "program-training", title: "Treinamentos", group: "programs" },
-  "/programas/inspecoes": { view: "program-inspections", title: "Inspeções e auditorias", group: "programs" },
-  "/admin/dados": { view: "data", title: "Dados do programa", group: "admin" },
-  "/admin/configuracoes": { view: "settings", title: "Configurações", group: "admin" }
-};
+const NAVIGATION_GROUPS = [
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    icon: "icon-dashboard",
+    defaultOpen: true,
+    items: [
+      { route: "/dashboard", view: "dashboard", label: "Visão geral", title: "Plano semanal da equipe de SST" }
+    ]
+  },
+  {
+    id: "tasks",
+    label: "Gestão de Tarefas",
+    icon: "icon-task",
+    defaultOpen: true,
+    items: [
+      { route: "/tarefas/executar", view: "execution", label: "Execução de tarefas", title: "Execução de tarefas" },
+      { route: "/tarefas/criar", view: "create-task", label: "Criação de tarefas", title: "Criação de tarefas" },
+      { route: "/tarefas/apoio", view: "help", label: "Apoio e ajuda", title: "Apoio e ajuda" }
+    ]
+  },
+  {
+    id: "team",
+    label: "Equipe",
+    icon: "icon-team",
+    defaultOpen: true,
+    items: [
+      { route: "/equipe/funcionarios", view: "employees", label: "Cadastro de funcionários", title: "Equipe e cadastro" }
+    ]
+  },
+  {
+    id: "programs",
+    label: "Programas de SST",
+    icon: "icon-check",
+    defaultOpen: false,
+    items: [
+      { route: "/programas/rota-segura", view: "program-route", label: "Rota Segura", title: "Rota Segura" },
+      { route: "/programas/treinamentos", view: "program-training", label: "Treinamentos", title: "Treinamentos" },
+      { route: "/programas/inspecoes", view: "program-inspections", label: "Inspeções e auditorias", title: "Inspeções e auditorias" }
+    ]
+  },
+  {
+    id: "admin",
+    label: "Administração",
+    icon: "icon-database",
+    defaultOpen: false,
+    items: [
+      { route: "/admin/dados", view: "data", label: "Dados do programa", title: "Dados do programa" },
+      { route: "/admin/configuracoes", view: "settings", label: "Configurações", title: "Configurações" }
+    ]
+  }
+];
+const NAV_ROUTES = Object.fromEntries(
+  NAVIGATION_GROUPS.flatMap((group) => group.items.map((item) => [item.route, { ...item, group: group.id }]))
+);
 
 let state = loadState();
 let filters = {
@@ -267,6 +310,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Inicializa o app com dados locais (rápido)
   setInitialFormValues();
   applySidebarState(localStorage.getItem(SIDEBAR_STORAGE_KEY) === "collapsed");
+  renderSidebarNavigation();
   applyNavGroupState();
   bindEvents();
   render();
@@ -531,6 +575,27 @@ function bindEvents() {
   $("#importDataButton").addEventListener("click", () => $("#importData").click());
   $("#importData").addEventListener("change", importData);
   $("#resetData").addEventListener("click", resetDemo);
+}
+
+function renderSidebarNavigation() {
+  const nav = $("#sidebarNav");
+  if (!nav) return;
+
+  nav.innerHTML = NAVIGATION_GROUPS.map((group) => `
+    <div class="nav-section ${group.defaultOpen ? "open" : ""}" data-nav-group="${group.id}">
+      <button class="nav-group-toggle" type="button" aria-expanded="${String(group.defaultOpen)}" aria-controls="nav-${group.id}" data-nav-group-toggle="${group.id}">
+        <span><svg><use href="#${group.icon}"></use></svg>${escapeHtml(group.label)}</span>
+        <svg class="chevron"><use href="#icon-chevron"></use></svg>
+      </button>
+      <div class="nav-sublist" id="nav-${group.id}">
+        ${group.items.map((item) => `
+          <button class="nav-button" type="button" data-view="${item.view}" data-route="${item.route}">
+            ${escapeHtml(item.label)}
+          </button>
+        `).join("")}
+      </div>
+    </div>
+  `).join("");
 }
 
 function setInitialFormValues() {

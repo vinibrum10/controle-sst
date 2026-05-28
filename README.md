@@ -10,10 +10,20 @@ Abra `abrir-controle-sst.bat` com dois cliques ou abra `index.html` no navegador
 
 - Cadastro de pessoas da equipe e capacidade semanal em horas.
 - Cadastro de tarefas por semana, responsável, prazo, prioridade e tipo: rotineira ou eventual.
+- Navegação lateral com grupos expansíveis e rotas internas.
 - Dashboard com tarefas ativas, vencidas, próximas do prazo, carga por pessoa e status.
 - Botão de pedir ajuda que procura primeiro quem está sem tarefa aberta na semana e depois quem tem maior capacidade livre.
 - Rankings de quem mais pede ajuda, quem mais entrega no prazo e quem mais atrasa.
 - Exportação e importação dos dados em JSON.
+
+## Estrutura
+
+- `index.html`, `styles.css` e `app.js`: versão estática em produção.
+- `build-netlify.js`: gera o pacote pronto para Netlify Drop.
+- `src/components`: componentes planejados para evolução do front-end.
+- `src/pages`: páginas/rotas do sistema.
+- `src/services`: integração com armazenamento, OneDrive e futuras APIs.
+- `src/data`: configuração de navegação e dados compartilhados.
 
 ## Observação
 

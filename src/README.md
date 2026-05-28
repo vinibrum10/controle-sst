@@ -1,12 +1,21 @@
-# Arquitetura futura
+# Arquitetura do Controle SST
 
-O app atual continua funcionando como site estatico em `index.html`, `styles.css` e `app.js`.
+O deploy atual continua estatico e usa os arquivos da raiz:
 
-Esta pasta prepara a organizacao para uma proxima fase em modulos:
+- `index.html`
+- `styles.css`
+- `app.js`
+- `build-netlify.js`
 
-- `components/`: partes reutilizaveis da interface.
-- `pages/`: telas principais do sistema.
-- `services/`: integracoes com OneDrive, planilha, e-mail ou banco de dados.
-- `data/`: dados temporarios, mocks e configuracoes compartilhadas.
+A pasta `src/` organiza a evolucao do sistema em modulos. Ela espelha as rotas e componentes atuais para facilitar uma migracao futura para React, Vite ou outro empacotador, sem quebrar o Netlify Drop atual.
 
-Quando o projeto migrar para React/Vite ou outro empacotador, a navegacao criada por rotas internas podera ser movida para arquivos dentro desta estrutura.
+## Pastas
+
+- `components/`: componentes reutilizaveis de tela, como menu lateral, cabecalho, cards e listas.
+- `pages/`: paginas/rotas principais do sistema.
+- `services/`: integracoes e regras de acesso a dados, como localStorage, OneDrive e futuras APIs.
+- `data/`: configuracoes compartilhadas, como grupos de navegacao e mapa de rotas.
+
+## Regra de crescimento
+
+Para adicionar uma nova funcionalidade, crie primeiro a pagina em `pages/`, registre a rota em `data/navigation.js` e depois conecte a tela real no app atual.
