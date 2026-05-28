@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
   </head>
   <body>
     <svg class="sprite" aria-hidden="true" focusable="false">
@@ -419,6 +420,25 @@
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <!-- Login overlay -->
+    <div class="auth-overlay" id="authOverlay" aria-modal="true" role="dialog">
+      <div class="auth-card">
+        <div class="brand-mark auth-logo">SST</div>
+        <h1 class="auth-title">Controle SST</h1>
+        <p class="auth-desc">Entre com sua conta Microsoft para sincronizar os dados com a planilha no OneDrive. Todos da equipe verão os mesmos dados.</p>
+        <button class="primary-button full" id="loginBtn" type="button">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="8" height="8"/><rect x="13" y="11" width="8" height="8"/><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/></svg>
+          Entrar com conta Microsoft
+        </button>
+        <button class="secondary-button full" id="offlineModeBtn" type="button">
+          Usar sem conta (dados locais)
+        </button>
+      </div>
+    </div>
+
+    <!-- Sync status bar -->
+    <div class="sync-bar" id="syncBar" aria-live="polite"></div>
 
     <script src="app.js"></script>
   </body>

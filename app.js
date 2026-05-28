@@ -1,6 +1,221 @@
 const STORAGE_KEY = "controle-sst-v1";
 const SIDEBAR_STORAGE_KEY = "controle-sst-sidebar";
 
+// =============================================
+// MICROSOFT GRAPH API — ONEDRIVE INTEGRATION
+// =============================================
+const MSAL_CLIENT_ID  = "998ff7bb-ac15-438d-811c-44cf38478de3";
+const EXCEL_FILE_PATH = "3.0 Profissional/controle-sst.xlsx";
+const GRAPH_BASE      = "https://graph.microsoft.com/v1.0";
+const LOGIN_SCOPES    = ["Files.ReadWrite", "User.Read"];
+
+let msalInstance = null;
+let graphToken   = null;
+let isOnlineMode = false;
+let syncTimer    = null;
+let currentUser  = null;
+
+function initMSAL() {
+  if (typeof msal === "undefined") return null;
+  return new msal.PublicClientApplication({
+    auth: {
+      clientId:    MSAL_CLIENT_ID,
+      authority:   "https://login.microsoftonline.com/common",
+      redirectUri: window.location.origin
+    },
+    cache: { cacheLocation: "localStorage", storeAuthStateInCookie: false }
+  });
+}
+
+async function acquireToken() {
+  if (!msalInstance) return null;
+  const accounts = msalInstance.getAllAccounts();
+  if (!accounts.length) return null;
+  try {
+    const res = await msalInstance.acquireTokenSilent({ scopes: LOGIN_SCOPES, account: accounts[0] });
+    return res.accessToken;
+  } catch {
+    try {
+      const res = await msalInstance.acquireTokenPopup({ scopes: LOGIN_SCOPES });
+      return res.accessToken;
+    } catch { return null; }
+  }
+}
+
+function graphUrl(sheetPath) {
+  const encoded = EXCEL_FILE_PATH.replace(/ /g, "%20");
+  return `${GRAPH_BASE}/me/drive/root:/${encoded}:/workbook/worksheets${sheetPath}`;
+}
+
+async function graphGet(url) {
+  const token = await acquireToken();
+  if (!token) throw new Error("sem token");
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) throw new Error(`Graph GET ${res.status}`);
+  return res.json();
+}
+
+async function graphPatch(url, body) {
+  const token = await acquireToken();
+  if (!token) throw new Error("sem token");
+  const res = await fetch(url, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(`Graph PATCH ${res.status}`);
+  return res.json();
+}
+
+function rowToPerson(row) {
+  if (!row[0] || String(row[0]).trim() === "") return null;
+  return {
+    id:       String(row[0]),
+    name:     String(row[1] || ""),
+    role:     String(row[2] || ""),
+    email:    String(row[3] || ""),
+    capacity: Number(row[4]) || 32,
+    photo:    String(row[10] || "")
+  };
+}
+
+function rowToTask(row) {
+  if (!row[0] || String(row[0]).trim() === "") return null;
+  return {
+    id:             String(row[0]),
+    title:          String(row[1] || ""),
+    ownerId:        row[2] ? String(row[2]) : null,
+    helperId:       row[4] ? String(row[4]) : null,
+    week:           String(row[6] || ""),
+    dueDate:        String(row[7] || ""),
+    type:           String(row[8] || "eventual"),
+    routinePeriod:  String(row[9] || ""),
+    priority:       String(row[10] || "media"),
+    estimatedHours: Number(row[11]) || 4,
+    status:         String(row[12] || "pendente"),
+    description:    String(row[13] || ""),
+    createdAt:      String(row[14] || ""),
+    completedAt:    row[15] ? String(row[15]) : null,
+    helpRequestLog: []
+  };
+}
+
+function personToRow(p) {
+  const load = personLoad(p.id, filters.week);
+  return [
+    p.id, p.name, p.role, p.email, p.capacity,
+    tasksForWeek(filters.week).filter(t => t.ownerId === p.id && !isDone(t)).length,
+    tasksForWeek(filters.week).filter(t => t.helperId === p.id && !isDone(t)).length,
+    completedOnTimeCount(p.id),
+    delayedCount(p.id),
+    helpRequestCount(p.id),
+    p.photo || ""
+  ];
+}
+
+function taskToRow(t) {
+  const owner  = personById(t.ownerId);
+  const helper = personById(t.helperId);
+  return [
+    t.id, t.title,
+    t.ownerId || "",  owner  ? owner.name  : "",
+    t.helperId || "", helper ? helper.name : "",
+    t.week, t.dueDate, t.type, t.routinePeriod || "",
+    t.priority, t.estimatedHours, t.status,
+    t.description || "", t.createdAt || "", t.completedAt || "",
+    getHelpLog(t).length
+  ];
+}
+
+async function loadFromExcel() {
+  setSyncBar("Carregando dados da OneDrive...", "loading");
+  try {
+    const [pessoasRes, tarefasRes] = await Promise.all([
+      graphGet(graphUrl("('Pessoas')/usedRange")),
+      graphGet(graphUrl("('Tarefas')/usedRange"))
+    ]);
+
+    const people = (pessoasRes.values || []).slice(1).map(rowToPerson).filter(Boolean);
+    const tasks  = (tarefasRes.values || []).slice(1).map(rowToTask).filter(Boolean);
+
+    if (people.length > 0 || tasks.length > 0) {
+      state.people = people;
+      state.tasks  = tasks;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      render();
+      setSyncBar(`Dados sincronizados — ${people.length} pessoas, ${tasks.length} tarefas ✓`, "success");
+    } else {
+      // Planilha vazia, escreve os dados de demo nela
+      setSyncBar("Planilha vazia. Salvando dados iniciais na OneDrive...", "loading");
+      await writeToExcel();
+      setSyncBar("Planilha inicializada na OneDrive ✓", "success");
+    }
+  } catch (err) {
+    console.error("loadFromExcel:", err);
+    setSyncBar("Erro ao ler OneDrive. Usando dados locais.", "error");
+  }
+}
+
+async function writeToExcel() {
+  if (!isOnlineMode) return;
+  try {
+    // Escreve Pessoas (max 100 linhas)
+    const pRows = state.people.map(personToRow);
+    while (pRows.length < 100) pRows.push(Array(11).fill(""));
+    await graphPatch(graphUrl("('Pessoas')/range(address='A2:K101')"), { values: pRows });
+
+    // Escreve Tarefas (max 500 linhas)
+    const tRows = state.tasks.map(taskToRow);
+    while (tRows.length < 500) tRows.push(Array(17).fill(""));
+    await graphPatch(graphUrl("('Tarefas')/range(address='A2:Q501')"), { values: tRows });
+
+    setSyncBar("Salvo no OneDrive ✓", "success");
+  } catch (err) {
+    console.error("writeToExcel:", err);
+    setSyncBar("Erro ao salvar no OneDrive. Dados mantidos localmente.", "error");
+  }
+}
+
+function scheduleSyncToExcel() {
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(writeToExcel, 2000);
+}
+
+function setSyncBar(msg, type) {
+  const bar = $("#syncBar");
+  if (!bar) return;
+  bar.textContent = msg;
+  bar.className = `sync-bar show ${type}`;
+  if (type === "success") setTimeout(() => bar.classList.remove("show"), 3500);
+}
+
+function hideAuthOverlay() {
+  const overlay = $("#authOverlay");
+  if (overlay) overlay.classList.add("hidden");
+}
+
+function updateUserChip(name) {
+  const sidebar = $(".sidebar");
+  if (!sidebar) return;
+  let chip = $("#userChip");
+  if (!chip) {
+    chip = document.createElement("button");
+    chip.id = "userChip";
+    chip.className = "auth-user-info";
+    chip.title = "Clique para sair da conta";
+    sidebar.appendChild(chip);
+  }
+  chip.innerHTML = `<span class="avatar small">${initials(name)}</span> <span>${escapeHtml(name)}</span>`;
+  chip.onclick = async () => {
+    if (!confirm(`Sair da conta de ${name}?`)) return;
+    await msalInstance.logoutPopup();
+    isOnlineMode = false;
+    chip.remove();
+    $("#authOverlay").classList.remove("hidden");
+  };
+}
+
+
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 
@@ -13,7 +228,7 @@ let filters = {
 };
 let personPhotoData = "";
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   // Dark mode
   const savedTheme = localStorage.getItem("sst-theme");
   if (savedTheme === "dark") document.documentElement.setAttribute("data-theme", "dark");
@@ -34,10 +249,65 @@ document.addEventListener("DOMContentLoaded", () => {
     if (savedTheme === "dark") themeBtn.querySelector("use").setAttribute("href", "#icon-sun");
   }
 
+  // Inicializa o app com dados locais (rápido)
   setInitialFormValues();
   applySidebarState(localStorage.getItem(SIDEBAR_STORAGE_KEY) === "collapsed");
   bindEvents();
   render();
+
+  // Inicializa MSAL e verifica se já há sessão ativa
+  msalInstance = initMSAL();
+  if (!msalInstance) {
+    // Biblioteca não carregou (offline?) — modo local
+    hideAuthOverlay();
+    return;
+  }
+
+  try {
+    await msalInstance.initialize();
+    // Trata possível redirect de login
+    await msalInstance.handleRedirectPromise();
+  } catch (e) { console.warn("MSAL init:", e); }
+
+  const accounts = msalInstance.getAllAccounts();
+  if (accounts.length > 0) {
+    // Já logado — entra direto
+    currentUser  = accounts[0];
+    isOnlineMode = true;
+    hideAuthOverlay();
+    updateUserChip(currentUser.name || currentUser.username);
+    await loadFromExcel();
+  } else {
+    // Mostra tela de login
+    const loginBtn = $("#loginBtn");
+    if (loginBtn) {
+      loginBtn.addEventListener("click", async () => {
+        loginBtn.textContent = "Entrando...";
+        loginBtn.disabled = true;
+        try {
+          const res = await msalInstance.loginPopup({ scopes: LOGIN_SCOPES });
+          currentUser  = res.account;
+          isOnlineMode = true;
+          hideAuthOverlay();
+          updateUserChip(currentUser.name || currentUser.username);
+          await loadFromExcel();
+        } catch (err) {
+          console.error("Login:", err);
+          loginBtn.textContent = "Entrar com conta Microsoft";
+          loginBtn.disabled = false;
+          setSyncBar("Erro no login. Tente novamente.", "error");
+        }
+      });
+    }
+
+    const offlineBtn = $("#offlineModeBtn");
+    if (offlineBtn) {
+      offlineBtn.addEventListener("click", () => {
+        isOnlineMode = false;
+        hideAuthOverlay();
+      });
+    }
+  }
 });
 
 function loadState() {
@@ -73,6 +343,7 @@ function normalizeState(nextState) {
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  scheduleSyncToExcel(); // sincroniza com OneDrive em modo online
 }
 
 function demoState() {
