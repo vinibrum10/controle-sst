@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: controle-sst
+    runtime: static
+    buildCommand: node build-render.js
+    staticPublishPath: ./render-public
+    autoDeployTrigger: commit

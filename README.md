@@ -20,10 +20,22 @@ Abra `abrir-controle-sst.bat` com dois cliques ou abra `index.html` no navegador
 
 - `index.html`, `styles.css` e `app.js`: versão estática em produção.
 - `build-netlify.js`: gera o pacote pronto para Netlify Drop.
+- `build-render.js`: gera a pasta `render-public` para deploy no Render.
+- `render.yaml`: configuração opcional de Blueprint para Render Static Site.
 - `src/components`: componentes planejados para evolução do front-end.
 - `src/pages`: páginas/rotas do sistema.
 - `src/services`: integração com armazenamento, OneDrive e futuras APIs.
 - `src/data`: configuração de navegação e dados compartilhados.
+
+## Deploy no Render
+
+Use como Static Site no Render:
+
+- Branch: `main`
+- Build Command: `node build-render.js`
+- Publish Directory: `render-public`
+
+O Render pode fazer deploy automático a cada push no GitHub.
 
 ## Observação
 
