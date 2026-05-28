@@ -679,6 +679,16 @@ textarea:focus {
   color: var(--teal);
 }
 
+.badge.active-person {
+  background: #e2f4e6;
+  color: var(--green);
+}
+
+.badge.inactive {
+  background: #eef0f2;
+  color: #68736f;
+}
+
 .workload-row,
 .availability-item,
 .ranking-item,
@@ -707,6 +717,14 @@ textarea:focus {
 
 .person-heading.compact {
   gap: 8px;
+}
+
+.person-status {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .avatar {
@@ -816,6 +834,10 @@ textarea:focus {
   margin-bottom: 10px;
 }
 
+.person-card.inactive {
+  background: linear-gradient(0deg, rgba(238, 240, 242, 0.54), rgba(238, 240, 242, 0.54)), var(--surface);
+}
+
 .person-card strong,
 .availability-item strong,
 .ranking-item strong {
@@ -846,6 +868,21 @@ textarea:focus {
 .person-stats strong {
   margin-top: 4px;
   font-size: 1.1rem;
+}
+
+.person-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.person-actions .secondary-button,
+.person-actions .danger-button {
+  min-height: 38px;
 }
 
 .person-assignments {

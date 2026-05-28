@@ -76,7 +76,8 @@ function rowToPerson(row) {
     role:     String(row[2] || ""),
     email:    String(row[3] || ""),
     capacity: Number(row[4]) || 32,
-    photo:    String(row[10] || "")
+    photo:    String(row[10] || ""),
+    active:   String(row[11] || "ativo").toLowerCase() !== "inativo"
   };
 }
 
@@ -110,7 +111,8 @@ function personToRow(p) {
     completedOnTimeCount(p.id),
     delayedCount(p.id),
     helpRequestCount(p.id),
-    p.photo || ""
+    p.photo || "",
+    isPersonActive(p) ? "ativo" : "inativo"
   ];
 }
 
@@ -162,8 +164,8 @@ async function writeToExcel() {
   try {
     // Escreve Pessoas (max 100 linhas)
     const pRows = state.people.map(personToRow);
-    while (pRows.length < 100) pRows.push(Array(11).fill(""));
-    await graphPatch(graphUrl("('Pessoas')/range(address='A2:K101')"), { values: pRows });
+    while (pRows.length < 100) pRows.push(Array(12).fill(""));
+    await graphPatch(graphUrl("('Pessoas')/range(address='A2:L101')"), { values: pRows });
 
     // Escreve Tarefas (max 500 linhas)
     const tRows = state.tasks.map(taskToRow);
@@ -390,7 +392,8 @@ function normalizeState(nextState) {
   nextState.people = nextState.people.map((person) => ({
     ...person,
     email: person.email || "",
-    photo: person.photo || ""
+    photo: person.photo || "",
+    active: person.active !== false
   }));
 
   nextState.tasks = nextState.tasks.map((task) => ({
@@ -411,10 +414,10 @@ function demoState() {
   const week = currentWeekValue();
   return {
     people: [
-      { id: id(), name: "Ana Paula", role: "Técnica de Segurança", email: "ana.paula@empresa.com.br", capacity: 32, photo: "" },
-      { id: id(), name: "Bruno Reis", role: "Engenheiro de Segurança", email: "bruno.reis@empresa.com.br", capacity: 30, photo: "" },
-      { id: id(), name: "Carla Nunes", role: "Analista SST", email: "carla.nunes@empresa.com.br", capacity: 28, photo: "" },
-      { id: id(), name: "Diego Martins", role: "Técnico de Segurança", email: "diego.martins@empresa.com.br", capacity: 32, photo: "" }
+      { id: id(), name: "Ana Paula", role: "Técnica de Segurança", email: "ana.paula@empresa.com.br", capacity: 32, photo: "", active: true },
+      { id: id(), name: "Bruno Reis", role: "Engenheiro de Segurança", email: "bruno.reis@empresa.com.br", capacity: 30, photo: "", active: true },
+      { id: id(), name: "Carla Nunes", role: "Analista SST", email: "carla.nunes@empresa.com.br", capacity: 28, photo: "", active: true },
+      { id: id(), name: "Diego Martins", role: "Técnico de Segurança", email: "diego.martins@empresa.com.br", capacity: 32, photo: "", active: true }
     ],
     tasks: [
       {
@@ -623,14 +626,15 @@ function render() {
 function renderPeopleOptions() {
   const ownerSelect = $("#taskOwner");
   const ownerFilter = $("#ownerFilter");
+  const activePeople = state.people.filter(isPersonActive);
 
-  ownerSelect.innerHTML = state.people
+  ownerSelect.innerHTML = activePeople
     .map((person) => `<option value="${person.id}">${escapeHtml(person.name)}</option>`)
     .join("");
 
   ownerFilter.innerHTML = [
     `<option value="todos">Todos os responsáveis</option>`,
-    ...state.people.map((person) => `<option value="${person.id}">${escapeHtml(person.name)}</option>`)
+    ...state.people.map((person) => `<option value="${person.id}">${escapeHtml(person.name)}${isPersonActive(person) ? "" : " (inativo)"}</option>`)
   ].join("");
 
   ownerFilter.value = filters.owner;
@@ -666,7 +670,8 @@ function renderMetrics() {
 }
 
 function renderWorkload() {
-  const rows = state.people.map((person) => {
+  const people = state.people.filter((person) => isPersonActive(person) || personLoad(person.id, filters.week) > 0);
+  const rows = people.map((person) => {
     const load = personLoad(person.id, filters.week);
     const percent = Math.min(Math.round((load / person.capacity) * 100), 140);
     const fillClass = percent >= 100 ? "danger" : percent >= 80 ? "warn" : "";
@@ -677,9 +682,9 @@ function renderWorkload() {
         <header>
           <div>
             <strong>${escapeHtml(person.name)}</strong>
-            <span class="muted">${escapeHtml(person.role)}</span>
+            <span class="muted">${escapeHtml(person.role)}${isPersonActive(person) ? "" : " - inativo"}</span>
           </div>
-          <span class="badge">${load}h de ${person.capacity}h</span>
+          <span class="badge ${isPersonActive(person) ? "" : "inactive"}">${load}h de ${person.capacity}h</span>
         </header>
         <div class="bar-track" aria-label="Carga de ${escapeHtml(person.name)}">
           <div class="bar-fill ${fillClass}" style="width: ${Math.min(percent, 100)}%"></div>
@@ -876,9 +881,11 @@ function renderPeople() {
     const help = helpRequestCount(person.id);
     const ownedTasks = tasksForWeek(filters.week).filter((task) => task.ownerId === person.id && !isDone(task));
     const helpingTasks = tasksForWeek(filters.week).filter((task) => task.helperId === person.id && !isDone(task));
+    const active = isPersonActive(person);
+    const linkedTasks = linkedTasksForPerson(person.id).length;
 
     return `
-      <article class="person-card">
+      <article class="person-card ${active ? "" : "inactive"}">
         <header>
           <div class="person-heading">
             ${personAvatar(person, "large")}
@@ -888,7 +895,10 @@ function renderPeople() {
               <span class="muted">${escapeHtml(person.email || "E-mail não cadastrado")}</span>
             </div>
           </div>
-          <span class="badge">${load}/${person.capacity}h</span>
+          <div class="person-status">
+            <span class="badge ${active ? "active-person" : "inactive"}">${active ? "Ativo" : "Inativo"}</span>
+            <span class="badge">${load}/${person.capacity}h</span>
+          </div>
         </header>
         <div class="bar-track">
           <div class="bar-fill ${load > person.capacity ? "danger" : load >= person.capacity * 0.8 ? "warn" : ""}" style="width: ${Math.min((load / person.capacity) * 100, 100)}%"></div>
@@ -904,6 +914,14 @@ function renderPeople() {
           <div><span>Ajuda pedida</span><strong>${help}</strong></div>
         </div>
         ${renderPersonAssignments(ownedTasks, helpingTasks)}
+        <div class="person-actions">
+          <button class="secondary-button" type="button" onclick="togglePersonActive('${person.id}')">
+            ${active ? "Inativar funcionário" : "Reativar funcionário"}
+          </button>
+          <button class="danger-button" type="button" onclick="deletePerson('${person.id}')" title="${linkedTasks ? "Existem tarefas vinculadas. Inative para manter o histórico." : "Excluir funcionário"}">
+            Excluir
+          </button>
+        </div>
       </article>
     `;
   });
@@ -960,6 +978,7 @@ function renderHelp() {
     .join("");
 
   const availability = state.people
+    .filter(isPersonActive)
     .map((person) => ({ person, load: personLoad(person.id, filters.week) }))
     .sort((a, b) => (b.person.capacity - b.load) - (a.person.capacity - a.load));
 
@@ -1010,9 +1029,15 @@ function addTask(event) {
   const week = $("#taskWeek").value || filters.week;
   const dueDate = $("#taskDueDate").value;
   const estimatedHours = Number($("#taskHours").value);
+  const owner = personById(ownerId);
 
   if (!title || !ownerId || !dueDate || !estimatedHours) {
     showToast("Preencha os campos obrigatórios da tarefa.");
+    return;
+  }
+
+  if (!isPersonActive(owner)) {
+    showToast("Escolha um funcionário ativo para receber a tarefa.");
     return;
   }
 
@@ -1061,7 +1086,7 @@ function addPerson(event) {
     return;
   }
 
-  state.people.push({ id: id(), name, role, email, capacity, photo: personPhotoData });
+  state.people.push({ id: id(), name, role, email, capacity, photo: personPhotoData, active: true });
   event.target.reset();
   $("#personCapacity").value = 32;
   personPhotoData = "";
@@ -1223,7 +1248,7 @@ function openEmailDraft(to, subject, body) {
 
 function chooseHelper(task) {
   const candidates = state.people
-    .filter((person) => person.id !== task.ownerId)
+    .filter((person) => person.id !== task.ownerId && isPersonActive(person))
     .map((person) => {
       const load = personLoad(person.id, task.week);
       const free = person.capacity - load;
@@ -1278,6 +1303,42 @@ function deleteTask(taskId) {
   saveState();
   render();
   showToast("Tarefa excluída.");
+}
+
+function togglePersonActive(personId) {
+  const person = personById(personId);
+  if (!person) return;
+
+  const nextActive = !isPersonActive(person);
+  const message = nextActive
+    ? `Reativar ${person.name} para permitir novas tarefas e apoios?`
+    : `Inativar ${person.name}? O histórico será mantido, mas esta pessoa não receberá novas tarefas nem apoios.`;
+
+  if (!confirm(message)) return;
+
+  person.active = nextActive;
+  saveState();
+  render();
+  showToast(nextActive ? "Funcionário reativado." : "Funcionário inativado. Histórico preservado.");
+}
+
+function deletePerson(personId) {
+  const person = personById(personId);
+  if (!person) return;
+
+  const linkedTasks = linkedTasksForPerson(personId);
+  if (linkedTasks.length) {
+    showToast("Existem tarefas associadas. Inative o funcionário para preservar o histórico.");
+    alert(`Não é possível excluir ${person.name} porque existem ${linkedTasks.length} tarefa(s) associada(s). Inative o funcionário para manter o histórico sem apagar dados antigos.`);
+    return;
+  }
+
+  if (!confirm("Tem certeza que deseja excluir este funcionário? Esta ação não poderá ser desfeita.")) return;
+
+  state.people = state.people.filter((item) => item.id !== personId);
+  saveState();
+  render();
+  showToast("Funcionário excluído.");
 }
 
 function exportData() {
@@ -1513,6 +1574,18 @@ function personById(personId) {
   return state.people.find((person) => person.id === personId);
 }
 
+function isPersonActive(person) {
+  return person?.active !== false;
+}
+
+function linkedTasksForPerson(personId) {
+  return state.tasks.filter((task) => (
+    task.ownerId === personId ||
+    task.helperId === personId ||
+    getHelpLog(task).some((event) => event.requestedBy === personId || event.assignedTo === personId)
+  ));
+}
+
 function isDone(task) {
   return task.status === "concluida";
 }
@@ -1663,6 +1736,8 @@ window.requestHelp = requestHelp;
 window.toggleTaskDone = toggleTaskDone;
 window.toggleTaskProgress = toggleTaskProgress;
 window.deleteTask = deleteTask;
+window.togglePersonActive = togglePersonActive;
+window.deletePerson = deletePerson;
 
 // =============================================
 // KANBAN DRAG AND DROP
