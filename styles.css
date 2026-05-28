@@ -872,17 +872,34 @@ textarea:focus {
 
 .person-actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: 8px;
   flex-wrap: wrap;
-  margin-top: 12px;
+  margin-top: 10px;
   padding-top: 12px;
   border-top: 1px solid var(--line);
+}
+
+.person-actions-label {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.person-actions > div {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .person-actions .secondary-button,
 .person-actions .danger-button {
   min-height: 38px;
+  padding-inline: 12px;
 }
 
 .person-assignments {

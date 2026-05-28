@@ -903,6 +903,17 @@ function renderPeople() {
         <div class="bar-track">
           <div class="bar-fill ${load > person.capacity ? "danger" : load >= person.capacity * 0.8 ? "warn" : ""}" style="width: ${Math.min((load / person.capacity) * 100, 100)}%"></div>
         </div>
+        <div class="person-actions">
+          <span class="person-actions-label">Ações do funcionário</span>
+          <div>
+            <button class="secondary-button" type="button" onclick="togglePersonActive('${person.id}')">
+              ${active ? "Inativar funcionário" : "Reativar funcionário"}
+            </button>
+            <button class="danger-button" type="button" onclick="deletePerson('${person.id}')" title="${linkedTasks ? "Existem tarefas vinculadas. Inative para manter o histórico." : "Excluir funcionário"}">
+              Excluir
+            </button>
+          </div>
+        </div>
         <div class="person-stats">
           <div><span>Abertas</span><strong>${ownedTasks.length}</strong></div>
           <div><span>Ajudando</span><strong>${helpingTasks.length}</strong></div>
@@ -914,14 +925,6 @@ function renderPeople() {
           <div><span>Ajuda pedida</span><strong>${help}</strong></div>
         </div>
         ${renderPersonAssignments(ownedTasks, helpingTasks)}
-        <div class="person-actions">
-          <button class="secondary-button" type="button" onclick="togglePersonActive('${person.id}')">
-            ${active ? "Inativar funcionário" : "Reativar funcionário"}
-          </button>
-          <button class="danger-button" type="button" onclick="deletePerson('${person.id}')" title="${linkedTasks ? "Existem tarefas vinculadas. Inative para manter o histórico." : "Excluir funcionário"}">
-            Excluir
-          </button>
-        </div>
       </article>
     `;
   });
