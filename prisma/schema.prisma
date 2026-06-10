@@ -1,0 +1,415 @@
+// Modelagem de dados do Controle SST
+// Banco: PostgreSQL (Render Postgres)
+// ORM: Prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =====================================================================
+// USUARIOS / AUTENTICACAO
+// =====================================================================
+
+enum PapelUsuario {
+  ADMIN
+  GESTOR
+  COLABORADOR
+}
+
+enum ProvedorAuth {
+  LOCAL
+  MICROSOFT
+}
+
+model Usuario {
+  id           String       @id @default(uuid())
+  nome         String
+  email        String       @unique
+  senhaHash    String?
+  papel        PapelUsuario @default(COLABORADOR)
+  provedor     ProvedorAuth @default(LOCAL)
+  provedorId   String?
+  ativo        Boolean      @default(true)
+  funcionarioId String?     @unique
+  funcionario  Funcionario? @relation(fields: [funcionarioId], references: [id])
+  criadoEm     DateTime     @default(now())
+  atualizadoEm DateTime     @updatedAt
+
+  @@index([email])
+}
+
+// =====================================================================
+// FUNCIONARIOS / EQUIPE SST
+// =====================================================================
+
+model Funcionario {
+  id        String   @id @default(uuid())
+  nome      String
+  funcao    String
+  email     String   @unique
+  capacidade Int     @default(32) // capacidade semanal em horas
+  foto      String?  // URL/avatar (ou data URL)
+  ativo     Boolean  @default(true)
+  criadoEm  DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  usuario Usuario?
+
+  tarefasResponsavel Tarefa[] @relation("TarefaResponsavel")
+  tarefasApoio       Tarefa[] @relation("TarefaApoio")
+
+  pedidosAjudaSolicitados PedidoAjuda[] @relation("PedidoAjudaSolicitante")
+  pedidosAjudaAtendidos   PedidoAjuda[] @relation("PedidoAjudaAtendente")
+
+  treinamentos Treinamento[] @relation("TreinamentoParticipantes")
+
+  inspecoesResponsavel  Inspecao[]
+  auditoriasResponsavel Auditoria[]
+  achadosResponsavel    Achado[]
+  planosAcaoResponsavel PlanoAcao[]
+  rotasSeguraResponsavel RotaSegura[]
+
+  anexosCriados Anexo[]
+
+  @@index([email])
+}
+
+// =====================================================================
+// SEMANAS
+// =====================================================================
+
+model Semana {
+  id          String   @id @default(uuid())
+  codigo      String   @unique // formato ISO: "2026-W24"
+  ano         Int
+  numero      Int
+  dataInicio  DateTime
+  dataFim     DateTime
+
+  tarefas Tarefa[]
+
+  @@index([codigo])
+}
+
+// =====================================================================
+// TAREFAS
+// =====================================================================
+
+enum TipoTarefa {
+  ROTINEIRA
+  EVENTUAL
+}
+
+enum PrioridadeTarefa {
+  BAIXA
+  MEDIA
+  ALTA
+  CRITICA
+}
+
+enum PeriodoRotina {
+  SEMANAL
+  MENSAL
+  TRIMESTRAL
+  SEMESTRAL
+  ANUAL
+}
+
+enum StatusTarefa {
+  PENDENTE
+  EM_ANDAMENTO
+  CONCLUIDA
+}
+
+model Tarefa {
+  id             String           @id @default(uuid())
+  titulo         String
+  descricao      String?
+  responsavelId  String?
+  responsavel    Funcionario?     @relation("TarefaResponsavel", fields: [responsavelId], references: [id])
+  apoioId        String?
+  apoio          Funcionario?     @relation("TarefaApoio", fields: [apoioId], references: [id])
+  semanaId       String?
+  semana         Semana?          @relation(fields: [semanaId], references: [id])
+  prazo          DateTime
+  tipo           TipoTarefa       @default(EVENTUAL)
+  prioridade     PrioridadeTarefa @default(MEDIA)
+  periodoRotina  PeriodoRotina?
+  horasEstimadas Int              @default(4)
+  status         StatusTarefa     @default(PENDENTE)
+  criadoEm       DateTime         @default(now())
+  concluidaEm    DateTime?
+
+  pedidosAjuda PedidoAjuda[]
+  anexos       Anexo[]
+
+  @@index([responsavelId])
+  @@index([semanaId])
+  @@index([status])
+}
+
+// =====================================================================
+// PEDIDOS DE AJUDA / HISTORICO DE AJUDA
+// (mesma tabela: pedidos abertos = status ABERTO; historico = consulta
+// por status ATENDIDO/CANCELADO ordenada por data)
+// =====================================================================
+
+enum StatusPedidoAjuda {
+  ABERTO
+  ATENDIDO
+  CANCELADO
+}
+
+model PedidoAjuda {
+  id             String            @id @default(uuid())
+  tarefaId       String
+  tarefa         Tarefa            @relation(fields: [tarefaId], references: [id], onDelete: Cascade)
+  solicitanteId  String?
+  solicitante    Funcionario?      @relation("PedidoAjudaSolicitante", fields: [solicitanteId], references: [id])
+  atendentePorId String?
+  atendente      Funcionario?      @relation("PedidoAjudaAtendente", fields: [atendentePorId], references: [id])
+  status         StatusPedidoAjuda @default(ABERTO)
+  criadoEm       DateTime          @default(now())
+  atendidoEm     DateTime?
+
+  @@index([tarefaId])
+  @@index([status])
+}
+
+// =====================================================================
+// TREINAMENTOS
+// =====================================================================
+
+enum StatusTreinamento {
+  PLANEJADO
+  REALIZADO
+  CANCELADO
+  VENCIDO
+}
+
+model Treinamento {
+  id              String            @id @default(uuid())
+  titulo          String
+  descricao       String?
+  norma           String?           // ex.: NR-35, NR-33, integracao
+  cargaHoraria    Int?
+  dataRealizacao  DateTime?
+  validade        DateTime?
+  status          StatusTreinamento @default(PLANEJADO)
+  responsavelId   String?
+  responsavel     Funcionario?      @relation("TreinamentoParticipantes", fields: [responsavelId], references: [id])
+  criadoEm        DateTime          @default(now())
+  atualizadoEm    DateTime          @updatedAt
+
+  anexos Anexo[]
+
+  @@index([status])
+}
+
+// =====================================================================
+// INSPECOES
+// =====================================================================
+
+enum StatusInspecao {
+  PLANEJADA
+  REALIZADA
+  CANCELADA
+}
+
+model Inspecao {
+  id            String         @id @default(uuid())
+  titulo        String
+  area          String?
+  tipo          String?
+  dataPrevista  DateTime
+  dataRealizada DateTime?
+  status        StatusInspecao @default(PLANEJADA)
+  observacoes   String?
+  responsavelId String?
+  responsavel   Funcionario?   @relation(fields: [responsavelId], references: [id])
+  criadoEm      DateTime       @default(now())
+  atualizadoEm  DateTime       @updatedAt
+
+  achados Achado[]
+  anexos  Anexo[]
+
+  @@index([status])
+}
+
+// =====================================================================
+// AUDITORIAS
+// =====================================================================
+
+enum StatusAuditoria {
+  PLANEJADA
+  REALIZADA
+  CANCELADA
+}
+
+model Auditoria {
+  id            String          @id @default(uuid())
+  titulo        String
+  escopo        String?
+  norma         String?         // ex.: ISO 45001, NR-XX
+  dataPrevista  DateTime
+  dataRealizada DateTime?
+  status        StatusAuditoria @default(PLANEJADA)
+  observacoes   String?
+  responsavelId String?
+  responsavel   Funcionario?    @relation(fields: [responsavelId], references: [id])
+  criadoEm      DateTime        @default(now())
+  atualizadoEm  DateTime        @updatedAt
+
+  achados Achado[]
+  anexos  Anexo[]
+
+  @@index([status])
+}
+
+// =====================================================================
+// ACHADOS / DESVIOS
+// =====================================================================
+
+enum TipoAchado {
+  NAO_CONFORMIDADE
+  OBSERVACAO
+  OPORTUNIDADE_MELHORIA
+}
+
+enum GravidadeAchado {
+  BAIXA
+  MEDIA
+  ALTA
+  CRITICA
+}
+
+enum StatusAchado {
+  ABERTO
+  EM_TRATATIVA
+  CONCLUIDO
+}
+
+model Achado {
+  id            String          @id @default(uuid())
+  descricao     String
+  tipo          TipoAchado      @default(NAO_CONFORMIDADE)
+  gravidade     GravidadeAchado @default(MEDIA)
+  status        StatusAchado    @default(ABERTO)
+  identificadoEm DateTime       @default(now())
+
+  inspecaoId    String?
+  inspecao      Inspecao?       @relation(fields: [inspecaoId], references: [id])
+  auditoriaId   String?
+  auditoria     Auditoria?      @relation(fields: [auditoriaId], references: [id])
+  rotaSeguraId  String?
+  rotaSegura    RotaSegura?     @relation(fields: [rotaSeguraId], references: [id])
+
+  responsavelId String?
+  responsavel   Funcionario?    @relation(fields: [responsavelId], references: [id])
+
+  planosAcao PlanoAcao[]
+  anexos     Anexo[]
+
+  @@index([status])
+}
+
+// =====================================================================
+// PLANOS DE ACAO
+// =====================================================================
+
+enum StatusPlanoAcao {
+  PENDENTE
+  EM_ANDAMENTO
+  CONCLUIDO
+  ATRASADO
+}
+
+model PlanoAcao {
+  id            String          @id @default(uuid())
+  achadoId      String
+  achado        Achado          @relation(fields: [achadoId], references: [id], onDelete: Cascade)
+  descricao     String
+  responsavelId String?
+  responsavel   Funcionario?    @relation(fields: [responsavelId], references: [id])
+  prazo         DateTime
+  status        StatusPlanoAcao @default(PENDENTE)
+  concluidoEm   DateTime?
+  criadoEm      DateTime        @default(now())
+
+  anexos Anexo[]
+
+  @@index([status])
+  @@index([achadoId])
+}
+
+// =====================================================================
+// ROTAS SEGURAS
+// =====================================================================
+
+enum FrequenciaRota {
+  DIARIA
+  SEMANAL
+  QUINZENAL
+  MENSAL
+}
+
+enum StatusRota {
+  ATIVA
+  INATIVA
+}
+
+model RotaSegura {
+  id                String         @id @default(uuid())
+  nome              String
+  descricao         String?
+  area              String?
+  frequencia        FrequenciaRota @default(SEMANAL)
+  ultimaVerificacao DateTime?
+  status            StatusRota     @default(ATIVA)
+  responsavelId     String?
+  responsavel       Funcionario?   @relation(fields: [responsavelId], references: [id])
+  criadoEm          DateTime       @default(now())
+  atualizadoEm      DateTime       @updatedAt
+
+  achados Achado[]
+  anexos  Anexo[]
+
+  @@index([status])
+}
+
+// =====================================================================
+// ANEXOS / EVIDENCIAS
+// =====================================================================
+
+model Anexo {
+  id           String   @id @default(uuid())
+  nomeArquivo  String
+  url          String
+  tipoMime     String?
+  tamanho      Int?
+  descricao    String?
+  criadoEm     DateTime @default(now())
+
+  criadoPorId String?
+  criadoPor   Funcionario? @relation(fields: [criadoPorId], references: [id])
+
+  tarefaId      String?
+  tarefa        Tarefa?      @relation(fields: [tarefaId], references: [id])
+  treinamentoId String?
+  treinamento   Treinamento? @relation(fields: [treinamentoId], references: [id])
+  inspecaoId    String?
+  inspecao      Inspecao?    @relation(fields: [inspecaoId], references: [id])
+  auditoriaId   String?
+  auditoria     Auditoria?   @relation(fields: [auditoriaId], references: [id])
+  achadoId      String?
+  achado        Achado?      @relation(fields: [achadoId], references: [id])
+  planoAcaoId   String?
+  planoAcao     PlanoAcao?   @relation(fields: [planoAcaoId], references: [id])
+  rotaSeguraId  String?
+  rotaSegura    RotaSegura?  @relation(fields: [rotaSeguraId], references: [id])
+}
