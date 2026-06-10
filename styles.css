@@ -1487,6 +1487,33 @@ textarea:hover {
   border-color: rgba(255, 255, 255, 0.3);
 }
 
+.auth-card .stacked-form {
+  text-align: left;
+  margin-bottom: 8px;
+}
+
+.auth-card .stacked-form label {
+  color: #c8d6d2;
+}
+
+.auth-error {
+  min-height: 1.2em;
+  margin: 0 0 12px;
+  color: #ff8a80;
+  font-size: 0.85rem;
+}
+
+.account-info {
+  display: grid;
+  gap: 4px;
+  margin: 10px 0;
+  font-size: 0.9rem;
+}
+
+.account-info p {
+  margin: 0;
+}
+
 .auth-user-info {
   display: flex;
   align-items: center;

@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css?v=20260528-actions">
-    <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
   </head>
   <body>
     <svg class="sprite" aria-hidden="true" focusable="false">
@@ -163,27 +162,27 @@
                   <select id="ownerFilter" aria-label="Filtrar por responsável"></select>
                   <select id="typeFilter" aria-label="Filtrar por tipo">
                     <option value="todos">Todos os tipos</option>
-                    <option value="rotineira">Rotineiras</option>
-                    <option value="eventual">Eventuais</option>
+                    <option value="ROTINEIRA">Rotineiras</option>
+                    <option value="EVENTUAL">Eventuais</option>
                   </select>
                 </div>
               </div>
               <div class="kanban-board" id="kanbanBoard">
-                <div class="kanban-column" data-status="pendente">
+                <div class="kanban-column" data-status="PENDENTE">
                   <div class="kanban-header">
                     Pendentes
                     <span class="badge" id="count-pendente">0</span>
                   </div>
                   <div class="kanban-tasks" id="col-pendente"></div>
                 </div>
-                <div class="kanban-column" data-status="em_andamento">
+                <div class="kanban-column" data-status="EM_ANDAMENTO">
                   <div class="kanban-header">
                     Em Andamento
                     <span class="badge" id="count-em_andamento">0</span>
                   </div>
                   <div class="kanban-tasks" id="col-em_andamento"></div>
                 </div>
-                <div class="kanban-column" data-status="concluida">
+                <div class="kanban-column" data-status="CONCLUIDA">
                   <div class="kanban-header">
                     Concluídas
                     <span class="badge" id="count-concluida">0</span>
@@ -228,28 +227,28 @@
                   <label>
                     Tipo
                     <select id="taskType" required>
-                      <option value="rotineira">Rotineira</option>
-                      <option value="eventual">Eventual</option>
+                      <option value="ROTINEIRA">Rotineira</option>
+                      <option value="EVENTUAL">Eventual</option>
                     </select>
                   </label>
                   <label>
                     Prioridade
                     <select id="taskPriority" required>
-                      <option value="media">Média</option>
-                      <option value="alta">Alta</option>
-                      <option value="critica">Crítica</option>
-                      <option value="baixa">Baixa</option>
+                      <option value="MEDIA">Média</option>
+                      <option value="ALTA">Alta</option>
+                      <option value="CRITICA">Crítica</option>
+                      <option value="BAIXA">Baixa</option>
                     </select>
                   </label>
                 </div>
                 <label id="routinePeriodField">
                   Período da rotina
                   <select id="taskRoutinePeriod">
-                    <option value="semanal">Semanal</option>
-                    <option value="mensal">Mensal</option>
-                    <option value="trimestral">Trimestral</option>
-                    <option value="semestral">Semestral</option>
-                    <option value="anual">Anual</option>
+                    <option value="SEMANAL">Semanal</option>
+                    <option value="MENSAL">Mensal</option>
+                    <option value="TRIMESTRAL">Trimestral</option>
+                    <option value="SEMESTRAL">Semestral</option>
+                    <option value="ANUAL">Anual</option>
                   </select>
                 </label>
                 <label>
@@ -467,7 +466,7 @@
             <div class="panel-header">
               <div>
                 <h2>Configurações</h2>
-                <p>Preferências gerais, integração e parâmetros de funcionamento do Controle SST.</p>
+                <p>Preferências gerais e informações da conta conectada.</p>
               </div>
             </div>
             <div class="module-grid">
@@ -477,9 +476,10 @@
                 <small class="muted">O alternador permanece disponível no topo da tela.</small>
               </article>
               <article class="module-item">
-                <span class="badge">Integração</span>
-                <strong>OneDrive e planilha</strong>
-                <small class="muted">Base preparada para evoluir os serviços de sincronização.</small>
+                <span class="badge">Conta</span>
+                <strong>Dados da conta</strong>
+                <div class="account-info" id="accountInfo"></div>
+                <button class="secondary-button" type="button" id="logoutButton">Sair da conta</button>
               </article>
             </div>
           </section>
@@ -494,20 +494,45 @@
       <div class="auth-card">
         <div class="brand-mark auth-logo">SST</div>
         <h1 class="auth-title">Controle SST</h1>
-        <p class="auth-desc">Entre com sua conta Microsoft para sincronizar os dados com a planilha no OneDrive. Todos da equipe verão os mesmos dados.</p>
-        <button class="primary-button full" id="loginBtn" type="button">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="8" height="8"/><rect x="13" y="11" width="8" height="8"/><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/></svg>
-          Entrar com conta Microsoft
-        </button>
-        <button class="secondary-button full" id="offlineModeBtn" type="button">
-          Usar sem conta (dados locais)
+        <p class="auth-desc" id="authDesc">Entre com seu e-mail e senha para acessar o Controle SST.</p>
+
+        <form id="loginForm" class="stacked-form">
+          <label>
+            E-mail
+            <input id="loginEmail" type="email" required autocomplete="email">
+          </label>
+          <label>
+            Senha
+            <input id="loginPassword" type="password" required autocomplete="current-password">
+          </label>
+          <button class="primary-button full" type="submit">Entrar</button>
+        </form>
+
+        <form id="registerForm" class="stacked-form hidden">
+          <label>
+            Nome
+            <input id="registerName" type="text" required autocomplete="name">
+          </label>
+          <label>
+            E-mail
+            <input id="registerEmail" type="email" required autocomplete="email">
+          </label>
+          <label>
+            Senha
+            <input id="registerPassword" type="password" required minlength="6" autocomplete="new-password">
+          </label>
+          <button class="primary-button full" type="submit">Criar conta</button>
+        </form>
+
+        <p class="auth-error" id="authError"></p>
+
+        <button class="secondary-button full" id="toggleAuthMode" type="button">Criar uma conta</button>
+        <button class="secondary-button full" type="button" disabled title="Em breve">
+          Entrar com Microsoft (em breve)
         </button>
       </div>
     </div>
 
-    <!-- Sync status bar -->
-    <div class="sync-bar" id="syncBar" aria-live="polite"></div>
-
-    <script src="app.js?v=20260528-actions"></script>
+    <script type="module" src="src/main.js"></script>
   </body>
 </html>
