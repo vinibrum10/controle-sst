@@ -46,3 +46,19 @@ export function shiftDate(days: number): string {
   date.setDate(date.getDate() + days);
   return toDateInputValue(date);
 }
+
+export function startOfToday(): Date {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+export function endOfDate(value: string): Date {
+  return new Date(`${value}T23:59:59`);
+}
+
+export function dateValue(value?: string | null): number {
+  if (!value) return 0;
+  const normalized = /^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T12:00:00` : value;
+  return new Date(normalized).getTime();
+}

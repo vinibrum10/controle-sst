@@ -48,6 +48,15 @@ export function IconSprite() {
         <path d="M16 17l5-5-5-5"></path>
         <path d="M21 12H9"></path>
       </symbol>
+      <symbol id="icon-clock" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M12 6v6l4 2"></path>
+      </symbol>
+      <symbol id="icon-trash" viewBox="0 0 24 24">
+        <path d="M3 6h18"></path>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        <path d="M10 11v6M14 11v6"></path>
+      </symbol>
     </svg>
   );
 }

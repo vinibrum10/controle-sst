@@ -26,10 +26,24 @@ export const PRIORITY_LABELS: Record<PrioridadeTarefa, string> = {
   CRITICA: "Crítica",
 };
 
+export const KANBAN_COLUMNS: { status: StatusTarefa; titulo: string }[] = [
+  { status: "PENDENTE", titulo: "Pendentes" },
+  { status: "EM_ANDAMENTO", titulo: "Em Andamento" },
+  { status: "CONCLUIDA", titulo: "Concluídas" },
+];
+
 export function typeLabel(tipo: TipoTarefa): string {
   return TYPE_LABELS[tipo] || tipo;
 }
 
 export function routinePeriodLabel(periodo?: PeriodoRotina | null): string {
   return periodo ? ROUTINE_PERIOD_LABELS[periodo] : ROUTINE_PERIOD_LABELS.SEMANAL;
+}
+
+export function statusLabel(status: StatusTarefa): string {
+  return STATUS_LABELS[status] || status;
+}
+
+export function priorityLabel(prioridade: PrioridadeTarefa): string {
+  return PRIORITY_LABELS[prioridade] || prioridade;
 }
