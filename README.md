@@ -14,13 +14,7 @@ Sistema online para controlar tarefas semanais da equipe de SST, prazos, pedidos
 
 ## Estrutura do projeto
 
-- `index.html`, `styles.css`: shell da aplicação e estilos.
-- `src/main.js`: ponto de entrada do front-end (tema, navegação, autenticação).
-- `src/router.js`, `src/config/navigation.js`: roteamento por hash e menu lateral.
-- `src/state/store.js`: estado central da aplicação.
-- `src/services/api`: chamadas HTTP para o backend.
-- `src/hooks`: regras de negócio do front-end (carregam dados da API e atualizam o estado).
-- `src/components`, `src/pages`: componentes de interface e páginas/rotas.
+- `web/`: front-end em Vite + React + TypeScript + Tailwind CSS (veja `web/README.md`). O build (`web/dist`) é servido pelo Express em produção.
 - `server/`: API REST em Express (rotas, middlewares e utilitários).
 - `prisma/`: schema do banco de dados, migrações e seed dos dados de demonstração.
 
@@ -42,10 +36,26 @@ Copie `.env.example` para `.env` e preencha os valores:
 npm install
 npx prisma migrate dev   # cria/atualiza as tabelas no banco
 npm run seed              # popula dados de demonstração e o usuário admin
-npm run dev                # inicia o servidor com recarregamento automático
+npm run dev                # inicia o servidor com recarregamento automático (API na porta 3000)
 ```
 
-A aplicação fica disponível em `http://localhost:3000`.
+Em outro terminal, inicie o front-end React:
+
+```bash
+cd web
+npm install
+npm run dev   # inicia o Vite na porta 5173, com proxy de /api para http://localhost:3000
+```
+
+Durante o desenvolvimento, a aplicação fica disponível em `http://localhost:5173`.
+
+Para rodar a aplicação completa como em produção (front-end já compilado e servido pelo Express):
+
+```bash
+npm install
+npm run build   # compila o front-end em web/dist
+npm start       # serve a API e o front-end em http://localhost:3000
+```
 
 Usuário administrador criado pelo seed:
 
@@ -55,7 +65,8 @@ Usuário administrador criado pelo seed:
 ## Comandos
 
 - `npm run dev`: inicia o servidor em modo desenvolvimento (nodemon).
-- `npm start`: inicia o servidor em produção.
+- `npm run build`: instala as dependências do front-end e gera `web/dist`.
+- `npm start`: inicia o servidor em produção, servindo a API e `web/dist`.
 - `npm run migrate:dev`: cria/atualiza migrações do banco em desenvolvimento.
 - `npm run migrate:deploy`: aplica migrações pendentes em produção.
 - `npm run seed`: popula o banco com dados de demonstração.
@@ -65,7 +76,7 @@ Usuário administrador criado pelo seed:
 
 Use como Web Service no Render (veja `render.yaml` para um Blueprint pronto):
 
-- Build Command: `npm install && npx prisma generate && npx prisma migrate deploy`
+- Build Command: `npm install && npm run build && npx prisma generate && npx prisma migrate deploy`
 - Start Command: `npm start`
 - Variáveis de ambiente: `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `NODE_ENV=production`
 

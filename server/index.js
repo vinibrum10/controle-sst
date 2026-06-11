@@ -4,6 +4,7 @@ const path = require("path");
 const express = require("express");
 const cors = require("cors");
 
+const prisma = require("./db");
 const authRoutes = require("./routes/auth.routes");
 const funcionariosRoutes = require("./routes/funcionarios.routes");
 const tarefasRoutes = require("./routes/tarefas.routes");
@@ -34,10 +35,18 @@ app.use("/api/planos-acao", planosAcao);
 app.use("/api/rotas-seguras", rotasSeguras);
 app.use("/api/anexos", anexos);
 
-app.get("/api/health", (req, res) => res.json({ status: "ok" }));
+app.get("/api/health", async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: "ok", database: "ok" });
+  } catch (err) {
+    console.error("Health check - falha na conexao com o banco:", err);
+    res.status(503).json({ status: "error", database: "unreachable" });
+  }
+});
 
 // ----- Frontend estatico -----
-const publicDir = path.join(__dirname, "..");
+const publicDir = path.join(__dirname, "..", "web", "dist");
 app.use(express.static(publicDir));
 
 // SPA fallback (rotas com hash sao tratadas no front-end)
