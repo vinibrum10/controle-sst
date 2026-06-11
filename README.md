@@ -23,6 +23,7 @@ Sistema online para controlar tarefas semanais da equipe de SST, prazos, pedidos
 - `src/components`, `src/pages`: componentes de interface e páginas/rotas.
 - `server/`: API REST em Express (rotas, middlewares e utilitários).
 - `prisma/`: schema do banco de dados, migrações e seed dos dados de demonstração.
+- `web/`: novo front-end em Vite + React + TypeScript + Tailwind CSS, em migração gradual (veja `web/README.md`).
 
 ## Configuração
 
