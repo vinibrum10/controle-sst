@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import { ApiError } from "../lib/api";
 import { Button } from "../components/ui/Button";
+import { DEFAULT_PATH } from "../components/sidebar/navigation";
 
 const inputClasses = "w-full min-h-[40px] px-2.5 rounded-[8px] border border-line bg-surface-soft text-text outline-none focus:border-teal";
 const labelClasses = "grid gap-1.5 text-[#c8d6d2] text-[0.83rem] font-extrabold";
@@ -24,7 +25,7 @@ export function LoginPage() {
   const [registerSenha, setRegisterSenha] = useState("");
 
   if (!carregando && usuario) {
-    const from = (location.state as { from?: string } | null)?.from || "/";
+    const from = (location.state as { from?: string } | null)?.from || DEFAULT_PATH;
     return <Navigate to={from} replace />;
   }
 
@@ -34,7 +35,7 @@ export function LoginPage() {
     setSubmitting(true);
     try {
       await login(loginEmail.trim(), loginSenha);
-      navigate("/", { replace: true });
+      navigate(DEFAULT_PATH, { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Erro ao entrar. Tente novamente.");
     } finally {
@@ -48,7 +49,7 @@ export function LoginPage() {
     setSubmitting(true);
     try {
       await register(registerNome.trim(), registerEmail.trim(), registerSenha);
-      navigate("/", { replace: true });
+      navigate(DEFAULT_PATH, { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Erro ao criar conta. Tente novamente.");
     } finally {
@@ -101,7 +102,7 @@ export function LoginPage() {
                 onChange={(e) => setLoginSenha(e.target.value)}
               />
             </label>
-            <Button type="submit" full disabled={submitting}>
+            <Button type="submit" size="lg" full disabled={submitting}>
               Entrar
             </Button>
           </form>
@@ -141,7 +142,7 @@ export function LoginPage() {
                 onChange={(e) => setRegisterSenha(e.target.value)}
               />
             </label>
-            <Button type="submit" full disabled={submitting}>
+            <Button type="submit" size="lg" full disabled={submitting}>
               Criar conta
             </Button>
           </form>

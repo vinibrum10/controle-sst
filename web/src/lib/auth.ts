@@ -1,5 +1,5 @@
 import { apiFetch } from "./api";
-import type { Usuario } from "./types";
+import type { Usuario } from "../types";
 
 interface AuthResponse {
   token: string;

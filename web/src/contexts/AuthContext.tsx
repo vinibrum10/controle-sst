@@ -1,33 +1,33 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { getMe, login as apiLogin, register as apiRegister } from "../lib/auth";
 import { getToken, setToken } from "../lib/api";
-import type { Usuario } from "../lib/types";
-
-interface AuthContextValue {
-  usuario: Usuario | null;
-  carregando: boolean;
-  login: (email: string, senha: string) => Promise<Usuario>;
-  register: (nome: string, email: string, senha: string) => Promise<Usuario>;
-  logout: () => void;
-}
-
-const AuthContext = createContext<AuthContextValue | null>(null);
+import type { Usuario } from "../types";
+import { AuthContext } from "./auth-context";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      setCarregando(false);
-      return;
+    let cancelled = false;
+
+    async function restoreSession() {
+      const token = getToken();
+      if (token) {
+        try {
+          const { usuario } = await getMe();
+          if (!cancelled) setUsuario(usuario);
+        } catch {
+          setToken(null);
+        }
+      }
+      if (!cancelled) setCarregando(false);
     }
 
-    getMe()
-      .then(({ usuario }) => setUsuario(usuario))
-      .catch(() => setToken(null))
-      .finally(() => setCarregando(false));
+    restoreSession();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const login = useCallback(async (email: string, senha: string) => {
@@ -54,10 +54,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth deve ser usado dentro de AuthProvider");
-  return ctx;
 }
