@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { solicitarAjuda as solicitarAjudaApi } from "../lib/ajuda";
 import { atualizarStatusTarefa, excluirTarefa, listarTarefas } from "../lib/tarefas";
+import type { ResultadoAjuda } from "../types/ajuda";
 import type { StatusTarefa, Tarefa } from "../types/tarefa";
 
 interface UseTarefasResult {
@@ -9,7 +10,7 @@ interface UseTarefasResult {
   erro: string | null;
   alterarStatus: (id: string, status: StatusTarefa) => Promise<Tarefa>;
   remover: (id: string) => Promise<void>;
-  pedirAjuda: (id: string) => Promise<{ tarefa: Tarefa; ajudante: { nome: string }; mensagem: string }>;
+  pedirAjuda: (id: string) => Promise<ResultadoAjuda>;
 }
 
 export function useTarefas(semana: string): UseTarefasResult {
