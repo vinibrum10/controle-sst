@@ -57,6 +57,14 @@ export function IconSprite() {
         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
         <path d="M10 11v6M14 11v6"></path>
       </symbol>
+      <symbol id="icon-download" viewBox="0 0 24 24">
+        <path d="M12 3v12m0 0 4-4m-4 4-4-4"></path>
+        <path d="M4 17v3h16v-3"></path>
+      </symbol>
+      <symbol id="icon-upload" viewBox="0 0 24 24">
+        <path d="M12 15V3m0 0 4 4m-4-4-4 4"></path>
+        <path d="M4 17v3h16v-3"></path>
+      </symbol>
     </svg>
   );
 }
