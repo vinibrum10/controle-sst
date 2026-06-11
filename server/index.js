@@ -46,7 +46,7 @@ app.get("/api/health", async (req, res) => {
 });
 
 // ----- Frontend estatico -----
-const publicDir = path.join(__dirname, "..");
+const publicDir = path.join(__dirname, "..", "web", "dist");
 app.use(express.static(publicDir));
 
 // SPA fallback (rotas com hash sao tratadas no front-end)
