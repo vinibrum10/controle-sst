@@ -41,7 +41,7 @@ export function AppLayout() {
 
       <Sidebar
         onNavigate={() => setMobileOpen(false)}
-        className={`fixed inset-y-0 left-0 z-40 w-[260px] -translate-x-full transition-transform duration-200 lg:sticky lg:translate-x-0 lg:transition-[width,opacity,padding] ${
+        className={`fixed inset-y-0 left-0 z-40 w-[260px] -translate-x-full transition-transform duration-200 lg:sticky lg:top-0 lg:translate-x-0 lg:transition-[width,opacity,padding] ${
           mobileOpen ? "translate-x-0" : ""
         } ${collapsed ? "lg:w-0 lg:overflow-hidden lg:p-0 lg:opacity-0" : ""}`}
       />

@@ -35,7 +35,7 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
 
   return (
     <aside
-      className={`sticky top-0 flex h-screen flex-col gap-[22px] overflow-y-auto bg-gradient-to-b from-sidebar to-[#0b1917] p-[22px] text-[#f7fbfa] shadow-[12px_0_34px_rgba(15,37,34,0.14)] dark:from-[#080f0e] dark:to-[#080f0e] ${className}`}
+      className={`flex h-screen flex-col gap-[22px] overflow-y-auto bg-gradient-to-b from-sidebar to-[#0b1917] p-[22px] text-[#f7fbfa] shadow-[12px_0_34px_rgba(15,37,34,0.14)] dark:from-[#080f0e] dark:to-[#080f0e] ${className}`}
       aria-label="Navegação principal"
     >
       <div className="flex min-h-[48px] items-center gap-3">

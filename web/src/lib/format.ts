@@ -35,3 +35,14 @@ export function initials(name: string): string {
     .map((part) => part[0]?.toUpperCase() || "")
     .join("");
 }
+
+export function formatDate(value?: string | null): string {
+  if (!value) return "-";
+  return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(value));
+}
+
+export function shiftDate(days: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return toDateInputValue(date);
+}
