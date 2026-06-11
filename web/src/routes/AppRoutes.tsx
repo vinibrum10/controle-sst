@@ -6,6 +6,7 @@ import { CriarTarefaPage } from "../pages/CriarTarefaPage";
 import { ExecucaoPage } from "../pages/ExecucaoPage";
 import { FuncionariosPage } from "../pages/FuncionariosPage";
 import { AjudaPage } from "../pages/AjudaPage";
+import { RotaSeguraPage } from "../pages/RotaSeguraPage";
 import { TreinamentosPage } from "../pages/TreinamentosPage";
 import { InspecoesPage } from "../pages/InspecoesPage";
 import { DadosPage } from "../pages/DadosPage";
@@ -31,6 +32,7 @@ export function AppRoutes() {
         <Route path="/tarefas/executar" element={<ExecucaoPage />} />
         <Route path="/funcionarios" element={<FuncionariosPage />} />
         <Route path="/ajuda" element={<AjudaPage />} />
+        <Route path="/programas/rota-segura" element={<RotaSeguraPage />} />
         <Route path="/treinamentos" element={<TreinamentosPage />} />
         <Route path="/inspecoes" element={<InspecoesPage />} />
         <Route path="/dados" element={<DadosPage />} />

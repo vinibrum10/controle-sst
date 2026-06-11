@@ -48,6 +48,7 @@ export const NAVIGATION_GROUPS: NavGroup[] = [
     icon: "icon-check",
     defaultOpen: false,
     items: [
+      { path: "/programas/rota-segura", label: "Rota Segura", title: "Rota Segura" },
       { path: "/treinamentos", label: "Treinamentos", title: "Treinamentos" },
       { path: "/inspecoes", label: "Inspeções e Auditorias", title: "Inspeções e auditorias" },
     ],
