@@ -47,7 +47,7 @@ const importSchema = z.object({
 
 // Exporta uma copia completa dos dados do banco (funcionarios, tarefas e
 // pedidos de ajuda), para backup ou migracao.
-router.get("/exportar", asyncHandler(async (req, res) => {
+router.get("/exportar", requireRole("ADMIN", "GESTOR"), asyncHandler(async (req, res) => {
   const [funcionarios, tarefas] = await Promise.all([
     prisma.funcionario.findMany({ orderBy: { nome: "asc" } }),
     prisma.tarefa.findMany({ include: tarefaInclude, orderBy: { criadoEm: "asc" } })
@@ -63,7 +63,7 @@ router.get("/exportar", asyncHandler(async (req, res) => {
 
 // Importa funcionarios e tarefas, validando cada registro. Registros
 // invalidos sao ignorados e reportados em "erros".
-router.post("/importar", asyncHandler(async (req, res) => {
+router.post("/importar", requireRole("ADMIN"), asyncHandler(async (req, res) => {
   const parsed = importSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: "Formato de arquivo invalido." });
