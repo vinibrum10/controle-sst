@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: controle_sst_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/controle_sst_test?schema=public"
+      JWT_SECRET: ci-secret
+      JWT_EXPIRES_IN: 7d
+      NODE_ENV: test
+
+    steps:
+      - name: Checkout do codigo
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            web/package-lock.json
+
+      - name: Instalar dependencias do projeto raiz
+        run: npm ci
+
+      - name: Gerar Prisma Client
+        run: npx prisma generate
+
+      - name: Instalar dependencias do front-end
+        run: npm ci --prefix web
+
+      - name: Build completo (tsc + vite)
+        run: npm run build
+
+      - name: Rodar testes do backend (Jest)
+        run: npm test --if-present
+
+      - name: Rodar testes do front-end (Vitest)
+        run: npm test --if-present --prefix web
+
+      - name: Rodar lint do front-end
+        run: npm run lint --if-present --prefix web
+
+      # Nenhuma suite Playwright esta configurada no projeto ainda. Quando
+      # for adicionada (ex.: web/tests ou playwright.config.ts), inclua
+      # aqui um passo "npx playwright install --with-deps" seguido de
+      # "npx playwright test", condicionado a existencia do arquivo de
+      # configuracao para nao quebrar o pipeline na ausencia dele.

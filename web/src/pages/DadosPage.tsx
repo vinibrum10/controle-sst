@@ -1,15 +1,22 @@
 import { useRef, type ChangeEvent } from "react";
-import { Panel } from "../components/ui/Panel";
+import { Panel, EmptyState } from "../components/ui/Panel";
 import { Button } from "../components/ui/Button";
 import { Icon } from "../components/ui/IconSprite";
 import { useToast } from "../hooks/useToast";
+import { useAuth } from "../hooks/useAuth";
 import { exportarDados, importarDados, restaurarDemo } from "../lib/dados";
+import { podeExportarDados, podeImportarDados, podeRestaurarDemo } from "../lib/permissions";
 import { ApiError } from "../lib/api";
 import { toDateInputValue } from "../lib/format";
 
 export function DadosPage() {
   const { showToast } = useToast();
+  const { usuario } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const podeExportar = podeExportarDados(usuario?.papel);
+  const podeImportar = podeImportarDados(usuario?.papel);
+  const podeRestaurar = podeRestaurarDemo(usuario?.papel);
 
   async function handleExport() {
     try {
@@ -68,21 +75,31 @@ export function DadosPage() {
       title="Dados do programa"
       description="Exporte uma cópia de segurança, importe dados ou restaure a demonstração."
     >
-      <div className="flex flex-wrap gap-2.5">
-        <Button variant="download" className="min-w-[190px] max-sm:w-full" onClick={handleExport}>
-          <Icon id="icon-download" />
-          Exportar dados
-        </Button>
-        <Button variant="secondary" className="min-w-[190px] max-sm:w-full" onClick={handleImportClick}>
-          <Icon id="icon-upload" />
-          Importar dados
-        </Button>
-        <Button variant="danger" className="min-w-[190px] max-sm:w-full" onClick={handleReset}>
-          <Icon id="icon-trash" />
-          Restaurar demonstração
-        </Button>
-        <input ref={fileInputRef} type="file" accept="application/json" hidden onChange={handleImportChange} />
-      </div>
+      {podeExportar || podeImportar || podeRestaurar ? (
+        <div className="flex flex-wrap gap-2.5">
+          {podeExportar && (
+            <Button variant="download" className="min-w-[190px] max-sm:w-full" onClick={handleExport}>
+              <Icon id="icon-download" />
+              Exportar dados
+            </Button>
+          )}
+          {podeImportar && (
+            <Button variant="secondary" className="min-w-[190px] max-sm:w-full" onClick={handleImportClick}>
+              <Icon id="icon-upload" />
+              Importar dados
+            </Button>
+          )}
+          {podeRestaurar && (
+            <Button variant="danger" className="min-w-[190px] max-sm:w-full" onClick={handleReset}>
+              <Icon id="icon-trash" />
+              Restaurar demonstração
+            </Button>
+          )}
+          <input ref={fileInputRef} type="file" accept="application/json" hidden onChange={handleImportChange} />
+        </div>
+      ) : (
+        <EmptyState message="Apenas administradores e gestores podem exportar, importar ou restaurar dados." />
+      )}
     </Panel>
   );
 }

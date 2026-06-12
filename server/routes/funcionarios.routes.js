@@ -4,9 +4,15 @@ const { z } = require("zod");
 const prisma = require("../db");
 const asyncHandler = require("../utils/asyncHandler");
 const { validateBody } = require("../middleware/validate");
-const { requireAuth } = require("../middleware/auth");
+const { requireAuth, requireRole } = require("../middleware/auth");
 
 const router = express.Router();
+
+// Cadastrar, editar e ativar/inativar funcionarios e' permitido a ADMIN,
+// GESTOR e VISUALIZADOR. Excluir e' restrito a ADMIN e GESTOR. Qualquer
+// usuario autenticado pode consultar a lista.
+const requireGestao = requireRole("ADMIN", "GESTOR", "VISUALIZADOR");
+const requireExclusao = requireRole("ADMIN", "GESTOR");
 
 const funcionarioSchema = z.object({
   nome: z.string().trim().min(2, "Informe o nome."),
@@ -37,12 +43,12 @@ router.get("/:id", asyncHandler(async (req, res) => {
   res.json(funcionario);
 }));
 
-router.post("/", validateBody(funcionarioSchema), asyncHandler(async (req, res) => {
+router.post("/", requireGestao, validateBody(funcionarioSchema), asyncHandler(async (req, res) => {
   const funcionario = await prisma.funcionario.create({ data: req.body });
   res.status(201).json(funcionario);
 }));
 
-router.put("/:id", validateBody(funcionarioUpdateSchema), asyncHandler(async (req, res) => {
+router.put("/:id", requireGestao, validateBody(funcionarioUpdateSchema), asyncHandler(async (req, res) => {
   const funcionario = await prisma.funcionario.findUnique({ where: { id: req.params.id } });
   if (!funcionario) return res.status(404).json({ error: "Funcionario nao encontrado." });
 
@@ -54,7 +60,7 @@ router.put("/:id", validateBody(funcionarioUpdateSchema), asyncHandler(async (re
 }));
 
 // Ativar/inativar (preserva historico de tarefas vinculadas).
-router.patch("/:id/status", validateBody(z.object({ ativo: z.boolean() })), asyncHandler(async (req, res) => {
+router.patch("/:id/status", requireGestao, validateBody(z.object({ ativo: z.boolean() })), asyncHandler(async (req, res) => {
   const funcionario = await prisma.funcionario.findUnique({ where: { id: req.params.id } });
   if (!funcionario) return res.status(404).json({ error: "Funcionario nao encontrado." });
 
@@ -65,7 +71,7 @@ router.patch("/:id/status", validateBody(z.object({ ativo: z.boolean() })), asyn
   res.json(atualizado);
 }));
 
-router.delete("/:id", asyncHandler(async (req, res) => {
+router.delete("/:id", requireExclusao, asyncHandler(async (req, res) => {
   const funcionario = await prisma.funcionario.findUnique({ where: { id: req.params.id } });
   if (!funcionario) return res.status(404).json({ error: "Funcionario nao encontrado." });
 

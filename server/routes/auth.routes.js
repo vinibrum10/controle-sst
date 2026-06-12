@@ -23,6 +23,11 @@ const loginSchema = z.object({
   senha: z.string().min(1, "Informe a senha.")
 });
 
+const changePasswordSchema = z.object({
+  senhaAtual: z.string().min(1, "Informe a senha atual."),
+  novaSenha: z.string().min(6, "A nova senha deve ter pelo menos 6 caracteres.")
+});
+
 function toPublicUser(usuario) {
   return {
     id: usuario.id,
@@ -84,6 +89,26 @@ router.post("/login", validateBody(loginSchema), asyncHandler(async (req, res) =
 
   const token = signToken(usuario);
   return res.json({ token, usuario: toPublicUser(usuario) });
+}));
+
+// Troca a senha do usuario autenticado, confirmando a senha atual.
+router.post("/senha", requireAuth, validateBody(changePasswordSchema), asyncHandler(async (req, res) => {
+  const { senhaAtual, novaSenha } = req.body;
+
+  const usuario = await prisma.usuario.findUnique({ where: { id: req.user.sub } });
+  if (!usuario || !usuario.senhaHash || !usuario.ativo) {
+    return res.status(401).json({ error: "Usuario nao encontrado." });
+  }
+
+  const senhaOk = await bcrypt.compare(senhaAtual, usuario.senhaHash);
+  if (!senhaOk) {
+    return res.status(401).json({ error: "Senha atual incorreta." });
+  }
+
+  const senhaHash = await bcrypt.hash(novaSenha, 10);
+  await prisma.usuario.update({ where: { id: usuario.id }, data: { senhaHash } });
+
+  return res.json({ mensagem: "Senha atualizada com sucesso." });
 }));
 
 // Retorna os dados do usuario autenticado (usado para validar o token salvo).

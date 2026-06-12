@@ -81,3 +81,24 @@ Use como Web Service no Render (veja `render.yaml` para um Blueprint pronto):
 - Variáveis de ambiente: `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `NODE_ENV=production`
 
 Após o primeiro deploy, rode `npm run seed` (via Shell do Render) para criar o usuário administrador e os dados de demonstração.
+
+## Deploy no Railway
+
+O projeto inclui um `railway.json` com a configuração do build, start e health check:
+
+- Build Command: `npm install && npm run build && npx prisma migrate deploy`
+- Start Command: `npm start`
+- Health Check Path: `/api/health`
+- Variáveis de ambiente obrigatórias: `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `NODE_ENV=production`, `PORT` (o Railway define automaticamente)
+
+Requisitos:
+
+- Node.js `^20.19.0` ou `>=22.12.0` (definido em `.nvmrc` e em `engines` do `package.json`, exigido pelo Vite 8 usado no front-end).
+
+Checklist de verificação pós-deploy:
+
+1. Acompanhe os logs do build no painel do Railway e confirme que `web/dist` foi gerado (procure por `vite build` e `built in`) e que `npx prisma migrate deploy` rodou sem erros.
+2. Acesse `https://<seu-dominio>.up.railway.app/api/health` e confirme `{"status":"ok","database":"ok"}`.
+3. Acesse a raiz do domínio e confirme que a SPA React carrega (tela de login).
+4. Confirme nas variáveis de ambiente do serviço: `DATABASE_URL` (apontando para o Postgres do projeto), `JWT_SECRET`, `JWT_EXPIRES_IN` e `NODE_ENV=production`.
+5. Após o primeiro deploy, rode `npm run seed` (via terminal/CLI do Railway) para criar o usuário administrador e os dados de demonstração, se necessário.

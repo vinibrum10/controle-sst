@@ -5,6 +5,7 @@ export interface ResultadoAjuda {
   tarefa: Tarefa;
   ajudante: Funcionario;
   mensagem: string;
+  emailEnviado?: boolean;
 }
 
 export interface Disponibilidade {

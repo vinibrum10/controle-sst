@@ -17,3 +17,7 @@ export function register(nome: string, email: string, senha: string) {
 export function getMe() {
   return apiFetch<{ usuario: Usuario }>("/auth/me");
 }
+
+export function changePassword(senhaAtual: string, novaSenha: string) {
+  return apiFetch<{ mensagem: string }>("/auth/senha", { method: "POST", body: { senhaAtual, novaSenha } });
+}
