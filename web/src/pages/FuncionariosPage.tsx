@@ -6,6 +6,8 @@ import { Avatar } from "../components/ui/Avatar";
 import { PersonCard } from "../components/funcionarios/PersonCard";
 import { useFuncionarios } from "../hooks/useFuncionarios";
 import { useToast } from "../hooks/useToast";
+import { useAuth } from "../hooks/useAuth";
+import { podeGerenciarEquipe } from "../lib/permissions";
 import { ApiError } from "../lib/api";
 import { listarTarefas } from "../lib/tarefas";
 import { currentWeekValue } from "../lib/format";
@@ -26,6 +28,8 @@ function defaultForm() {
 export function FuncionariosPage() {
   const { funcionarios, carregando, criar, alternarAtivo, remover } = useFuncionarios();
   const { showToast } = useToast();
+  const { usuario } = useAuth();
+  const canManage = podeGerenciarEquipe(usuario?.papel);
 
   const [tarefas, setTarefas] = useState<Tarefa[]>([]);
   const [form, setForm] = useState(defaultForm);
@@ -157,7 +161,7 @@ export function FuncionariosPage() {
   }
 
   return (
-    <div className="grid gap-[18px] lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] lg:items-start">
+    <div className={`grid gap-[18px] lg:items-start ${canManage ? "lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]" : ""}`}>
       <Panel title="Funcionários" description="Capacidade semanal, tarefas próprias, tarefas de apoio e desempenho.">
         {carregando ? (
           <p className="text-muted">Carregando equipe...</p>
@@ -170,6 +174,7 @@ export function FuncionariosPage() {
                 key={funcionario.id}
                 funcionario={funcionario}
                 info={info}
+                canManage={canManage}
                 onToggleAtivo={handleToggleAtivo}
                 onExcluir={handleExcluir}
               />
@@ -178,6 +183,7 @@ export function FuncionariosPage() {
         )}
       </Panel>
 
+      {canManage && (
       <Panel title="Cadastro de funcionário" description="Inclua membros da equipe de SST e a capacidade semanal.">
         <form className="grid gap-3" onSubmit={handleSubmit}>
           <label className={labelClasses}>
@@ -248,6 +254,7 @@ export function FuncionariosPage() {
           </Button>
         </form>
       </Panel>
+      )}
     </div>
   );
 }
