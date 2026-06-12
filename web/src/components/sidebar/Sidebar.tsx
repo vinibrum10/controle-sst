@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Icon } from "../ui/IconSprite";
+import { useAuth } from "../../hooks/useAuth";
 import { NAVIGATION_GROUPS } from "./navigation";
 
 const NAV_GROUP_STORAGE_KEY = "controle-sst-nav-groups";
@@ -20,7 +21,13 @@ interface SidebarProps {
 
 export function Sidebar({ className = "", onNavigate }: SidebarProps) {
   const location = useLocation();
+  const { usuario } = useAuth();
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(readNavGroupState);
+
+  const visibleGroups = NAVIGATION_GROUPS.map((group) => ({
+    ...group,
+    items: group.items.filter((item) => !item.roles || (usuario && item.roles.includes(usuario.papel))),
+  })).filter((group) => group.items.length > 0);
 
   useEffect(() => {
     localStorage.setItem(NAV_GROUP_STORAGE_KEY, JSON.stringify(openGroups));
@@ -49,7 +56,7 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
       </div>
 
       <nav className="grid content-start gap-2.5 overflow-y-auto pr-0.5" aria-label="Áreas do programa">
-        {NAVIGATION_GROUPS.map((group) => {
+        {visibleGroups.map((group) => {
           const isActiveGroup = group.items.some((item) => location.pathname.startsWith(item.path));
           const isOpen = (openGroups[group.id] ?? group.defaultOpen) || isActiveGroup;
 

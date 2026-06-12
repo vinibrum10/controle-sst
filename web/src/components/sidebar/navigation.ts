@@ -1,7 +1,10 @@
+import type { Papel } from "../../types";
+
 export interface NavItem {
   path: string;
   label: string;
   title: string;
+  roles?: Papel[];
 }
 
 export interface NavGroup {
@@ -60,6 +63,7 @@ export const NAVIGATION_GROUPS: NavGroup[] = [
     defaultOpen: false,
     items: [
       { path: "/dados", label: "Dados do programa", title: "Dados do programa" },
+      { path: "/usuarios", label: "Usuários", title: "Usuários", roles: ["ADMIN"] },
       { path: "/configuracoes", label: "Configurações", title: "Configurações" },
     ],
   },

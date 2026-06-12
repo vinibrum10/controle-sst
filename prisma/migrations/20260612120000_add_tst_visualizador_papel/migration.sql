@@ -1,0 +1,3 @@
+-- AlterEnum
+ALTER TYPE "PapelUsuario" ADD VALUE 'TST';
+ALTER TYPE "PapelUsuario" ADD VALUE 'VISUALIZADOR';

@@ -8,9 +8,11 @@ const { requireAuth, requireRole } = require("../middleware/auth");
 
 const router = express.Router();
 
-// Gerenciar a equipe (criar, editar, ativar/inativar, excluir) e' restrito
-// a ADMIN e GESTOR. Qualquer usuario autenticado pode consultar a lista.
-const requireGestao = requireRole("ADMIN", "GESTOR");
+// Cadastrar, editar e ativar/inativar funcionarios e' permitido a ADMIN,
+// GESTOR e VISUALIZADOR. Excluir e' restrito a ADMIN e GESTOR. Qualquer
+// usuario autenticado pode consultar a lista.
+const requireGestao = requireRole("ADMIN", "GESTOR", "VISUALIZADOR");
+const requireExclusao = requireRole("ADMIN", "GESTOR");
 
 const funcionarioSchema = z.object({
   nome: z.string().trim().min(2, "Informe o nome."),
@@ -69,7 +71,7 @@ router.patch("/:id/status", requireGestao, validateBody(z.object({ ativo: z.bool
   res.json(atualizado);
 }));
 
-router.delete("/:id", requireGestao, asyncHandler(async (req, res) => {
+router.delete("/:id", requireExclusao, asyncHandler(async (req, res) => {
   const funcionario = await prisma.funcionario.findUnique({ where: { id: req.params.id } });
   if (!funcionario) return res.status(404).json({ error: "Funcionario nao encontrado." });
 

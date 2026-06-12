@@ -6,6 +6,7 @@ const cors = require("cors");
 
 const prisma = require("./db");
 const authRoutes = require("./routes/auth.routes");
+const usuariosRoutes = require("./routes/usuarios.routes");
 const funcionariosRoutes = require("./routes/funcionarios.routes");
 const tarefasRoutes = require("./routes/tarefas.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
@@ -22,6 +23,7 @@ app.use(express.json({ limit: "5mb" }));
 
 // ----- API -----
 app.use("/api/auth", authRoutes);
+app.use("/api/usuarios", usuariosRoutes);
 app.use("/api/funcionarios", funcionariosRoutes);
 app.use("/api/tarefas", tarefasRoutes);
 app.use("/api/dashboard", dashboardRoutes);

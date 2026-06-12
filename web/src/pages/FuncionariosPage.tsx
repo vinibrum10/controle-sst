@@ -7,7 +7,7 @@ import { PersonCard } from "../components/funcionarios/PersonCard";
 import { useFuncionarios } from "../hooks/useFuncionarios";
 import { useToast } from "../hooks/useToast";
 import { useAuth } from "../hooks/useAuth";
-import { podeGerenciarEquipe } from "../lib/permissions";
+import { podeExcluirFuncionario, podeGerenciarEquipe } from "../lib/permissions";
 import { ApiError } from "../lib/api";
 import { listarTarefas } from "../lib/tarefas";
 import { currentWeekValue } from "../lib/format";
@@ -30,6 +30,7 @@ export function FuncionariosPage() {
   const { showToast } = useToast();
   const { usuario } = useAuth();
   const canManage = podeGerenciarEquipe(usuario?.papel);
+  const canDelete = podeExcluirFuncionario(usuario?.papel);
 
   const [tarefas, setTarefas] = useState<Tarefa[]>([]);
   const [form, setForm] = useState(defaultForm);
@@ -175,6 +176,7 @@ export function FuncionariosPage() {
                 funcionario={funcionario}
                 info={info}
                 canManage={canManage}
+                canDelete={canDelete}
                 onToggleAtivo={handleToggleAtivo}
                 onExcluir={handleExcluir}
               />

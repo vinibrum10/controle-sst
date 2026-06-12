@@ -11,7 +11,9 @@ import { TreinamentosPage } from "../pages/TreinamentosPage";
 import { InspecoesPage } from "../pages/InspecoesPage";
 import { DadosPage } from "../pages/DadosPage";
 import { ConfiguracoesPage } from "../pages/ConfiguracoesPage";
+import { UsuariosPage } from "../pages/UsuariosPage";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { RequireRole } from "./RequireRole";
 import { DEFAULT_PATH } from "../components/sidebar/navigation";
 
 export function AppRoutes() {
@@ -36,6 +38,14 @@ export function AppRoutes() {
         <Route path="/treinamentos" element={<TreinamentosPage />} />
         <Route path="/inspecoes" element={<InspecoesPage />} />
         <Route path="/dados" element={<DadosPage />} />
+        <Route
+          path="/usuarios"
+          element={
+            <RequireRole roles={["ADMIN"]}>
+              <UsuariosPage />
+            </RequireRole>
+          }
+        />
         <Route path="/configuracoes" element={<ConfiguracoesPage />} />
         <Route path="*" element={<Navigate to={DEFAULT_PATH} replace />} />
       </Route>

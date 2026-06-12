@@ -5,14 +5,8 @@ import { Button } from "../components/ui/Button";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/useToast";
 import { changePassword } from "../lib/auth";
+import { PAPEL_LABELS } from "../lib/permissions";
 import { ApiError } from "../lib/api";
-import type { Papel } from "../types";
-
-const PAPEL_LABELS: Record<Papel, string> = {
-  ADMIN: "Administrador",
-  GESTOR: "Gestor",
-  COLABORADOR: "Colaborador",
-};
 
 const fieldClasses =
   "min-h-[40px] w-full rounded-[8px] border border-line bg-surface-soft px-2.5 text-text outline-none transition-colors focus:border-teal focus:bg-white dark:focus:bg-surface-soft";

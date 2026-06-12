@@ -26,7 +26,7 @@ const treinamentos = createCrudRouter({
   updateSchema: treinamentoCreate.partial(),
   include: responsavelInclude,
   orderBy: { criadoEm: "desc" },
-  writeRoles: ["ADMIN", "GESTOR"]
+  writeRoles: ["ADMIN", "GESTOR", "TST"]
 });
 
 // ---------------------------------------------------------------------
@@ -49,7 +49,7 @@ const inspecoes = createCrudRouter({
   updateSchema: inspecaoCreate.partial(),
   include: { ...responsavelInclude, achados: true },
   orderBy: { dataPrevista: "asc" },
-  writeRoles: ["ADMIN", "GESTOR"]
+  writeRoles: ["ADMIN", "GESTOR", "TST"]
 });
 
 // ---------------------------------------------------------------------
@@ -72,7 +72,7 @@ const auditorias = createCrudRouter({
   updateSchema: auditoriaCreate.partial(),
   include: { ...responsavelInclude, achados: true },
   orderBy: { dataPrevista: "asc" },
-  writeRoles: ["ADMIN", "GESTOR"]
+  writeRoles: ["ADMIN", "GESTOR", "TST"]
 });
 
 // ---------------------------------------------------------------------
@@ -95,7 +95,7 @@ const achados = createCrudRouter({
   updateSchema: achadoCreate.partial(),
   include: { ...responsavelInclude, planosAcao: true },
   orderBy: { identificadoEm: "desc" },
-  writeRoles: ["ADMIN", "GESTOR"]
+  writeRoles: ["ADMIN", "GESTOR", "TST"]
 });
 
 // ---------------------------------------------------------------------
@@ -115,7 +115,7 @@ const planosAcao = createCrudRouter({
   updateSchema: planoAcaoCreate.partial(),
   include: { ...responsavelInclude, achado: true },
   orderBy: { prazo: "asc" },
-  writeRoles: ["ADMIN", "GESTOR"]
+  writeRoles: ["ADMIN", "GESTOR", "TST"]
 });
 
 // ---------------------------------------------------------------------
@@ -137,7 +137,7 @@ const rotasSeguras = createCrudRouter({
   updateSchema: rotaSeguraCreate.partial(),
   include: { ...responsavelInclude, achados: true },
   orderBy: { nome: "asc" },
-  writeRoles: ["ADMIN", "GESTOR"]
+  writeRoles: ["ADMIN", "GESTOR", "TST"]
 });
 
 // ---------------------------------------------------------------------
@@ -174,7 +174,7 @@ const anexos = createCrudRouter({
   updateSchema: anexoBase.partial(),
   include: { criadoPor: { select: { id: true, nome: true } } },
   orderBy: { criadoEm: "desc" },
-  writeRoles: ["ADMIN", "GESTOR"]
+  writeRoles: ["ADMIN", "GESTOR", "TST"]
 });
 
 module.exports = { treinamentos, inspecoes, auditorias, achados, planosAcao, rotasSeguras, anexos };

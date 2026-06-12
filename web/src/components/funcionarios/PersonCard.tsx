@@ -20,11 +20,12 @@ interface PersonCardProps {
   funcionario: Funcionario;
   info: PersonCardInfo;
   canManage: boolean;
+  canDelete: boolean;
   onToggleAtivo: (funcionario: Funcionario) => void;
   onExcluir: (funcionario: Funcionario) => void;
 }
 
-export function PersonCard({ funcionario, info, canManage, onToggleAtivo, onExcluir }: PersonCardProps) {
+export function PersonCard({ funcionario, info, canManage, canDelete, onToggleAtivo, onExcluir }: PersonCardProps) {
   const { carga, onTime, atrasos, ajudaPedida, tarefasProprias, tarefasApoio, linkedTasks } = info;
   const ativo = funcionario.ativo;
   const percent = Math.min((carga / funcionario.capacidade) * 100, 100);
@@ -58,10 +59,11 @@ export function PersonCard({ funcionario, info, canManage, onToggleAtivo, onExcl
         <div className={`h-full rounded-full ${fillClass}`} style={{ width: `${percent}%` }} />
       </div>
 
-      {canManage && (
+      {(canManage || canDelete) && (
       <div className="mt-3 flex flex-wrap items-center justify-end gap-2 rounded-[8px] border border-line bg-surface-soft p-2.5">
         <span className="mr-auto text-[0.74rem] font-black uppercase text-muted">Ações do funcionário</span>
         <div className="flex flex-wrap justify-end gap-2">
+          {canManage && (
           <button
             type="button"
             className="inline-flex min-h-[38px] items-center justify-center gap-[9px] rounded-[8px] border border-line bg-neutral-button px-3 font-extrabold text-text transition-transform duration-150 hover:-translate-y-px active:translate-y-0"
@@ -69,6 +71,8 @@ export function PersonCard({ funcionario, info, canManage, onToggleAtivo, onExcl
           >
             {ativo ? "Inativar funcionário" : "Reativar funcionário"}
           </button>
+          )}
+          {canDelete && (
           <button
             type="button"
             className="inline-flex min-h-[38px] items-center justify-center gap-[9px] rounded-[8px] border border-red/25 bg-red-soft px-3 font-extrabold text-red transition-transform duration-150 hover:-translate-y-px active:translate-y-0"
@@ -77,6 +81,7 @@ export function PersonCard({ funcionario, info, canManage, onToggleAtivo, onExcl
           >
             Excluir
           </button>
+          )}
         </div>
       </div>
       )}
