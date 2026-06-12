@@ -7,7 +7,6 @@ import { HistoryItem } from "../components/ajuda/HistoryItem";
 import { useTarefas } from "../hooks/useTarefas";
 import { useAjuda } from "../hooks/useAjuda";
 import { useToast } from "../hooks/useToast";
-import { notificarApoioAtribuido } from "../lib/email";
 import { currentWeekValue, formatDate } from "../lib/format";
 import { isDone } from "../lib/tarefaHelpers";
 
@@ -36,8 +35,11 @@ export function AjudaPage() {
     try {
       const resposta = await pedirAjuda(selectedId);
       setResultado(resposta.mensagem);
-      showToast("Ajuda atribuída automaticamente.");
-      notificarApoioAtribuido(resposta.tarefa, resposta.ajudante);
+      if (resposta.emailEnviado === false) {
+        showToast("Ajuda atribuída, mas houve falha no envio do e-mail.");
+      } else {
+        showToast("Ajuda atribuída automaticamente.");
+      }
       await recarregar();
     } catch (err) {
       setResultado(err instanceof Error ? err.message : "Nenhuma pessoa com capacidade livre foi encontrada para essa semana.");

@@ -37,4 +37,5 @@ export interface Tarefa extends NovaTarefa {
   responsavel: Funcionario | null;
   apoio: Funcionario | null;
   pedidosAjuda: PedidoAjuda[];
+  emailEnviado?: boolean;
 }
