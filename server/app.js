@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs");
 const express = require("express");
 const cors = require("cors");
 
@@ -49,12 +50,27 @@ app.get("/api/health", async (req, res) => {
 
 // ----- Frontend estatico -----
 const publicDir = path.join(__dirname, "..", "web", "dist");
+
+if (!fs.existsSync(path.join(publicDir, "index.html"))) {
+  console.error(`[ERRO] web/dist/index.html nao encontrado em: ${publicDir}`);
+  console.error("[ERRO] Execute: npm run build");
+}
+
 app.use(express.static(publicDir));
 
-// SPA fallback (rotas com hash sao tratadas no front-end)
+// SPA fallback — serve index.html para todas as rotas nao-API
 app.get("*", (req, res, next) => {
   if (req.path.startsWith("/api/")) return next();
-  res.sendFile(path.join(publicDir, "index.html"));
+  const indexPath = path.join(publicDir, "index.html");
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      console.error(`[ERRO] Falha ao servir ${indexPath}:`, err.message);
+      res.status(503).json({
+        error: "Frontend nao encontrado. Execute: npm run build",
+        path: indexPath,
+      });
+    }
+  });
 });
 
 // ----- Tratamento de erros -----
