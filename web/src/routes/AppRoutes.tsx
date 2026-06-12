@@ -10,6 +10,7 @@ import { RotaSeguraPage } from "../pages/RotaSeguraPage";
 import { TreinamentosPage } from "../pages/TreinamentosPage";
 import { InspecoesPage } from "../pages/InspecoesPage";
 import { DadosPage } from "../pages/DadosPage";
+import { RelatoriosPage } from "../pages/RelatoriosPage";
 import { ConfiguracoesPage } from "../pages/ConfiguracoesPage";
 import { UsuariosPage } from "../pages/UsuariosPage";
 import { ProtectedRoute } from "./ProtectedRoute";
@@ -38,6 +39,7 @@ export function AppRoutes() {
         <Route path="/treinamentos" element={<TreinamentosPage />} />
         <Route path="/inspecoes" element={<InspecoesPage />} />
         <Route path="/dados" element={<DadosPage />} />
+        <Route path="/relatorios" element={<RelatoriosPage />} />
         <Route
           path="/usuarios"
           element={

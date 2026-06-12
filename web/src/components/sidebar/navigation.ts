@@ -62,6 +62,7 @@ export const NAVIGATION_GROUPS: NavGroup[] = [
     icon: "icon-database",
     defaultOpen: false,
     items: [
+      { path: "/relatorios", label: "Relatórios", title: "Relatórios" },
       { path: "/dados", label: "Dados do programa", title: "Dados do programa" },
       { path: "/usuarios", label: "Usuários", title: "Usuários", roles: ["ADMIN"] },
       { path: "/configuracoes", label: "Configurações", title: "Configurações" },

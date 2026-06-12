@@ -47,3 +47,24 @@ export function statusLabel(status: StatusTarefa): string {
 export function priorityLabel(prioridade: PrioridadeTarefa): string {
   return PRIORITY_LABELS[prioridade] || prioridade;
 }
+
+// Rotulos dos status usados nos relatorios dos programas de SST.
+export const PROGRAMA_STATUS_LABELS: Record<string, string> = {
+  PLANEJADO: "Planejado",
+  REALIZADO: "Realizado",
+  CANCELADO: "Cancelado",
+  VENCIDO: "Vencido",
+  PLANEJADA: "Planejada",
+  REALIZADA: "Realizada",
+  CANCELADA: "Cancelada",
+  ABERTO: "Aberto",
+  EM_TRATATIVA: "Em tratativa",
+  CONCLUIDO: "Concluído",
+  ATRASADO: "Atrasado",
+  ATIVA: "Ativa",
+  INATIVA: "Inativa",
+};
+
+export function programaStatusLabel(status: string): string {
+  return PROGRAMA_STATUS_LABELS[status] || status;
+}

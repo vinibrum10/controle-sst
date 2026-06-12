@@ -10,6 +10,7 @@ const usuariosRoutes = require("./routes/usuarios.routes");
 const funcionariosRoutes = require("./routes/funcionarios.routes");
 const tarefasRoutes = require("./routes/tarefas.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
+const relatoriosRoutes = require("./routes/relatorios.routes");
 const ajudaRoutes = require("./routes/ajuda.routes");
 const dataRoutes = require("./routes/data.routes");
 const {
@@ -27,6 +28,7 @@ app.use("/api/usuarios", usuariosRoutes);
 app.use("/api/funcionarios", funcionariosRoutes);
 app.use("/api/tarefas", tarefasRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/relatorios", relatoriosRoutes);
 app.use("/api/ajuda", ajudaRoutes);
 app.use("/api/dados", dataRoutes);
 app.use("/api/treinamentos", treinamentos);
