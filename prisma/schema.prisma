@@ -414,4 +414,166 @@ model Anexo {
   planoAcao     PlanoAcao?   @relation(fields: [planoAcaoId], references: [id])
   rotaSeguraId  String?
   rotaSegura    RotaSegura?  @relation(fields: [rotaSeguraId], references: [id])
+
+  rsAprAvaliacaoId String?
+  rsAprAvaliacao   RsAprAvaliacao? @relation(fields: [rsAprAvaliacaoId], references: [id])
+  rsPenalidadeId   String?
+  rsPenalidade     RsPenalidade?   @relation(fields: [rsPenalidadeId], references: [id])
+}
+
+// =====================================================================
+// ROTA SEGURA 2026 (avaliacao de APR, pontuacao, comite e ranking)
+// =====================================================================
+
+enum RsAreaEquipe {
+  LINHAS_LIMPEZA_FAIXA
+  EAT
+  PCC
+  UFV
+  OUTRO
+}
+
+enum RsTipoApr {
+  AMOSTRAL
+  FORMS
+}
+
+enum RsTipoInfracao {
+  LEVE
+  GRAVE
+  GRAVISSIMA
+}
+
+enum RsTipoRevisaoComite {
+  RISCOS_ADICIONAIS
+  MEDIDAS_ADICIONAIS
+}
+
+enum RsDecisaoComite {
+  PENDENTE
+  APROVADO
+  REPROVADO
+}
+
+model RsEquipe {
+  id           String       @id @default(uuid())
+  nome         String
+  area         RsAreaEquipe @default(OUTRO)
+  supervisor   String?
+  tst          String?
+  ativo        Boolean      @default(true)
+  observacoes  String?
+  criadoEm     DateTime     @default(now())
+  atualizadoEm DateTime     @updatedAt
+
+  colaboradores RsColaborador[]
+  avaliacoes    RsAprAvaliacao[]
+  penalidades   RsPenalidade[]
+
+  @@index([area])
+  @@index([ativo])
+}
+
+model RsColaborador {
+  id           String    @id @default(uuid())
+  nome         String
+  matricula    String?
+  funcao       String?
+  equipeId     String?
+  equipe       RsEquipe? @relation(fields: [equipeId], references: [id])
+  ativo        Boolean   @default(true)
+  criadoEm     DateTime  @default(now())
+  atualizadoEm DateTime  @updatedAt
+
+  penalidades RsPenalidade[]
+
+  @@index([equipeId])
+  @@index([ativo])
+}
+
+// Avaliacao mensal de APR de uma equipe. A combinacao equipe+mes+tipo e
+// unica: cada equipe pode ter no maximo 1 APR amostral e 1 APR via Forms
+// por mes de referencia (edicao do registro existente continua permitida).
+model RsAprAvaliacao {
+  id            String    @id @default(uuid())
+  mesReferencia String // formato "AAAA-MM"
+  dataAvaliacao DateTime
+  equipeId      String
+  equipe        RsEquipe  @relation(fields: [equipeId], references: [id])
+  tipo          RsTipoApr
+  numeroOs      String?
+  numeroApr     String?
+  atividade     String?
+  local         String?
+  avaliador     String?
+  observacoes   String?
+
+  // Checklist da APR
+  cabecalhoOk      Boolean @default(false)
+  enderecoOk       Boolean @default(false)
+  assinaturasOk    Boolean @default(false)
+  riscosMinimosOk  Boolean @default(false)
+  medidasMinimasOk Boolean @default(false)
+  coerenciaOk      Boolean @default(false)
+  arquivadaEam     Boolean @default(false)
+  legivel          Boolean @default(false)
+  aprovacaoBasica  Boolean @default(false)
+
+  // Pontuacao adicional sujeita a analise do comite
+  riscosAdicionais           Boolean         @default(false)
+  riscosAdicionaisDescricao  String?
+  riscosAdicionaisComite     RsDecisaoComite @default(PENDENTE)
+  medidasAdicionais          Boolean         @default(false)
+  medidasAdicionaisDescricao String?
+  medidasAdicionaisComite    RsDecisaoComite @default(PENDENTE)
+
+  // Pontuacao proativa calculada automaticamente (ver server/utils/rotaSegura2026.js)
+  pontuacao Int @default(0)
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  anexos         Anexo[]
+  decisoesComite RsComiteDecisao[]
+
+  @@unique([equipeId, mesReferencia, tipo])
+  @@index([equipeId])
+  @@index([mesReferencia])
+}
+
+// Historico de decisoes do comite sobre riscos/medidas adicionais (auditoria).
+model RsComiteDecisao {
+  id          String              @id @default(uuid())
+  avaliacaoId String
+  avaliacao   RsAprAvaliacao      @relation(fields: [avaliacaoId], references: [id], onDelete: Cascade)
+  tipo        RsTipoRevisaoComite
+  decisao     RsDecisaoComite
+  responsavel String?
+  dataDecisao DateTime            @default(now())
+  observacoes String?
+
+  @@index([avaliacaoId])
+}
+
+// Penalidades reativas (infracoes leves/graves/gravissimas).
+model RsPenalidade {
+  id             String         @id @default(uuid())
+  mesReferencia  String
+  equipeId       String
+  equipe         RsEquipe       @relation(fields: [equipeId], references: [id])
+  colaboradorId  String?
+  colaborador    RsColaborador? @relation(fields: [colaboradorId], references: [id])
+  tipo           RsTipoInfracao
+  pontos         Int
+  descricao      String
+  dataOcorrencia DateTime
+  responsavel    String?
+  observacoes    String?
+  criadoEm       DateTime       @default(now())
+  atualizadoEm   DateTime       @updatedAt
+
+  anexos Anexo[]
+
+  @@index([equipeId])
+  @@index([mesReferencia])
 }
