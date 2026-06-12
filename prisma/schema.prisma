@@ -422,7 +422,12 @@ model Anexo {
 }
 
 // =====================================================================
-// ROTA SEGURA 2026 (avaliacao de APR, pontuacao, comite e ranking)
+// ROTA SEGURA (programa anual de seguranca: edicoes, propostas, criterios
+// de pontuacao, regras condicionais, premiacao, equipes, avaliacoes de
+// APR, comite e penalidades). A regra do Rota Segura muda todo ano, por
+// isso os criterios/pontuacoes/regras/proposta/premiacao sao configuraveis
+// por edicao (RsEdicaoPrograma) em vez de fixos no codigo. A edicao 2026
+// (foco em avaliacao de APR) e criada via seed como a primeira edicao.
 // =====================================================================
 
 enum RsAreaEquipe {
@@ -453,6 +458,158 @@ enum RsDecisaoComite {
   PENDENTE
   APROVADO
   REPROVADO
+}
+
+enum RsTipoCriterio {
+  PROATIVO
+  REATIVO
+}
+
+enum RsCategoriaCriterio {
+  APR
+  VIDEO
+  INSPECAO
+  DDS
+  TREINAMENTO
+  TRANSITO
+  COMPORTAMENTO
+  PENALIDADE
+  OUTRO
+}
+
+// Tipos de regra condicional suportados pelo motor de pontuacao:
+// - REQUER_CRITERIO_APROVADO: o criterio so pontua se "criterioDependente"
+//   tiver sido concedido na mesma avaliacao (ex.: riscos/medidas adicionais
+//   dependem da APR estar com aprovacao basica / erro zero).
+// - BLOQUEADO_PARA_TIPO_APR: o criterio nao se aplica a um tipo de APR
+//   (parametros: { "tipoApr": "FORMS" | "AMOSTRAL" }). Usado para
+//   documentar regras tambem refletidas em aplicaAmostral/aplicaForms.
+// - LIMITE_MENSAL_POR_EQUIPE: documenta o limite de avaliacoes por
+//   tipo/mes/equipe (parametros: { "tipoApr": "FORMS", "limite": 1 }).
+//   A aplicacao e garantida pela constraint unica de RsAprAvaliacao.
+enum RsTipoCondicao {
+  REQUER_CRITERIO_APROVADO
+  BLOQUEADO_PARA_TIPO_APR
+  LIMITE_MENSAL_POR_EQUIPE
+}
+
+// Edicao anual do programa Rota Segura. Cada edicao tem sua propria
+// proposta, criterios de pontuacao, regras condicionais e premiacao,
+// permitindo que o programa mude de foco (APR, videos, DDS, etc.) sem
+// alteracoes de codigo.
+model RsEdicaoPrograma {
+  id           String    @id @default(uuid())
+  nome         String
+  ano          Int       @unique
+  slogan       String?
+  objetivo     String?
+  descricao    String?
+  dataInicio   DateTime?
+  dataFim      DateTime?
+  ativo        Boolean   @default(true)
+  observacoes  String?
+  criadoEm     DateTime  @default(now())
+  atualizadoEm DateTime  @updatedAt
+
+  proposta    RsProposta?
+  criterios   RsCriterio[]
+  regras      RsRegraCondicional[]
+  premiacoes  RsPremiacao[]
+  avaliacoes  RsAprAvaliacao[]
+  penalidades RsPenalidade[]
+
+  @@index([ativo])
+}
+
+// Proposta/regulamento oficial da edicao, consultavel dentro do app.
+model RsProposta {
+  id                 String           @id @default(uuid())
+  edicaoId           String           @unique
+  edicao             RsEdicaoPrograma @relation(fields: [edicaoId], references: [id], onDelete: Cascade)
+  titulo             String?
+  slogan             String?
+  mensagemAbertura   String?
+  objetivoGeral      String?
+  justificativa      String?
+  publicoAlvo        String?
+  areasParticipantes String?
+  regrasGerais       String?
+  criteriosAvaliacao String?
+  estruturaComite    String?
+  regraPremiacao     String?
+  premios            String?
+  cronograma         String?
+  observacoes        String?
+  criadoEm           DateTime @default(now())
+  atualizadoEm       DateTime @updatedAt
+}
+
+// Criterio de pontuacao da edicao. "codigo" identifica criterios que o
+// motor de calculo (server/utils/rotaSegura2026.js) sabe interpretar
+// automaticamente (ex.: APR_ERRO_ZERO, RISCOS_ADICIONAIS_APROVADOS,
+// MEDIDAS_ADICIONAIS_APROVADAS, PENALIDADE_LEVE/GRAVE/GRAVISSIMA).
+// Criterios sem codigo reconhecido servem como documentacao/configuracao
+// para futuras edicoes e categorias (videos, DDS, inspecoes, etc.).
+model RsCriterio {
+  id             String              @id @default(uuid())
+  edicaoId       String
+  edicao         RsEdicaoPrograma    @relation(fields: [edicaoId], references: [id], onDelete: Cascade)
+  codigo         String?
+  nome           String
+  descricao      String?
+  tipo           RsTipoCriterio
+  pontuacao      Int
+  categoria      RsCategoriaCriterio @default(OUTRO)
+  exigeComite    Boolean             @default(false)
+  exigeEvidencia Boolean             @default(false)
+  aplicaAmostral Boolean             @default(true)
+  aplicaForms    Boolean             @default(true)
+  ativo          Boolean             @default(true)
+  ordem          Int                 @default(0)
+  criadoEm       DateTime @default(now())
+  atualizadoEm   DateTime @updatedAt
+
+  regrasOrigem      RsRegraCondicional[] @relation("CriterioOrigem")
+  regrasDependencia RsRegraCondicional[] @relation("CriterioDependente")
+
+  @@index([edicaoId])
+  @@index([categoria])
+}
+
+// Dependencia/regra entre criterios da mesma edicao (ver RsTipoCondicao).
+model RsRegraCondicional {
+  id                   String           @id @default(uuid())
+  edicaoId             String
+  edicao               RsEdicaoPrograma @relation(fields: [edicaoId], references: [id], onDelete: Cascade)
+  criterioId           String
+  criterio             RsCriterio       @relation("CriterioOrigem", fields: [criterioId], references: [id], onDelete: Cascade)
+  criterioDependenteId String?
+  criterioDependente   RsCriterio?      @relation("CriterioDependente", fields: [criterioDependenteId], references: [id])
+  tipoCondicao         RsTipoCondicao
+  parametros           Json?
+  descricao            String?
+  ativo                Boolean          @default(true)
+  criadoEm             DateTime @default(now())
+  atualizadoEm         DateTime @updatedAt
+
+  @@index([edicaoId])
+}
+
+// Configuracao de premiacao por area/especialidade da edicao.
+model RsPremiacao {
+  id              String           @id @default(uuid())
+  edicaoId        String
+  edicao          RsEdicaoPrograma @relation(fields: [edicaoId], references: [id], onDelete: Cascade)
+  area            RsAreaEquipe
+  quantidade      Int
+  posicaoInicial  Int
+  posicaoFinal    Int
+  descricaoPremio String
+  observacoes     String?
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
+
+  @@index([edicaoId])
 }
 
 model RsEquipe {
@@ -495,7 +652,9 @@ model RsColaborador {
 // unica: cada equipe pode ter no maximo 1 APR amostral e 1 APR via Forms
 // por mes de referencia (edicao do registro existente continua permitida).
 model RsAprAvaliacao {
-  id            String    @id @default(uuid())
+  id            String           @id @default(uuid())
+  edicaoId      String
+  edicao        RsEdicaoPrograma @relation(fields: [edicaoId], references: [id])
   mesReferencia String // formato "AAAA-MM"
   dataAvaliacao DateTime
   equipeId      String
@@ -536,7 +695,8 @@ model RsAprAvaliacao {
   anexos         Anexo[]
   decisoesComite RsComiteDecisao[]
 
-  @@unique([equipeId, mesReferencia, tipo])
+  @@unique([edicaoId, equipeId, mesReferencia, tipo])
+  @@index([edicaoId])
   @@index([equipeId])
   @@index([mesReferencia])
 }
@@ -557,7 +717,9 @@ model RsComiteDecisao {
 
 // Penalidades reativas (infracoes leves/graves/gravissimas).
 model RsPenalidade {
-  id             String         @id @default(uuid())
+  id             String           @id @default(uuid())
+  edicaoId       String
+  edicao         RsEdicaoPrograma @relation(fields: [edicaoId], references: [id])
   mesReferencia  String
   equipeId       String
   equipe         RsEquipe       @relation(fields: [equipeId], references: [id])
@@ -574,6 +736,7 @@ model RsPenalidade {
 
   anexos Anexo[]
 
+  @@index([edicaoId])
   @@index([equipeId])
   @@index([mesReferencia])
 }
