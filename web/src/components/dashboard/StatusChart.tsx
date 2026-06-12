@@ -27,7 +27,7 @@ export function StatusChart({ statusChart, typeChart }: StatusChartProps) {
     <>
       <div className="mb-4 grid gap-2.5">
         {entries.map(([key, value]) => (
-          <div key={key} className="grid grid-cols-[92px_minmax(0,1fr)_30px] items-center gap-2.5 text-[0.86rem] font-extrabold text-muted sm:grid-cols-[112px_minmax(0,1fr)_36px]">
+          <div key={key} className="grid grid-cols-[64px_minmax(0,1fr)_28px] items-center gap-2.5 text-[0.86rem] font-extrabold text-muted sm:grid-cols-[112px_minmax(0,1fr)_36px]">
             <span>{STATUS_LABELS[key]}</span>
             <div className="relative h-2.5 overflow-hidden rounded-full bg-[#e7eeec] dark:bg-surface-strong">
               <div className={`h-full rounded-full ${STATUS_COLORS[key]}`} style={{ width: `${(value / max) * 100}%` }} />

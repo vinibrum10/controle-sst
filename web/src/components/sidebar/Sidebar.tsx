@@ -49,9 +49,9 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
         <div className="grid h-11 w-11 shrink-0 place-items-center rounded-[8px] bg-[#dff4ef] font-extrabold text-teal-strong">
           SST
         </div>
-        <div>
-          <strong className="block text-base">Controle SST</strong>
-          <span className="mt-0.5 block text-[0.82rem] text-[#b9c9c5]">tarefas e apoio</span>
+        <div className="min-w-0">
+          <strong className="block text-base">SGEPI</strong>
+          <span className="mt-0.5 block truncate text-[0.82rem] text-[#b9c9c5]">Equipes e Programas Institucionais</span>
         </div>
       </div>
 

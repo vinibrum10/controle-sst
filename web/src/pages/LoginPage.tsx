@@ -71,11 +71,12 @@ export function LoginPage() {
         <div className="grid place-items-center w-[60px] h-[60px] mx-auto mb-5 rounded-[8px] bg-[#d8f2ed] text-[#0b524c] font-extrabold text-[1.2rem]">
           SST
         </div>
-        <h1 className="text-[1.8rem] mb-2.5 text-white">Controle SST</h1>
+        <h1 className="text-[1.8rem] mb-1 text-white">SGEPI</h1>
+        <p className="text-[#91a39e] text-[0.78rem] mb-5 uppercase tracking-wide">Sistema de Gestão de Equipes e Programas Institucionais</p>
         <p className="text-[#91a39e] text-[0.92rem] mb-7 leading-relaxed">
           {mode === "login"
-            ? "Entre com seu e-mail e senha para acessar o Controle SST."
-            : "Crie sua conta para acessar o Controle SST."}
+            ? "Entre com seu e-mail e senha para acessar o sistema."
+            : "Crie sua conta para acessar o sistema."}
         </p>
 
         {mode === "login" ? (

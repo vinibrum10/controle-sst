@@ -234,10 +234,10 @@ export function AvaliacoesTab({ edicaoId, equipes, podeLancar, papel }: Avaliaco
         title="Avaliações de APR"
         description="Avaliações lançadas para a edição selecionada, com a pontuação calculada conforme os critérios configurados."
         headerExtra={
-          <div className="flex flex-wrap items-end justify-end gap-2">
+          <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-end sm:justify-end">
             <label className="grid gap-1.5 text-[0.82rem] font-bold text-muted">
               Equipe
-              <select className={`${selectInlineClasses} min-w-[160px]`} value={filtroEquipeId} onChange={(e) => setFiltroEquipeId(e.target.value)}>
+              <select className={`${selectInlineClasses} w-full sm:min-w-[160px]`} value={filtroEquipeId} onChange={(e) => setFiltroEquipeId(e.target.value)}>
                 <option value="">Todas</option>
                 {equipes.map((equipe) => (
                   <option key={equipe.id} value={equipe.id}>
@@ -248,11 +248,11 @@ export function AvaliacoesTab({ edicaoId, equipes, podeLancar, papel }: Avaliaco
             </label>
             <label className="grid gap-1.5 text-[0.82rem] font-bold text-muted">
               Mês
-              <input type="month" className={`${selectInlineClasses} min-w-[140px]`} value={filtroMes} onChange={(e) => setFiltroMes(e.target.value)} />
+              <input type="month" className={`${selectInlineClasses} w-full sm:min-w-[140px]`} value={filtroMes} onChange={(e) => setFiltroMes(e.target.value)} />
             </label>
             <label className="grid gap-1.5 text-[0.82rem] font-bold text-muted">
               Tipo
-              <select className={`${selectInlineClasses} min-w-[140px]`} value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value)}>
+              <select className={`${selectInlineClasses} w-full sm:min-w-[140px]`} value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value)}>
                 <option value="">Todos</option>
                 {TIPO_APR_OPTIONS.map((tipo) => (
                   <option key={tipo} value={tipo}>

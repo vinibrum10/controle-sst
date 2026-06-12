@@ -93,33 +93,35 @@ export function ComiteTab({ edicaoId, podeDecidir }: ComiteTabProps) {
                     </div>
                     {descricao && <p className="mb-2 text-[0.85rem] text-muted">{descricao}</p>}
                     {podeDecidir && (
-                      <div className="flex flex-wrap items-end gap-2">
+                      <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-end">
                         <input
                           type="text"
                           maxLength={300}
                           placeholder="Observações da decisão (opcional)"
-                          className={`${fieldClasses} min-w-[220px] flex-1`}
+                          className={`${fieldClasses} w-full sm:min-w-[220px] sm:flex-1`}
                           value={observacoes[chave] || ""}
                           onChange={(e) => setObservacoes((current) => ({ ...current, [chave]: e.target.value }))}
                         />
-                        <button
-                          type="button"
-                          className={approveButtonClasses}
-                          disabled={enviando === chave}
-                          onClick={() => handleDecisao(avaliacao, tipo, "APROVADO")}
-                        >
-                          <Icon id="icon-check" />
-                          Aprovar
-                        </button>
-                        <button
-                          type="button"
-                          className={deleteButtonClasses}
-                          disabled={enviando === chave}
-                          onClick={() => handleDecisao(avaliacao, tipo, "REPROVADO")}
-                        >
-                          <Icon id="icon-trash" />
-                          Reprovar
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            className={`${approveButtonClasses} flex-1 sm:flex-initial`}
+                            disabled={enviando === chave}
+                            onClick={() => handleDecisao(avaliacao, tipo, "APROVADO")}
+                          >
+                            <Icon id="icon-check" />
+                            Aprovar
+                          </button>
+                          <button
+                            type="button"
+                            className={`${deleteButtonClasses} flex-1 sm:flex-initial`}
+                            disabled={enviando === chave}
+                            onClick={() => handleDecisao(avaliacao, tipo, "REPROVADO")}
+                          >
+                            <Icon id="icon-trash" />
+                            Reprovar
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>

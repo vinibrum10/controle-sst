@@ -12,7 +12,7 @@ export function EdicaoSelector({ edicoes, value, onChange, label = "Edição" }:
   return (
     <label className="grid gap-1.5 text-[0.82rem] font-bold text-muted">
       {label}
-      <select className={`${selectInlineClasses} min-w-[220px]`} value={value} onChange={(e) => onChange(e.target.value)}>
+      <select className={`${selectInlineClasses} w-full sm:min-w-[220px]`} value={value} onChange={(e) => onChange(e.target.value)}>
         {edicoes.length === 0 && <option value="">Nenhuma edição cadastrada</option>}
         {edicoes.map((edicao) => (
           <option key={edicao.id} value={edicao.id}>

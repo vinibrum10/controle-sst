@@ -108,12 +108,12 @@ export function RotaSegura2026RankingPage() {
         description="Classificação das equipes por pontuação (APR + penalidades), conforme os critérios configurados na edição."
         headerExtra={edicoes.length > 0 ? <EdicaoSelector edicoes={edicoes} value={edicaoId} onChange={setEdicaoId} /> : undefined}
       >
-        <div className="flex flex-wrap items-end gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-end">
           <label className="grid gap-1.5 text-[0.82rem] font-bold text-muted">
             Mês
             <input
               type="month"
-              className={`${selectInlineClasses} min-w-[140px]`}
+              className={`${selectInlineClasses} w-full sm:min-w-[140px]`}
               value={mes}
               onChange={(e) => {
                 setMes(e.target.value);
@@ -128,7 +128,7 @@ export function RotaSegura2026RankingPage() {
               min={2000}
               max={2100}
               placeholder="Acumulado"
-              className={`${fieldClasses} min-w-[120px]`}
+              className={`${fieldClasses} w-full sm:min-w-[120px]`}
               value={ano}
               onChange={(e) => {
                 setAno(e.target.value);
@@ -138,7 +138,7 @@ export function RotaSegura2026RankingPage() {
           </label>
           <label className="grid gap-1.5 text-[0.82rem] font-bold text-muted">
             Área
-            <select className={`${selectInlineClasses} min-w-[160px]`} value={area} onChange={(e) => setArea(e.target.value)}>
+            <select className={`${selectInlineClasses} w-full sm:min-w-[160px]`} value={area} onChange={(e) => setArea(e.target.value)}>
               <option value="">Todas</option>
               {AREA_EQUIPE_OPTIONS.map((opcao) => (
                 <option key={opcao} value={opcao}>
@@ -152,7 +152,7 @@ export function RotaSegura2026RankingPage() {
             <input
               type="text"
               placeholder="Filtrar por supervisor"
-              className={`${fieldClasses} min-w-[160px]`}
+              className={`${fieldClasses} w-full sm:min-w-[160px]`}
               value={supervisor}
               onChange={(e) => setSupervisor(e.target.value)}
             />
@@ -162,12 +162,12 @@ export function RotaSegura2026RankingPage() {
             <input
               type="text"
               placeholder="Filtrar por TST"
-              className={`${fieldClasses} min-w-[160px]`}
+              className={`${fieldClasses} w-full sm:min-w-[160px]`}
               value={tst}
               onChange={(e) => setTst(e.target.value)}
             />
           </label>
-          <Button variant="download" onClick={handleExportar} disabled={!data?.edicao || exportando}>
+          <Button variant="download" onClick={handleExportar} disabled={!data?.edicao || exportando} full className="sm:w-auto">
             <Icon id="icon-download" />
             Exportar CSV
           </Button>

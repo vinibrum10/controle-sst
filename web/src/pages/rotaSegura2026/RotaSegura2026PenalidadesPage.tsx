@@ -137,11 +137,11 @@ export function RotaSegura2026PenalidadesPage() {
         title="Penalidades"
         description="Infrações registradas por equipe/colaborador, com a pontuação de penalidade calculada conforme os critérios da edição."
         headerExtra={
-          <div className="flex flex-wrap items-end justify-end gap-2">
+          <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-end sm:justify-end">
             {edicoes.length > 0 && <EdicaoSelector edicoes={edicoes} value={edicaoId} onChange={setEdicaoId} />}
             <label className="grid gap-1.5 text-[0.82rem] font-bold text-muted">
               Equipe
-              <select className={`${selectInlineClasses} min-w-[160px]`} value={filtroEquipeId} onChange={(e) => setFiltroEquipeId(e.target.value)}>
+              <select className={`${selectInlineClasses} w-full sm:min-w-[160px]`} value={filtroEquipeId} onChange={(e) => setFiltroEquipeId(e.target.value)}>
                 <option value="">Todas</option>
                 {equipes.map((equipe) => (
                   <option key={equipe.id} value={equipe.id}>
@@ -152,7 +152,7 @@ export function RotaSegura2026PenalidadesPage() {
             </label>
             <label className="grid gap-1.5 text-[0.82rem] font-bold text-muted">
               Mês
-              <input type="month" className={`${selectInlineClasses} min-w-[140px]`} value={filtroMes} onChange={(e) => setFiltroMes(e.target.value)} />
+              <input type="month" className={`${selectInlineClasses} w-full sm:min-w-[140px]`} value={filtroMes} onChange={(e) => setFiltroMes(e.target.value)} />
             </label>
           </div>
         }

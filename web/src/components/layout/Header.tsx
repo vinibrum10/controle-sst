@@ -26,7 +26,7 @@ export function Header({ onToggleSidebar }: HeaderProps) {
 
   const pageTitle = useMemo(() => {
     const match = NAV_ITEMS.find((item) => location.pathname.startsWith(item.path));
-    return match?.title ?? "Controle SST";
+    return match?.title ?? "SGEPI";
   }, [location.pathname]);
 
   return (
