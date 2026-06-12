@@ -29,6 +29,11 @@ export interface NovaTarefa {
   descricao?: string;
 }
 
+export interface NotificacaoEmail {
+  enviado: boolean;
+  motivo?: string;
+}
+
 export interface Tarefa extends NovaTarefa {
   id: string;
   status: StatusTarefa;
@@ -37,4 +42,5 @@ export interface Tarefa extends NovaTarefa {
   responsavel: Funcionario | null;
   apoio: Funcionario | null;
   pedidosAjuda: PedidoAjuda[];
+  notificacaoEmail?: NotificacaoEmail;
 }

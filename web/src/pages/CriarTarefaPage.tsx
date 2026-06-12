@@ -6,7 +6,6 @@ import { Button } from "../components/ui/Button";
 import { useFuncionarios } from "../hooks/useFuncionarios";
 import { useToast } from "../hooks/useToast";
 import { criarTarefa } from "../lib/tarefas";
-import { notificarTarefaAtribuida } from "../lib/email";
 import { currentWeekValue, shiftDate } from "../lib/format";
 import { ApiError } from "../lib/api";
 import type { PeriodoRotina, PrioridadeTarefa, TipoTarefa } from "../types/tarefa";
@@ -63,9 +62,14 @@ export function CriarTarefaPage() {
 
       setForm(() => defaultState(responsavelId));
 
-      showToast("Tarefa adicionada ao plano semanal.");
+      if (tarefa.notificacaoEmail?.enviado) {
+        showToast("Tarefa adicionada ao plano semanal. E-mail de notificação enviado ao responsável.");
+      } else if (tarefa.notificacaoEmail?.motivo) {
+        showToast(`Tarefa adicionada ao plano semanal. ${tarefa.notificacaoEmail.motivo}`);
+      } else {
+        showToast("Tarefa adicionada ao plano semanal.");
+      }
       navigate("/tarefas/executar");
-      notificarTarefaAtribuida(tarefa);
     } catch (err) {
       if (err instanceof ApiError && Array.isArray(err.detalhes) && err.detalhes.length > 0) {
         const primeiro = err.detalhes[0] as { mensagem?: string };

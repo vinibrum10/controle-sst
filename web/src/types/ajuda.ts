@@ -1,10 +1,11 @@
 import type { Funcionario } from "./funcionario";
-import type { StatusPedidoAjuda, Tarefa } from "./tarefa";
+import type { NotificacaoEmail, StatusPedidoAjuda, Tarefa } from "./tarefa";
 
 export interface ResultadoAjuda {
   tarefa: Tarefa;
   ajudante: Funcionario;
   mensagem: string;
+  notificacaoEmail?: NotificacaoEmail;
 }
 
 export interface Disponibilidade {

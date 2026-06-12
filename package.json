@@ -1,7 +1,7 @@
 {
   "name": "controle-sst",
   "version": "2.0.0",
-  "description": "Controle SST - gestao de tarefas e programas de SST com banco de dados online",
+  "description": "SGEPI - Sistema de Gestao de Equipes e Programas Institucionais (tarefas, equipe e programas de SST com banco de dados online)",
   "private": true,
   "main": "server/index.js",
   "scripts": {
@@ -23,6 +23,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^8.0.11",
     "prisma": "^5.22.0",
     "zod": "^3.23.8"
   },

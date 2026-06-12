@@ -7,6 +7,7 @@ const { validateBody } = require("../middleware/validate");
 const { requireAuth } = require("../middleware/auth");
 const { tarefaInclude, serializeTarefa } = require("../utils/tarefaSerializer");
 const { isDone, isLate, tarefasDaSemana, cargaPessoa } = require("../utils/metrics");
+const { enviarNotificacaoApoioAtribuido } = require("../utils/notificacoes");
 
 const router = express.Router();
 
@@ -103,10 +104,13 @@ router.post("/solicitar", validateBody(z.object({ tarefaId: z.string().min(1) })
     })
   ]);
 
+  const notificacaoEmail = await enviarNotificacaoApoioAtribuido(serializeTarefa(tarefaAtualizada), escolhido.pessoa);
+
   res.json({
     tarefa: serializeTarefa(tarefaAtualizada),
     ajudante: escolhido.pessoa,
-    mensagem: `${escolhido.pessoa.nome} foi designado(a) para apoiar na tarefa "${tarefa.titulo}".`
+    mensagem: `${escolhido.pessoa.nome} foi designado(a) para apoiar na tarefa "${tarefa.titulo}".`,
+    notificacaoEmail
   });
 }));
 
