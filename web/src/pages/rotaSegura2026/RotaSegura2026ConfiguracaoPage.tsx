@@ -43,7 +43,7 @@ export function RotaSegura2026ConfiguracaoPage() {
   );
 
   return (
-    <div className="grid gap-[18px]">
+    <div className="grid gap-6">
       <Panel
         title="Configuração do Rota Segura"
         description="Cada edição anual tem sua própria proposta, critérios de pontuação, regras condicionais e premiação."

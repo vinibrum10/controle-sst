@@ -23,7 +23,7 @@ export function DashboardOverviewPage() {
   const { legacy: rotaSegura, rs2026, temRs2026, carregando: carregandoRotaSegura, vazio: rotaSeguraVazio } = useRotaSeguraResumo();
 
   return (
-    <div className="grid gap-[18px]">
+    <div className="grid gap-6">
       <Panel title="Visão geral" description="Resumo consolidado dos principais indicadores de cada área do programa.">
         <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
           <SummaryCard

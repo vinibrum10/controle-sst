@@ -100,7 +100,7 @@ export function RotaSegura2026RankingPage() {
   }
 
   return (
-    <div className="grid gap-[18px]">
+    <div className="grid gap-6">
       <Panel
         title="Ranking"
         description="Classificação das equipes por pontuação (APR + penalidades), conforme os critérios configurados na edição."

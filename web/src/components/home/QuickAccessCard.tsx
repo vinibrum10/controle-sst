@@ -12,9 +12,9 @@ export function QuickAccessCard({ to, label, description, icon }: QuickAccessLin
   return (
     <Link
       to={to}
-      className="group flex items-start gap-3.5 rounded-[8px] border border-line bg-surface p-[18px] shadow-card transition-all hover:-translate-y-px hover:border-teal/40 hover:shadow-card-lg"
+      className="group flex items-start gap-3.5 rounded-xl border border-line bg-surface p-6 shadow-card transition-all hover:-translate-y-px hover:border-teal/40 hover:shadow-card-lg"
     >
-      <div className="grid h-11 w-11 shrink-0 place-items-center rounded-[8px] bg-teal-soft text-teal-strong dark:text-teal" aria-hidden="true">
+      <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-teal-soft text-teal-strong dark:text-teal" aria-hidden="true">
         <Icon id={icon} className="h-5 w-5" />
       </div>
       <div className="min-w-0 flex-1">

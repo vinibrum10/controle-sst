@@ -24,7 +24,7 @@ export function HomePage() {
   const primeiroNome = usuario?.nome?.split(" ")[0] || "";
 
   return (
-    <div className="grid gap-[18px]">
+    <div className="grid gap-6">
       <Panel className="border-none bg-gradient-to-br from-sidebar to-[#0a1825] text-white shadow-floating">
         <p className="m-0 text-eyebrow text-[#9fc6e8]">SGEPI · Sistema de Gestão de Equipes, Programas e Indicadores</p>
         <h1 className="mb-1.5 mt-2 text-[1.6rem] font-extrabold tracking-tight sm:text-[1.9rem]">

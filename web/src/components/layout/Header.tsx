@@ -43,7 +43,7 @@ export function Header({ onToggleSidebar }: HeaderProps) {
   }, [location.pathname]);
 
   return (
-    <header className="mb-[22px] flex flex-col gap-[14px] sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-[18px]">
+    <header className="mb-6 flex flex-col gap-[14px] sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-6">
       <div className="flex min-w-0 items-center gap-3">
         <button
           type="button"

@@ -31,12 +31,12 @@ export function MetricGrid({ metrics }: MetricGridProps) {
   return (
     <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
       {cards.map((card) => (
-        <article key={card.label} className="min-h-[112px] rounded-[8px] border border-line bg-surface p-[18px] shadow-card">
-          <div className={`mb-3 grid h-9 w-9 place-items-center rounded-[8px] ${ACCENT_CLASSES[card.accent]}`} aria-hidden="true">
+        <article key={card.label} className="min-h-[112px] rounded-xl border border-line bg-surface p-6 shadow-card">
+          <div className={`mb-3 grid h-9 w-9 place-items-center rounded-lg ${ACCENT_CLASSES[card.accent]}`} aria-hidden="true">
             <Icon id={card.icon} />
           </div>
           <span className="block text-eyebrow text-muted">{card.label}</span>
-          <strong className="my-1.5 block text-display">{card.value}</strong>
+          <strong className="my-1.5 block text-display tabular-nums">{card.value}</strong>
           <small className="text-muted">{card.hint}</small>
         </article>
       ))}

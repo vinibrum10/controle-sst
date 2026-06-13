@@ -52,7 +52,7 @@ export function AjudaPage() {
   }
 
   return (
-    <div className="grid gap-[18px]">
+    <div className="grid gap-6">
       <div className="flex justify-end">
         <label className="grid w-full gap-1.5 text-[0.82rem] font-bold text-muted sm:w-auto">
           Semana
@@ -65,7 +65,7 @@ export function AjudaPage() {
         </label>
       </div>
 
-      <div className="grid gap-[18px] lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
         <Panel
           title="Pedir ajuda"
           description="O programa procura primeiro quem está sem tarefa aberta na semana e depois quem tem maior capacidade livre."

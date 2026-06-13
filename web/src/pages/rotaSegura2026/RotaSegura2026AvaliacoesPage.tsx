@@ -26,7 +26,7 @@ export function RotaSegura2026AvaliacoesPage() {
   const { items: equipes } = useCrud<RsEquipe>("/rota-segura/equipes", "Não foi possível carregar as equipes.");
 
   return (
-    <div className="grid gap-[18px]">
+    <div className="grid gap-6">
       <Panel
         title="Avaliação de APR"
         description="Lançamento das avaliações de APR (amostral e via Forms) e decisões do comitê sobre riscos/medidas adicionais."

@@ -32,7 +32,7 @@ const deleteButtonClasses =
   "inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-[8px] border border-red/25 bg-red-soft px-2.5 text-[0.8rem] font-extrabold text-red transition-transform duration-150 hover:-translate-y-px active:translate-y-0";
 const verifyButtonClasses =
   "inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-[8px] border border-green/25 bg-[#edf8f1] px-2.5 text-[0.8rem] font-extrabold text-green transition-transform duration-150 hover:-translate-y-px active:translate-y-0";
-const twoColLayout = "grid gap-[18px] lg:items-start lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)]";
+const twoColLayout = "grid gap-6 lg:items-start lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)]";
 
 const STATUS_ROTA_OPTIONS: StatusRota[] = ["ATIVA", "INATIVA"];
 const FREQUENCIA_OPTIONS: FrequenciaRota[] = ["DIARIA", "SEMANAL", "QUINZENAL", "MENSAL"];
@@ -229,7 +229,7 @@ export function RotaSeguraPage() {
   }
 
   return (
-    <div className="grid gap-[18px]">
+    <div className="grid gap-6">
       <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
         <SummaryCard label="Rotas cadastradas" value={resumo.total} hint="todas as rotas do programa" />
         <SummaryCard label="Rotas ativas" value={resumo.ativas} hint="em acompanhamento" />
@@ -237,7 +237,7 @@ export function RotaSeguraPage() {
         <SummaryCard label="Desvios pendentes" value={resumo.desviosPendentes} hint="identificados nas rotas" />
       </div>
 
-      <div className={canManage ? twoColLayout : "grid gap-[18px]"}>
+      <div className={canManage ? twoColLayout : "grid gap-6"}>
         <Panel title="Rotas seguras" description="Trajetos monitorados, frequência de verificação e responsáveis pela inspeção de campo.">
           {erroRotas && <p className="text-red">{erroRotas}</p>}
           {carregandoRotas ? (
@@ -422,7 +422,7 @@ export function RotaSeguraPage() {
         )}
       </div>
 
-      <div className={canManage ? twoColLayout : "grid gap-[18px]"}>
+      <div className={canManage ? twoColLayout : "grid gap-6"}>
         <Panel title="Desvios identificados nas rotas" description="Ocorrências encontradas durante as verificações de campo.">
           {erroAchados && <p className="text-red">{erroAchados}</p>}
           {carregandoAchados ? (

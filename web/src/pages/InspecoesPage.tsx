@@ -32,7 +32,7 @@ const selectInlineClasses =
   "min-h-[38px] rounded-[8px] border border-line bg-surface-soft px-2 text-[0.85rem] text-text outline-none transition-colors focus:border-teal focus:bg-white dark:focus:bg-surface-soft";
 const deleteButtonClasses =
   "inline-flex min-h-[34px] items-center justify-center gap-1.5 rounded-[8px] border border-red/25 bg-red-soft px-2.5 text-[0.8rem] font-extrabold text-red transition-transform duration-150 hover:-translate-y-px active:translate-y-0";
-const twoColLayout = "grid gap-[18px] lg:items-start lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)]";
+const twoColLayout = "grid gap-6 lg:items-start lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)]";
 
 const STATUS_INSPECAO_OPTIONS: StatusInspecao[] = ["PLANEJADA", "REALIZADA", "CANCELADA"];
 const STATUS_AUDITORIA_OPTIONS: StatusAuditoria[] = ["PLANEJADA", "REALIZADA", "CANCELADA"];
@@ -362,7 +362,7 @@ export function InspecoesPage() {
   }
 
   return (
-    <div className="grid gap-[18px]">
+    <div className="grid gap-6">
       <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
         <SummaryCard label="Inspeções planejadas" value={resumo.inspecoesPlanejadas} hint="aguardando execução" />
         <SummaryCard label="Auditorias planejadas" value={resumo.auditoriasPlanejadas} hint="aguardando execução" />
@@ -370,7 +370,7 @@ export function InspecoesPage() {
         <SummaryCard label="Planos de ação atrasados" value={resumo.planosAtrasados} hint="prazo vencido" />
       </div>
 
-      <div className={canManage ? twoColLayout : "grid gap-[18px]"}>
+      <div className={canManage ? twoColLayout : "grid gap-6"}>
         <Panel title="Inspeções programadas" description="Checklists de campo, áreas avaliadas e responsáveis pela execução.">
           {erroInspecoes && <p className="text-red">{erroInspecoes}</p>}
           {carregandoInspecoes ? (
@@ -552,7 +552,7 @@ export function InspecoesPage() {
         )}
       </div>
 
-      <div className={canManage ? twoColLayout : "grid gap-[18px]"}>
+      <div className={canManage ? twoColLayout : "grid gap-6"}>
         <Panel title="Auditorias" description="Auditorias internas e externas de conformidade com normas e procedimentos.">
           {erroAuditorias && <p className="text-red">{erroAuditorias}</p>}
           {carregandoAuditorias ? (
@@ -734,7 +734,7 @@ export function InspecoesPage() {
         )}
       </div>
 
-      <div className={canManage ? twoColLayout : "grid gap-[18px]"}>
+      <div className={canManage ? twoColLayout : "grid gap-6"}>
         <Panel title="Achados e desvios" description="Não conformidades, observações e oportunidades de melhoria identificadas.">
           {erroAchados && <p className="text-red">{erroAchados}</p>}
           {carregandoAchados ? (
@@ -923,7 +923,7 @@ export function InspecoesPage() {
         )}
       </div>
 
-      <div className={canManage ? twoColLayout : "grid gap-[18px]"}>
+      <div className={canManage ? twoColLayout : "grid gap-6"}>
         <Panel title="Planos de ação" description="Tratativas, responsáveis e prazos para correção dos achados identificados.">
           {erroPlanos && <p className="text-red">{erroPlanos}</p>}
           {carregandoPlanos ? (

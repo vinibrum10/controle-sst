@@ -34,7 +34,7 @@ export function RotaSegura2026EquipesPage() {
   } = useCrud<RsColaborador>("/rota-segura/colaboradores", "Não foi possível carregar os colaboradores.");
 
   return (
-    <div className="grid gap-[18px]">
+    <div className="grid gap-6">
       <Panel title="Equipes e colaboradores" description="Cadastro das equipes de campo e dos colaboradores vinculados a cada uma.">
         <div className="flex flex-wrap gap-2">
           <button type="button" className={tabButtonClasses(aba === "equipes")} onClick={() => setAba("equipes")}>

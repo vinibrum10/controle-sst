@@ -162,7 +162,7 @@ export function FuncionariosPage() {
   }
 
   return (
-    <div className={`grid gap-[18px] lg:items-start ${canManage ? "lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]" : ""}`}>
+    <div className={`grid gap-6 lg:items-start ${canManage ? "lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]" : ""}`}>
       <Panel title="Funcionários" description="Capacidade semanal, tarefas próprias, tarefas de apoio e desempenho.">
         {carregando ? (
           <p className="text-muted">Carregando equipe...</p>
