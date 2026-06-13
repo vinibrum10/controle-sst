@@ -7,12 +7,25 @@ export interface NavItem {
   roles?: Papel[];
 }
 
+export interface NavSubGroup {
+  id: string;
+  label: string;
+  defaultOpen: boolean;
+  items: NavItem[];
+}
+
+export type NavEntry = NavItem | NavSubGroup;
+
+export function isNavSubGroup(entry: NavEntry): entry is NavSubGroup {
+  return "items" in entry;
+}
+
 export interface NavGroup {
   id: string;
   label: string;
   icon: string;
   defaultOpen: boolean;
-  items: NavItem[];
+  items: NavEntry[];
 }
 
 export const DEFAULT_PATH = "/inicio";
@@ -61,17 +74,24 @@ export const NAVIGATION_GROUPS: NavGroup[] = [
       { path: "/programas/rota-segura", label: "Rota Segura", title: "Rota Segura" },
       { path: "/treinamentos", label: "Treinamentos", title: "Treinamentos" },
       { path: "/inspecoes", label: "Inspeções e Auditorias", title: "Inspeções e auditorias" },
-      { path: "/programas/rota-segura-2026", label: "Rota Segura 2026 - Dashboard", title: "Rota Segura 2026 - Dashboard" },
       {
-        path: "/programas/rota-segura-2026/configuracao",
-        label: "Rota Segura 2026 - Configuração",
-        title: "Rota Segura 2026 - Configuração da edição",
-        roles: ["ADMIN"],
+        id: "rota-segura-2026",
+        label: "Rota Segura 2026",
+        defaultOpen: false,
+        items: [
+          { path: "/programas/rota-segura-2026", label: "Dashboard", title: "Rota Segura 2026 - Dashboard" },
+          {
+            path: "/programas/rota-segura-2026/configuracao",
+            label: "Configuração",
+            title: "Rota Segura 2026 - Configuração da edição",
+            roles: ["ADMIN"],
+          },
+          { path: "/programas/rota-segura-2026/equipes", label: "Equipes", title: "Rota Segura 2026 - Equipes e colaboradores" },
+          { path: "/programas/rota-segura-2026/avaliacoes", label: "Avaliações", title: "Rota Segura 2026 - Avaliação de APR" },
+          { path: "/programas/rota-segura-2026/penalidades", label: "Penalidades", title: "Rota Segura 2026 - Penalidades" },
+          { path: "/programas/rota-segura-2026/ranking", label: "Ranking", title: "Rota Segura 2026 - Ranking" },
+        ],
       },
-      { path: "/programas/rota-segura-2026/equipes", label: "Rota Segura 2026 - Equipes", title: "Rota Segura 2026 - Equipes e colaboradores" },
-      { path: "/programas/rota-segura-2026/avaliacoes", label: "Rota Segura 2026 - Avaliações", title: "Rota Segura 2026 - Avaliação de APR" },
-      { path: "/programas/rota-segura-2026/penalidades", label: "Rota Segura 2026 - Penalidades", title: "Rota Segura 2026 - Penalidades" },
-      { path: "/programas/rota-segura-2026/ranking", label: "Rota Segura 2026 - Ranking", title: "Rota Segura 2026 - Ranking" },
     ],
   },
   {
@@ -88,4 +108,8 @@ export const NAVIGATION_GROUPS: NavGroup[] = [
   },
 ];
 
-export const NAV_ITEMS: NavItem[] = NAVIGATION_GROUPS.flatMap((group) => group.items);
+function flattenEntries(entries: NavEntry[]): NavItem[] {
+  return entries.flatMap((entry) => (isNavSubGroup(entry) ? flattenEntries(entry.items) : [entry]));
+}
+
+export const NAV_ITEMS: NavItem[] = NAVIGATION_GROUPS.flatMap((group) => flattenEntries(group.items));
