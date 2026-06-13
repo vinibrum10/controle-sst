@@ -75,6 +75,23 @@ model PermissaoPerfil {
   @@index([chave])
 }
 
+// Historico de alteracoes na matriz de permissoes (auditoria). Um registro
+// e criado para cada combinacao papel+chave cujo valor efetivamente mudou
+// em um PATCH /api/permissoes.
+model PermissaoHistorico {
+  id               String         @id @default(uuid())
+  papel            PapelUsuario
+  chave            ChavePermissao
+  permitidoAntes   Boolean
+  permitidoDepois  Boolean
+  alteradoPorId    String?
+  alteradoPorNome  String?
+  alteradoPorEmail String?
+  criadoEm         DateTime       @default(now())
+
+  @@index([criadoEm])
+}
+
 // =====================================================================
 // FUNCIONARIOS / EQUIPE SST
 // =====================================================================

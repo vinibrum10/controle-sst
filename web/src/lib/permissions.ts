@@ -84,6 +84,11 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
   },
 ];
 
+export const CHAVE_LABELS: Record<ChavePermissao, string> = PERMISSION_GROUPS.reduce((labels, group) => {
+  for (const item of group.items) labels[item.chave] = item.label;
+  return labels;
+}, {} as Record<ChavePermissao, string>);
+
 // Matriz usada como fallback enquanto a matriz real (banco) ainda nao foi
 // carregada, evitando que toda a interface fique sem permissoes por um instante.
 export const MATRIZ_PADRAO: MatrizPermissoes = {

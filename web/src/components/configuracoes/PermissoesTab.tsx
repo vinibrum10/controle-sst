@@ -2,13 +2,17 @@ import { Fragment, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/IconSprite";
+import { EmptyState } from "../ui/Panel";
 import { useAuth } from "../../hooks/useAuth";
 import { usePermissoes } from "../../hooks/usePermissao";
+import { useApiResource } from "../../hooks/useApiResource";
 import { useToast } from "../../hooks/useToast";
 import { extractErrorMessage } from "../../lib/formClasses";
-import { atualizarPermissoes } from "../../lib/permissoes";
+import { formatDateTime } from "../../lib/format";
+import { atualizarPermissoes, type PermissaoHistoricoItem } from "../../lib/permissoes";
 import {
   CHAVES_PERMISSAO,
+  CHAVE_LABELS,
   PAPEIS,
   PAPEL_LABELS,
   PAPEL_DESCRICOES,
@@ -36,9 +40,15 @@ export function PermissoesTab() {
   const [draft, setDraft] = useState<MatrizPermissoes | null>(null);
   const [salvando, setSalvando] = useState(false);
 
-  if (!usuario) return null;
+  const isAdmin = usuario?.papel === "ADMIN";
+  const {
+    data: historico,
+    carregando: historicoCarregando,
+    erro: historicoErro,
+    recarregar: recarregarHistorico,
+  } = useApiResource<PermissaoHistoricoItem[]>(isAdmin ? "/permissoes/historico" : null, "Não foi possível carregar o histórico de alterações.");
 
-  const isAdmin = usuario.papel === "ADMIN";
+  if (!usuario) return null;
   const matrizExibida = draft ?? matriz;
   const alterado = draft !== null;
 
@@ -81,6 +91,7 @@ export function PermissoesTab() {
       const atualizado = await atualizarPermissoes(itens);
       atualizarMatriz(atualizado);
       setDraft(null);
+      recarregarHistorico();
       showToast("Permissões atualizadas.");
     } catch (err) {
       showToast(extractErrorMessage(err, "Erro ao atualizar as permissões."));
@@ -216,7 +227,49 @@ export function PermissoesTab() {
         )}
       </article>
 
-      {usuario.papel === "ADMIN" && (
+      {isAdmin && (
+        <article className="grid gap-3 rounded-[8px] border border-line bg-surface-soft p-3.5 dark:bg-surface">
+          <h3 className={sectionTitleClasses}>Histórico de alterações</h3>
+          <p className="m-0 text-[0.85rem] text-muted">
+            Registro de quem alterou a matriz de permissões, quando e o que mudou.
+          </p>
+          {historicoErro && <p className="text-red">{historicoErro}</p>}
+          {historicoCarregando ? (
+            <p className="text-muted">Carregando histórico...</p>
+          ) : !historico || historico.length === 0 ? (
+            <EmptyState message="Nenhuma alteração registrada até agora." />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px] border-collapse text-[0.85rem]">
+                <thead>
+                  <tr className="border-b border-line text-left text-[0.76rem] font-extrabold uppercase text-muted">
+                    <th className="py-2 pr-3">Data</th>
+                    <th className="py-2 pr-3">Responsável</th>
+                    <th className="py-2 pr-3">Perfil</th>
+                    <th className="py-2 pr-3">Permissão</th>
+                    <th className="py-2 pr-3">Alteração</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {historico.map((item) => (
+                    <tr key={item.id} className="border-b border-line last:border-b-0">
+                      <td className="py-2 pr-3 text-muted">{formatDateTime(item.criadoEm)}</td>
+                      <td className="py-2 pr-3 text-text">{item.alteradoPorNome || item.alteradoPorEmail || "-"}</td>
+                      <td className="py-2 pr-3 text-text">{PAPEL_LABELS[item.papel]}</td>
+                      <td className="py-2 pr-3 text-text">{CHAVE_LABELS[item.chave]}</td>
+                      <td className="py-2 pr-3 text-text">
+                        {item.permitidoAntes ? "Permitido" : "Bloqueado"} → {item.permitidoDepois ? "Permitido" : "Bloqueado"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </article>
+      )}
+
+      {isAdmin && (
         <article className="grid gap-3 rounded-[8px] border border-line bg-surface-soft p-3.5 dark:bg-surface">
           <h3 className={sectionTitleClasses}>Gerenciar usuários</h3>
           <p className="m-0 text-[0.85rem] text-muted">

@@ -49,19 +49,45 @@ router.patch("/", requireRole("ADMIN"), validateBody(permissaoUpdateSchema), asy
     });
   }
 
-  await prisma.$transaction(
-    req.body.itens.map((item) =>
+  const matrizAtual = await getMatriz();
+  const mudancas = req.body.itens.filter((item) => matrizAtual[item.papel][item.chave] !== item.permitido);
+
+  await prisma.$transaction([
+    ...req.body.itens.map((item) =>
       prisma.permissaoPerfil.upsert({
         where: { papel_chave: { papel: item.papel, chave: item.chave } },
         update: { permitido: item.permitido },
         create: { papel: item.papel, chave: item.chave, permitido: item.permitido }
       })
+    ),
+    ...mudancas.map((item) =>
+      prisma.permissaoHistorico.create({
+        data: {
+          papel: item.papel,
+          chave: item.chave,
+          permitidoAntes: matrizAtual[item.papel][item.chave],
+          permitidoDepois: item.permitido,
+          alteradoPorId: req.user.sub,
+          alteradoPorNome: req.user.nome,
+          alteradoPorEmail: req.user.email
+        }
+      })
     )
-  );
+  ]);
 
   invalidarMatriz();
   const matriz = await getMatriz();
   res.json(toLista(matriz));
+}));
+
+// Historico de alteracoes da matriz de permissoes, restrito ao ADMIN.
+router.get("/historico", requireRole("ADMIN"), asyncHandler(async (req, res) => {
+  const limite = Math.min(Number(req.query.limite) || 50, 200);
+  const historico = await prisma.permissaoHistorico.findMany({
+    orderBy: { criadoEm: "desc" },
+    take: limite
+  });
+  res.json(historico);
 }));
 
 module.exports = router;
