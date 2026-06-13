@@ -42,8 +42,8 @@ export function Header({ onToggleSidebar }: HeaderProps) {
     return best?.title ?? "SGEPI";
   }, [location.pathname]);
 
-  const ROTAS_SEM_CRIAR_TAREFA = ["/inicio", "/programas/rota-segura", "/treinamentos", "/inspecoes", "/funcionarios"];
-  const mostrarCriarTarefa = !ROTAS_SEM_CRIAR_TAREFA.some((rota) => location.pathname.startsWith(rota));
+  const ROTAS_COM_CRIAR_TAREFA = ["/tarefas", "/ajuda"];
+  const mostrarCriarTarefa = ROTAS_COM_CRIAR_TAREFA.some((rota) => location.pathname.startsWith(rota));
 
   return (
     <header className="mb-6 flex flex-col gap-[14px] sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-6">
