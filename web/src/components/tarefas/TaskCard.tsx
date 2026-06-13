@@ -64,7 +64,7 @@ export function TaskCard({
             {typeLabel(tarefa.tipo)}
           </span>
           {tarefa.tipo === "ROTINEIRA" && (
-            <span className={`${badgeBase} bg-[#e9f7f6] text-teal`}>{routinePeriodLabel(tarefa.periodoRotina)}</span>
+            <span className={`${badgeBase} bg-teal-soft text-teal`}>{routinePeriodLabel(tarefa.periodoRotina)}</span>
           )}
           <span
             className={`${badgeBase} ${

@@ -66,10 +66,10 @@ export function LoginPage() {
   return (
     <div
       className="fixed inset-0 z-[1000] flex items-center justify-center"
-      style={{ background: "radial-gradient(ellipse at 60% 40%, #0f2d28 0%, #060f0d 100%)" }}
+      style={{ background: "radial-gradient(ellipse at 60% 40%, #15304a 0%, #070e16 100%)" }}
     >
       <div className="w-full max-w-[400px] p-9 rounded-2xl bg-white/4 border border-white/10 backdrop-blur-xl shadow-floating text-center">
-        <div className="grid place-items-center w-[60px] h-[60px] mx-auto mb-5 rounded-[8px] bg-gradient-to-b from-[#1ee0cb] to-teal text-[#06231f] shadow-card">
+        <div className="grid place-items-center w-[60px] h-[60px] mx-auto mb-5 rounded-[8px] bg-gradient-to-b from-[#6fa0c8] to-teal text-white shadow-card">
           <Icon id="icon-shield" className="h-7 w-7" />
         </div>
         <h1 className="text-[1.8rem] mb-1 font-extrabold tracking-tight text-white">SGEPI</h1>

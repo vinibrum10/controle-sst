@@ -6,7 +6,7 @@ interface MetricGridProps {
 }
 
 const ACCENT_CLASSES = {
-  teal: "bg-[#e3f3f0] text-teal-strong dark:bg-[rgba(18,201,184,0.12)] dark:text-teal",
+  teal: "bg-teal-soft text-teal-strong dark:text-teal",
   red: "bg-red-soft text-red",
   amber: "bg-[#fff4d8] text-[#7b4a00] dark:bg-[rgba(242,169,19,0.14)] dark:text-amber",
   green: "bg-[#e2f4e6] text-green-strong dark:bg-[rgba(69,196,98,0.12)] dark:text-green",

@@ -12,7 +12,7 @@ interface AvatarProps {
 }
 
 export function Avatar({ nome, foto, size = "small" }: AvatarProps) {
-  const baseClasses = `inline-grid shrink-0 place-items-center rounded-full bg-[#d8f2ed] font-black text-[#0b524c] ${sizeClasses[size]}`;
+  const baseClasses = `inline-grid shrink-0 place-items-center rounded-full bg-teal-soft font-black text-teal-strong ${sizeClasses[size]}`;
 
   if (foto?.startsWith("data:image/")) {
     return <img className={`${baseClasses} object-cover`} src={foto} alt={`Foto de ${nome}`} />;
