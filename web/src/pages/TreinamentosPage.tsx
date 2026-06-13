@@ -121,7 +121,7 @@ export function TreinamentosPage() {
   }
 
   return (
-    <div className="grid gap-[18px]">
+    <div className="grid gap-6">
       <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
         <SummaryCard label="Treinamentos cadastrados" value={resumo.total} hint="todos os registros do programa" />
         <SummaryCard label="Planejados" value={resumo.planejados} hint="aguardando realização" />
@@ -129,7 +129,7 @@ export function TreinamentosPage() {
         <SummaryCard label="Vencendo em 30 dias" value={resumo.vencendo} hint="renovação de certificado" />
       </div>
 
-      <div className={`grid gap-[18px] lg:items-start ${canManage ? "lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)]" : ""}`}>
+      <div className={`grid gap-6 lg:items-start ${canManage ? "lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)]" : ""}`}>
         <Panel
           title="Treinamentos de SST"
           description="Capacitações obrigatórias, normas regulamentadoras, carga horária e validade dos certificados."

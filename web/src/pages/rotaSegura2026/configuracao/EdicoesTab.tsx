@@ -150,7 +150,7 @@ export function EdicoesTab({ edicoes, carregando, erro, criar, atualizar, remove
   }
 
   return (
-    <div className="grid gap-[18px]">
+    <div className="grid gap-6">
       <div className={twoColLayout}>
         <Panel
           title="Edições do programa"

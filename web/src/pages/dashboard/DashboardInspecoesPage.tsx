@@ -8,7 +8,7 @@ export function DashboardInspecoesPage() {
   const { resumo, carregando, erro, vazio } = useInspecoesResumo();
 
   return (
-    <div className="grid gap-[18px]">
+    <div className="grid gap-6">
       <Panel
         title="Inspeções e auditorias"
         description="Indicadores gerais de inspeções, auditorias e achados."

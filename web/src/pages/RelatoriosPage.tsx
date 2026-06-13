@@ -71,7 +71,7 @@ export function RelatoriosPage() {
   }
 
   return (
-    <div className="grid gap-[18px]">
+    <div className="grid gap-6">
       <Panel
         title="Relatórios"
         description="Resumo de tarefas, equipe e programas de SST para o período selecionado."

@@ -12,7 +12,7 @@ export function DashboardTarefasPage() {
   const { dashboard, carregando, erro } = useDashboard(semana);
 
   return (
-    <div className="grid gap-[18px]">
+    <div className="grid gap-6">
       <div className="flex justify-end">
         <label className="grid w-full gap-1.5 text-[0.82rem] font-bold text-muted sm:w-auto">
           Semana
@@ -33,7 +33,7 @@ export function DashboardTarefasPage() {
         <>
           <MetricGrid metrics={dashboard.metrics} />
 
-          <div className="grid gap-[18px] lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
             <Panel title="Carga por pessoa" description="Horas estimadas em tarefas abertas na semana selecionada.">
               <WorkloadList cargaPorPessoa={dashboard.cargaPorPessoa} />
             </Panel>
@@ -43,7 +43,7 @@ export function DashboardTarefasPage() {
             </Panel>
           </div>
 
-          <div className="grid gap-[18px] lg:grid-cols-3">
+          <div className="grid gap-6 lg:grid-cols-3">
             <Panel title="Mais pedem ajuda">
               <RankingList ranking={dashboard.rankings.maisPedemAjuda} suffix="pedido(s)" />
             </Panel>

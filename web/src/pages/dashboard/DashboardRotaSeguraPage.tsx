@@ -9,7 +9,7 @@ export function DashboardRotaSeguraPage() {
   const { legacy, rs2026, temRs2026, carregando, erro, vazio } = useRotaSeguraResumo();
 
   return (
-    <div className="grid gap-[18px]">
+    <div className="grid gap-6">
       <Panel
         title="Rota Segura"
         description={rs2026?.edicao?.slogan || "Indicadores do programa Rota Segura."}

@@ -17,7 +17,7 @@ export function RotaSegura2026DashboardPage() {
   const { data, carregando, erro } = useApiResource<RsDashboardResponse>(path, "Não foi possível carregar o dashboard do Rota Segura.");
 
   return (
-    <div className="grid gap-[18px]">
+    <div className="grid gap-6">
       <Panel
         title="Rota Segura 2026"
         description={data?.edicao?.slogan || "Programa de avaliação da Análise Preliminar de Risco (APR) das equipes de campo."}

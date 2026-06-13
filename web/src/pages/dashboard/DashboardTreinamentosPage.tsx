@@ -8,7 +8,7 @@ export function DashboardTreinamentosPage() {
   const { resumo, carregando, erro, vazio } = useTreinamentosResumo();
 
   return (
-    <div className="grid gap-[18px]">
+    <div className="grid gap-6">
       <Panel
         title="Treinamentos"
         description="Indicadores gerais dos treinamentos cadastrados."

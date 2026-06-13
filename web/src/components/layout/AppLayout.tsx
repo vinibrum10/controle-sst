@@ -43,7 +43,7 @@ export function AppLayout() {
         } ${collapsed ? "lg:w-0 lg:overflow-hidden lg:p-0 lg:opacity-0" : ""}`}
       />
 
-      <main className="min-w-0 p-[26px] max-[760px]:p-4">
+      <main className="min-w-0 p-6 max-[760px]:p-4">
         <Header onToggleSidebar={toggleSidebar} />
         <Outlet />
       </main>

@@ -10,7 +10,7 @@ interface PanelProps {
 
 export function Panel({ title, description, headerExtra, children, className = "" }: PanelProps) {
   return (
-    <section className={`min-w-0 rounded-[8px] border border-line bg-surface p-5 shadow-card ${className}`}>
+    <section className={`min-w-0 rounded-xl border border-line bg-surface p-6 shadow-card ${className}`}>
       {(title || headerExtra) && (
         <div className="mb-3.5 flex flex-wrap items-start justify-between gap-3.5">
           {title && (
@@ -29,7 +29,7 @@ export function Panel({ title, description, headerExtra, children, className = "
 
 export function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-[8px] border border-dashed border-line bg-[#fbfdfc] p-[22px] text-muted dark:bg-surface-soft">
+    <div className="rounded-xl border border-dashed border-line bg-[#fbfdfc] p-6 text-center text-[0.9rem] text-muted dark:bg-surface-soft">
       {message}
     </div>
   );

@@ -10,8 +10,8 @@ const TABS: { to: string; label: string; end?: boolean }[] = [
 
 export function DashboardLayout() {
   return (
-    <div className="grid gap-[18px]">
-      <div className="relative -mx-1">
+    <div className="grid grid-cols-1 gap-6">
+      <div className="relative min-w-0 -mx-1">
         <nav className="flex gap-2 overflow-x-auto px-1 pb-1" aria-label="Visões do dashboard">
           {TABS.map((tab) => (
             <NavLink
