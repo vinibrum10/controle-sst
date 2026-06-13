@@ -49,6 +49,32 @@ model Usuario {
   @@index([email])
 }
 
+enum ChavePermissao {
+  GERENCIAR_EQUIPE
+  EXCLUIR_FUNCIONARIO
+  GERENCIAR_PROGRAMAS_SST
+  GERENCIAR_USUARIOS
+  EXPORTAR_DADOS
+  IMPORTAR_DADOS
+  RESTAURAR_DEMO
+  CONFIGURAR_ROTA_SEGURA
+  GERENCIAR_EQUIPES_ROTA_SEGURA
+  LANCAR_AVALIACAO_ROTA_SEGURA
+  DECIDIR_COMITE_ROTA_SEGURA
+  EXCLUIR_AVALIACAO_ROTA_SEGURA
+}
+
+model PermissaoPerfil {
+  id           String         @id @default(uuid())
+  papel        PapelUsuario
+  chave        ChavePermissao
+  permitido    Boolean        @default(false)
+  atualizadoEm DateTime       @updatedAt
+
+  @@unique([papel, chave])
+  @@index([chave])
+}
+
 // =====================================================================
 // FUNCIONARIOS / EQUIPE SST
 // =====================================================================

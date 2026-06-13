@@ -4,15 +4,16 @@ const { z } = require("zod");
 const prisma = require("../db");
 const asyncHandler = require("../utils/asyncHandler");
 const { validateBody } = require("../middleware/validate");
-const { requireAuth, requireRole } = require("../middleware/auth");
+const { requireAuth } = require("../middleware/auth");
+const { requirePermissao } = require("../utils/permissions");
 
 const router = express.Router();
 
-// Cadastrar, editar e ativar/inativar funcionarios e' permitido a ADMIN,
-// GESTOR e VISUALIZADOR. Excluir e' restrito a ADMIN e GESTOR. Qualquer
-// usuario autenticado pode consultar a lista.
-const requireGestao = requireRole("ADMIN", "GESTOR", "VISUALIZADOR");
-const requireExclusao = requireRole("ADMIN", "GESTOR");
+// Cadastrar, editar e ativar/inativar funcionarios e excluir funcionarios
+// sao controlados pela matriz de permissoes. Qualquer usuario autenticado
+// pode consultar a lista.
+const requireGestao = requirePermissao("GERENCIAR_EQUIPE");
+const requireExclusao = requirePermissao("EXCLUIR_FUNCIONARIO");
 
 const funcionarioSchema = z.object({
   nome: z.string().trim().min(2, "Informe o nome."),

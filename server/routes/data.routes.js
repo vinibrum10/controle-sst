@@ -3,7 +3,8 @@ const { z } = require("zod");
 
 const prisma = require("../db");
 const asyncHandler = require("../utils/asyncHandler");
-const { requireAuth, requireRole } = require("../middleware/auth");
+const { requireAuth } = require("../middleware/auth");
+const { requirePermissao } = require("../utils/permissions");
 const { tarefaInclude, serializeTarefa } = require("../utils/tarefaSerializer");
 const { findOrCreateSemana } = require("../utils/semana");
 const { seedFuncionariosDemo, seedTarefasDemo } = require("../utils/seedDemo");
@@ -47,7 +48,7 @@ const importSchema = z.object({
 
 // Exporta uma copia completa dos dados do banco (funcionarios, tarefas e
 // pedidos de ajuda), para backup ou migracao.
-router.get("/exportar", requireRole("ADMIN", "GESTOR"), asyncHandler(async (req, res) => {
+router.get("/exportar", requirePermissao("EXPORTAR_DADOS"), asyncHandler(async (req, res) => {
   const [funcionarios, tarefas] = await Promise.all([
     prisma.funcionario.findMany({ orderBy: { nome: "asc" } }),
     prisma.tarefa.findMany({ include: tarefaInclude, orderBy: { criadoEm: "asc" } })
@@ -63,7 +64,7 @@ router.get("/exportar", requireRole("ADMIN", "GESTOR"), asyncHandler(async (req,
 
 // Importa funcionarios e tarefas, validando cada registro. Registros
 // invalidos sao ignorados e reportados em "erros".
-router.post("/importar", requireRole("ADMIN"), asyncHandler(async (req, res) => {
+router.post("/importar", requirePermissao("IMPORTAR_DADOS"), asyncHandler(async (req, res) => {
   const parsed = importSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: "Formato de arquivo invalido." });
@@ -129,7 +130,7 @@ router.post("/importar", requireRole("ADMIN"), asyncHandler(async (req, res) => 
 // Restaura os dados de demonstracao: remove tarefas e funcionarios atuais
 // e recria o conjunto inicial (apenas ADMIN). Usuarios de login nao sao
 // removidos, apenas perdem o vinculo com o funcionario excluido.
-router.post("/restaurar-demo", requireRole("ADMIN"), asyncHandler(async (req, res) => {
+router.post("/restaurar-demo", requirePermissao("RESTAURAR_DEMO"), asyncHandler(async (req, res) => {
   await prisma.tarefa.deleteMany();
   await prisma.funcionario.deleteMany();
 

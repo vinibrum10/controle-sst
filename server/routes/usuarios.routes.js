@@ -4,12 +4,14 @@ const { z } = require("zod");
 const prisma = require("../db");
 const asyncHandler = require("../utils/asyncHandler");
 const { validateBody } = require("../middleware/validate");
-const { requireAuth, requireRole } = require("../middleware/auth");
+const { requireAuth } = require("../middleware/auth");
+const { requirePermissao } = require("../utils/permissions");
 
 const router = express.Router();
 
-// Gestao de usuarios (alterar papel/ativar-inativar conta) e' restrita a ADMIN.
-router.use(requireAuth, requireRole("ADMIN"));
+// Gestao de usuarios (alterar papel/ativar-inativar conta) e' controlada
+// pela matriz de permissoes (chave GERENCIAR_USUARIOS).
+router.use(requireAuth, requirePermissao("GERENCIAR_USUARIOS"));
 
 const PAPEIS = ["ADMIN", "GESTOR", "TST", "VISUALIZADOR", "COLABORADOR"];
 

@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Panel } from "../../components/ui/Panel";
-import { useAuth } from "../../hooks/useAuth";
 import { useCrud } from "../../hooks/useCrud";
+import { usePermissao } from "../../hooks/usePermissao";
 import { tabButtonClasses } from "../../lib/formClasses";
-import { podeGerenciarEquipesRotaSegura } from "../../lib/permissions";
 import type { RsColaborador, RsEquipe } from "../../types/rotaSegura2026";
 import { ColaboradoresTab } from "./equipes/ColaboradoresTab";
 import { EquipesTab } from "./equipes/EquipesTab";
@@ -11,8 +10,7 @@ import { EquipesTab } from "./equipes/EquipesTab";
 type Aba = "equipes" | "colaboradores";
 
 export function RotaSegura2026EquipesPage() {
-  const { usuario } = useAuth();
-  const podeEditar = podeGerenciarEquipesRotaSegura(usuario?.papel);
+  const podeEditar = usePermissao("GERENCIAR_EQUIPES_ROTA_SEGURA");
   const [aba, setAba] = useState<Aba>("equipes");
 
   const {

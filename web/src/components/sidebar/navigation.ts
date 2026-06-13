@@ -1,10 +1,10 @@
-import type { Papel } from "../../types";
+import type { ChavePermissao } from "../../lib/permissions";
 
 export interface NavItem {
   path: string;
   label: string;
   title: string;
-  roles?: Papel[];
+  permissao?: ChavePermissao;
 }
 
 export interface NavSubGroup {
@@ -84,7 +84,7 @@ export const NAVIGATION_GROUPS: NavGroup[] = [
             path: "/programas/rota-segura-2026/configuracao",
             label: "Configuração",
             title: "Rota Segura 2026 - Configuração da edição",
-            roles: ["ADMIN"],
+            permissao: "CONFIGURAR_ROTA_SEGURA",
           },
           { path: "/programas/rota-segura-2026/equipes", label: "Equipes", title: "Rota Segura 2026 - Equipes e colaboradores" },
           { path: "/programas/rota-segura-2026/avaliacoes", label: "Avaliações", title: "Rota Segura 2026 - Avaliação de APR" },
@@ -102,7 +102,7 @@ export const NAVIGATION_GROUPS: NavGroup[] = [
     items: [
       { path: "/relatorios", label: "Relatórios", title: "Relatórios" },
       { path: "/dados", label: "Dados do programa", title: "Dados do programa" },
-      { path: "/usuarios", label: "Usuários", title: "Usuários", roles: ["ADMIN"] },
+      { path: "/usuarios", label: "Usuários", title: "Usuários", permissao: "GERENCIAR_USUARIOS" },
       { path: "/configuracoes", label: "Configurações", title: "Configurações" },
     ],
   },

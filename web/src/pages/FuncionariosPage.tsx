@@ -6,8 +6,7 @@ import { Avatar } from "../components/ui/Avatar";
 import { PersonCard } from "../components/funcionarios/PersonCard";
 import { useFuncionarios } from "../hooks/useFuncionarios";
 import { useToast } from "../hooks/useToast";
-import { useAuth } from "../hooks/useAuth";
-import { podeExcluirFuncionario, podeGerenciarEquipe } from "../lib/permissions";
+import { usePermissao } from "../hooks/usePermissao";
 import { ApiError } from "../lib/api";
 import { listarTarefas } from "../lib/tarefas";
 import { currentWeekValue } from "../lib/format";
@@ -27,9 +26,8 @@ function defaultForm() {
 export function FuncionariosPage() {
   const { funcionarios, carregando, criar, alternarAtivo, remover } = useFuncionarios();
   const { showToast } = useToast();
-  const { usuario } = useAuth();
-  const canManage = podeGerenciarEquipe(usuario?.papel);
-  const canDelete = podeExcluirFuncionario(usuario?.papel);
+  const canManage = usePermissao("GERENCIAR_EQUIPE");
+  const canDelete = usePermissao("EXCLUIR_FUNCIONARIO");
 
   const [tarefas, setTarefas] = useState<Tarefa[]>([]);
   const [form, setForm] = useState(defaultForm);

@@ -5,7 +5,8 @@ const prisma = require("../db");
 const createCrudRouter = require("../utils/crudRouter");
 const asyncHandler = require("../utils/asyncHandler");
 const { validateBody } = require("../middleware/validate");
-const { requireAuth, requireRole } = require("../middleware/auth");
+const { requireAuth } = require("../middleware/auth");
+const { requirePermissao } = require("../utils/permissions");
 const { dataField, dataOpcional } = require("../utils/zodHelpers");
 const { MES_REFERENCIA_REGEX, calcularPontuacaoApr, calcularPontosPenalidade } = require("../utils/rotaSegura2026");
 
@@ -19,9 +20,11 @@ const TIPOS_CONDICAO = ["REQUER_CRITERIO_APROVADO", "BLOQUEADO_PARA_TIPO_APR", "
 // edicao (?edicaoId=...). Leitura liberada para qualquer usuario
 // autenticado; escrita restrita ao(s) papel(eis) informados.
 // ---------------------------------------------------------------------
-function createEdicaoScopedRouter({ model, createSchema, updateSchema, orderBy, writeRoles = ["ADMIN"] }) {
+function createEdicaoScopedRouter({ model, createSchema, updateSchema, orderBy, writePermissao = "CONFIGURAR_ROTA_SEGURA" }) {
   const router = express.Router();
   router.use(requireAuth);
+
+  const requireWriteAccess = requirePermissao(writePermissao);
 
   router.get("/", asyncHandler(async (req, res) => {
     const where = req.query.edicaoId ? { edicaoId: String(req.query.edicaoId) } : {};
@@ -35,7 +38,7 @@ function createEdicaoScopedRouter({ model, createSchema, updateSchema, orderBy, 
     res.json(item);
   }));
 
-  router.post("/", requireRole(...writeRoles), validateBody(createSchema), asyncHandler(async (req, res) => {
+  router.post("/", requireWriteAccess, validateBody(createSchema), asyncHandler(async (req, res) => {
     const item = await model.create({ data: req.body });
     res.status(201).json(item);
   }));
@@ -47,10 +50,10 @@ function createEdicaoScopedRouter({ model, createSchema, updateSchema, orderBy, 
     res.json(item);
   });
 
-  router.put("/:id", requireRole(...writeRoles), validateBody(updateSchema), atualizar);
-  router.patch("/:id", requireRole(...writeRoles), validateBody(updateSchema), atualizar);
+  router.put("/:id", requireWriteAccess, validateBody(updateSchema), atualizar);
+  router.patch("/:id", requireWriteAccess, validateBody(updateSchema), atualizar);
 
-  router.delete("/:id", requireRole(...writeRoles), asyncHandler(async (req, res) => {
+  router.delete("/:id", requireWriteAccess, asyncHandler(async (req, res) => {
     const existing = await model.findUnique({ where: { id: req.params.id } });
     if (!existing) return res.status(404).json({ error: "Registro nao encontrado." });
     await model.delete({ where: { id: req.params.id } });
@@ -86,7 +89,7 @@ const edicoes = createCrudRouter({
   updateSchema: edicaoCreate.partial(),
   include: edicaoInclude,
   orderBy: { ano: "desc" },
-  writeRoles: ["ADMIN"]
+  writePermissao: "CONFIGURAR_ROTA_SEGURA"
 });
 
 const clonarEdicaoSchema = z.object({
@@ -97,7 +100,7 @@ const clonarEdicaoSchema = z.object({
 // Clona proposta, criterios, regras condicionais e premiacao de uma edicao
 // para uma nova edicao. NAO copia avaliacoes, penalidades, pontuacao
 // lancada nem historico do comite.
-edicoes.post("/:id/clonar", requireRole("ADMIN"), validateBody(clonarEdicaoSchema), asyncHandler(async (req, res) => {
+edicoes.post("/:id/clonar", requirePermissao("CONFIGURAR_ROTA_SEGURA"), validateBody(clonarEdicaoSchema), asyncHandler(async (req, res) => {
   const origem = await prisma.rsEdicaoPrograma.findUnique({
     where: { id: req.params.id },
     include: { proposta: true, criterios: true, regras: true, premiacoes: true }
@@ -193,8 +196,8 @@ const salvarProposta = asyncHandler(async (req, res) => {
   res.json(proposta);
 });
 
-propostas.put("/:edicaoId", requireRole("ADMIN"), validateBody(propostaUpsert), salvarProposta);
-propostas.patch("/:edicaoId", requireRole("ADMIN"), validateBody(propostaUpsert), salvarProposta);
+propostas.put("/:edicaoId", requirePermissao("CONFIGURAR_ROTA_SEGURA"), validateBody(propostaUpsert), salvarProposta);
+propostas.patch("/:edicaoId", requirePermissao("CONFIGURAR_ROTA_SEGURA"), validateBody(propostaUpsert), salvarProposta);
 
 // ---------------------------------------------------------------------
 // Criterios de pontuacao
@@ -220,7 +223,7 @@ const criterios = createEdicaoScopedRouter({
   createSchema: criterioCreate,
   updateSchema: criterioCreate.partial(),
   orderBy: [{ ordem: "asc" }, { criadoEm: "asc" }],
-  writeRoles: ["ADMIN"]
+  writePermissao: "CONFIGURAR_ROTA_SEGURA"
 });
 
 // ---------------------------------------------------------------------
@@ -241,7 +244,7 @@ const regras = createEdicaoScopedRouter({
   createSchema: regraCreate,
   updateSchema: regraCreate.partial(),
   orderBy: { criadoEm: "asc" },
-  writeRoles: ["ADMIN"]
+  writePermissao: "CONFIGURAR_ROTA_SEGURA"
 });
 
 // ---------------------------------------------------------------------
@@ -262,7 +265,7 @@ const premiacoes = createEdicaoScopedRouter({
   createSchema: premiacaoCreate,
   updateSchema: premiacaoCreate.partial(),
   orderBy: [{ area: "asc" }, { posicaoInicial: "asc" }],
-  writeRoles: ["ADMIN"]
+  writePermissao: "CONFIGURAR_ROTA_SEGURA"
 });
 
 // ---------------------------------------------------------------------
@@ -283,7 +286,7 @@ const equipes = createCrudRouter({
   updateSchema: equipeCreate.partial(),
   include: { colaboradores: { select: { id: true, nome: true, ativo: true } } },
   orderBy: { nome: "asc" },
-  writeRoles: ["ADMIN", "GESTOR", "TST"]
+  writePermissao: "GERENCIAR_EQUIPES_ROTA_SEGURA"
 });
 
 const colaboradorCreate = z.object({
@@ -300,7 +303,7 @@ const colaboradores = createCrudRouter({
   updateSchema: colaboradorCreate.partial(),
   include: { equipe: { select: { id: true, nome: true, area: true } } },
   orderBy: { nome: "asc" },
-  writeRoles: ["ADMIN", "GESTOR", "TST"]
+  writePermissao: "GERENCIAR_EQUIPES_ROTA_SEGURA"
 });
 
 // ---------------------------------------------------------------------
@@ -366,7 +369,7 @@ avaliacoes.get("/:id", asyncHandler(async (req, res) => {
   res.json(item);
 }));
 
-avaliacoes.post("/", requireRole("ADMIN", "TST"), validateBody(aprAvaliacaoBase), asyncHandler(async (req, res) => {
+avaliacoes.post("/", requirePermissao("LANCAR_AVALIACAO_ROTA_SEGURA"), validateBody(aprAvaliacaoBase), asyncHandler(async (req, res) => {
   const edicao = await prisma.rsEdicaoPrograma.findUnique({ where: { id: req.body.edicaoId } });
   if (!edicao) return res.status(400).json({ error: "Edicao do programa nao encontrada." });
 
@@ -408,10 +411,10 @@ const atualizarAvaliacao = asyncHandler(async (req, res) => {
   res.json(item);
 });
 
-avaliacoes.put("/:id", requireRole("ADMIN", "TST"), validateBody(aprAvaliacaoUpdate), atualizarAvaliacao);
-avaliacoes.patch("/:id", requireRole("ADMIN", "TST"), validateBody(aprAvaliacaoUpdate), atualizarAvaliacao);
+avaliacoes.put("/:id", requirePermissao("LANCAR_AVALIACAO_ROTA_SEGURA"), validateBody(aprAvaliacaoUpdate), atualizarAvaliacao);
+avaliacoes.patch("/:id", requirePermissao("LANCAR_AVALIACAO_ROTA_SEGURA"), validateBody(aprAvaliacaoUpdate), atualizarAvaliacao);
 
-avaliacoes.delete("/:id", requireRole("ADMIN"), asyncHandler(async (req, res) => {
+avaliacoes.delete("/:id", requirePermissao("EXCLUIR_AVALIACAO_ROTA_SEGURA"), asyncHandler(async (req, res) => {
   const existing = await prisma.rsAprAvaliacao.findUnique({ where: { id: req.params.id } });
   if (!existing) return res.status(404).json({ error: "Avaliacao nao encontrada." });
   await prisma.rsAprAvaliacao.delete({ where: { id: req.params.id } });
@@ -445,7 +448,7 @@ const decisaoComiteSchema = z.object({
   observacoes: z.string().trim().nullable().optional()
 });
 
-comite.post("/:avaliacaoId/decisao", requireRole("ADMIN", "GESTOR"), validateBody(decisaoComiteSchema), asyncHandler(async (req, res) => {
+comite.post("/:avaliacaoId/decisao", requirePermissao("DECIDIR_COMITE_ROTA_SEGURA"), validateBody(decisaoComiteSchema), asyncHandler(async (req, res) => {
   const avaliacao = await prisma.rsAprAvaliacao.findUnique({ where: { id: req.params.avaliacaoId } });
   if (!avaliacao) return res.status(404).json({ error: "Avaliacao nao encontrada." });
 
@@ -522,7 +525,7 @@ penalidades.get("/:id", asyncHandler(async (req, res) => {
   res.json(item);
 }));
 
-penalidades.post("/", requireRole("ADMIN", "TST"), validateBody(penalidadeBase), asyncHandler(async (req, res) => {
+penalidades.post("/", requirePermissao("LANCAR_AVALIACAO_ROTA_SEGURA"), validateBody(penalidadeBase), asyncHandler(async (req, res) => {
   const criterios = await prisma.rsCriterio.findMany({ where: { edicaoId: req.body.edicaoId } });
   const pontos = calcularPontosPenalidade(req.body.tipo, criterios);
 
@@ -545,10 +548,10 @@ const atualizarPenalidade = asyncHandler(async (req, res) => {
   res.json(item);
 });
 
-penalidades.put("/:id", requireRole("ADMIN", "TST"), validateBody(penalidadeUpdate), atualizarPenalidade);
-penalidades.patch("/:id", requireRole("ADMIN", "TST"), validateBody(penalidadeUpdate), atualizarPenalidade);
+penalidades.put("/:id", requirePermissao("LANCAR_AVALIACAO_ROTA_SEGURA"), validateBody(penalidadeUpdate), atualizarPenalidade);
+penalidades.patch("/:id", requirePermissao("LANCAR_AVALIACAO_ROTA_SEGURA"), validateBody(penalidadeUpdate), atualizarPenalidade);
 
-penalidades.delete("/:id", requireRole("ADMIN"), asyncHandler(async (req, res) => {
+penalidades.delete("/:id", requirePermissao("EXCLUIR_AVALIACAO_ROTA_SEGURA"), asyncHandler(async (req, res) => {
   const existing = await prisma.rsPenalidade.findUnique({ where: { id: req.params.id } });
   if (!existing) return res.status(404).json({ error: "Penalidade nao encontrada." });
   await prisma.rsPenalidade.delete({ where: { id: req.params.id } });

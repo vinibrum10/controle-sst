@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Panel } from "../../components/ui/Panel";
 import { EdicaoSelector } from "../../components/rotaSegura2026/EdicaoSelector";
-import { useAuth } from "../../hooks/useAuth";
 import { useEdicoesRotaSegura } from "../../hooks/useEdicoesRotaSegura";
 import { useQueryCrud } from "../../hooks/useQueryCrud";
+import { usePermissao } from "../../hooks/usePermissao";
 import { tabButtonClasses } from "../../lib/formClasses";
-import { podeConfigurarRotaSegura } from "../../lib/permissions";
 import type { RsCriterio } from "../../types/rotaSegura2026";
 import { CriteriosTab } from "./configuracao/CriteriosTab";
 import { EdicoesTab } from "./configuracao/EdicoesTab";
@@ -24,8 +23,7 @@ const ABAS: { id: Aba; label: string }[] = [
 ];
 
 export function RotaSegura2026ConfiguracaoPage() {
-  const { usuario } = useAuth();
-  const podeEditar = podeConfigurarRotaSegura(usuario?.papel);
+  const podeEditar = usePermissao("CONFIGURAR_ROTA_SEGURA");
 
   const { edicoes, carregando, erro, edicaoAtiva, criar, atualizar, remover } = useEdicoesRotaSegura();
   const [edicaoIdSelecionada, setEdicaoIdSelecionada] = useState("");

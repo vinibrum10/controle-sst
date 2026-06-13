@@ -7,8 +7,7 @@ import { SummaryCard } from "../components/ui/SummaryCard";
 import { useCrud } from "../hooks/useCrud";
 import { useFuncionarios } from "../hooks/useFuncionarios";
 import { useToast } from "../hooks/useToast";
-import { useAuth } from "../hooks/useAuth";
-import { podeGerenciarProgramasSST } from "../lib/permissions";
+import { usePermissao } from "../hooks/usePermissao";
 import { ApiError } from "../lib/api";
 import { programaStatusLabel } from "../lib/enums";
 import { formatDate, startOfToday } from "../lib/format";
@@ -41,8 +40,7 @@ export function TreinamentosPage() {
   const { items: treinamentos, carregando, erro, criar, atualizar, remover } = useCrud<Treinamento>("/treinamentos");
   const { funcionarios } = useFuncionarios();
   const { showToast } = useToast();
-  const { usuario } = useAuth();
-  const canManage = podeGerenciarProgramasSST(usuario?.papel);
+  const canManage = usePermissao("GERENCIAR_PROGRAMAS_SST");
 
   const [form, setForm] = useState(defaultForm);
   const [submitting, setSubmitting] = useState(false);
