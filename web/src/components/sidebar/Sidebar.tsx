@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, type Location } from "react-router-dom";
 import { Icon } from "../ui/IconSprite";
 import { useAuth } from "../../hooks/useAuth";
-import { NAVIGATION_GROUPS } from "./navigation";
+import { NAVIGATION_GROUPS, isNavSubGroup, type NavEntry, type NavItem } from "./navigation";
+import type { Papel } from "../../types";
 
 const NAV_GROUP_STORAGE_KEY = "controle-sst-nav-groups";
 
@@ -13,6 +14,27 @@ function readNavGroupState(): Record<string, boolean> {
     return {};
   }
 }
+
+function containsPath(entries: NavEntry[], pathname: string): boolean {
+  return entries.some((entry) => (isNavSubGroup(entry) ? containsPath(entry.items, pathname) : pathname.startsWith(entry.path)));
+}
+
+function filterEntries(entries: NavEntry[], papel?: Papel): NavEntry[] {
+  return entries
+    .map((entry) => {
+      if (isNavSubGroup(entry)) {
+        const items = filterEntries(entry.items, papel) as NavItem[];
+        return items.length > 0 ? { ...entry, items } : null;
+      }
+      return !entry.roles || (papel && entry.roles.includes(papel)) ? entry : null;
+    })
+    .filter((entry): entry is NavEntry => entry !== null);
+}
+
+const linkClass = ({ isActive }: { isActive: boolean }) =>
+  `flex min-h-[38px] w-full items-center justify-start rounded-[8px] px-2.5 text-[0.88rem] font-extrabold transition-colors ${
+    isActive ? "bg-[#1f3a52] text-white shadow-[inset_3px_0_0_#6fa0c8]" : "text-[#c9d4dc] hover:bg-[#1f3a52] hover:text-white"
+  }`;
 
 interface SidebarProps {
   className?: string;
@@ -26,18 +48,19 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
 
   const visibleGroups = NAVIGATION_GROUPS.map((group) => ({
     ...group,
-    items: group.items.filter((item) => !item.roles || (usuario && item.roles.includes(usuario.papel))),
+    items: filterEntries(group.items, usuario?.papel),
   })).filter((group) => group.items.length > 0);
 
   useEffect(() => {
     localStorage.setItem(NAV_GROUP_STORAGE_KEY, JSON.stringify(openGroups));
   }, [openGroups]);
 
-  function toggleGroup(groupId: string, defaultOpen: boolean) {
-    setOpenGroups((current) => {
-      const isOpen = current[groupId] ?? defaultOpen;
-      return { ...current, [groupId]: !isOpen };
-    });
+  function isGroupOpen(groupId: string, defaultOpen: boolean, isActiveGroup: boolean) {
+    return openGroups[groupId] ?? (defaultOpen || isActiveGroup);
+  }
+
+  function toggleGroup(groupId: string, defaultOpen: boolean, isActiveGroup: boolean) {
+    setOpenGroups((current) => ({ ...current, [groupId]: !isGroupOpen(groupId, defaultOpen, isActiveGroup) }));
   }
 
   return (
@@ -66,9 +89,9 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
 
       <nav className="grid content-start gap-2.5 overflow-y-auto pr-0.5" aria-label="Áreas do programa">
         {visibleGroups.map((group) => {
-          const isActiveGroup = group.items.some((item) => location.pathname.startsWith(item.path));
+          const isActiveGroup = containsPath(group.items, location.pathname);
 
-          if (group.items.length === 1) {
+          if (group.items.length === 1 && !isNavSubGroup(group.items[0])) {
             const item = group.items[0];
             return (
               <NavLink
@@ -89,7 +112,7 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
             );
           }
 
-          const isOpen = (openGroups[group.id] ?? group.defaultOpen) || isActiveGroup;
+          const isOpen = isGroupOpen(group.id, group.defaultOpen, isActiveGroup);
 
           return (
             <div key={group.id} className="grid gap-1.5">
@@ -99,7 +122,7 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
                   isOpen ? "border-[#6fa0c8]/18 bg-sidebar-strong dark:bg-[#17283c]" : "hover:border-[#6fa0c8]/18 hover:bg-sidebar-strong dark:hover:bg-[#17283c]"
                 }`}
                 aria-expanded={isOpen}
-                onClick={() => toggleGroup(group.id, group.defaultOpen)}
+                onClick={() => toggleGroup(group.id, group.defaultOpen, isActiveGroup)}
               >
                 <span className="inline-flex min-w-0 items-center gap-2">
                   <Icon id={group.icon} />
@@ -110,22 +133,26 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
 
               {isOpen && (
                 <div className="ml-[18px] grid gap-1.5 border-l border-[#d6e0e8]/14 pl-2.5">
-                  {group.items.map((item) => (
-                    <NavLink
-                      key={item.path}
-                      to={item.path}
-                      onClick={onNavigate}
-                      className={({ isActive }) =>
-                        `flex min-h-[38px] w-full items-center justify-start rounded-[8px] px-2.5 text-[0.88rem] font-extrabold transition-colors ${
-                          isActive
-                            ? "bg-[#1f3a52] text-white shadow-[inset_3px_0_0_#6fa0c8]"
-                            : "text-[#c9d4dc] hover:bg-[#1f3a52] hover:text-white"
-                        }`
-                      }
-                    >
-                      {item.label}
-                    </NavLink>
-                  ))}
+                  {group.items.map((entry) => {
+                    if (isNavSubGroup(entry)) {
+                      return (
+                        <NavSubGroupNav
+                          key={entry.id}
+                          subGroup={entry}
+                          location={location}
+                          isGroupOpen={isGroupOpen}
+                          toggleGroup={toggleGroup}
+                          onNavigate={onNavigate}
+                        />
+                      );
+                    }
+
+                    return (
+                      <NavLink key={entry.path} to={entry.path} onClick={onNavigate} className={linkClass}>
+                        {entry.label}
+                      </NavLink>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -133,5 +160,44 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
         })}
       </nav>
     </aside>
+  );
+}
+
+interface NavSubGroupNavProps {
+  subGroup: Extract<NavEntry, { items: NavItem[] }>;
+  location: Location;
+  isGroupOpen: (groupId: string, defaultOpen: boolean, isActiveGroup: boolean) => boolean;
+  toggleGroup: (groupId: string, defaultOpen: boolean, isActiveGroup: boolean) => void;
+  onNavigate?: () => void;
+}
+
+function NavSubGroupNav({ subGroup, location, isGroupOpen, toggleGroup, onNavigate }: NavSubGroupNavProps) {
+  const isActiveSub = containsPath(subGroup.items, location.pathname);
+  const isOpen = isGroupOpen(subGroup.id, subGroup.defaultOpen, isActiveSub);
+
+  return (
+    <div className="grid gap-1.5">
+      <button
+        type="button"
+        className={`flex min-h-[38px] w-full items-center justify-between rounded-[8px] px-2.5 text-[0.88rem] font-extrabold transition-colors ${
+          isOpen ? "bg-[#1f3a52] text-white" : "text-[#c9d4dc] hover:bg-[#1f3a52] hover:text-white"
+        }`}
+        aria-expanded={isOpen}
+        onClick={() => toggleGroup(subGroup.id, subGroup.defaultOpen, isActiveSub)}
+      >
+        <span>{subGroup.label}</span>
+        <Icon id="icon-chevron" className={`h-3.5 w-3.5 text-[#91a39e] transition-transform ${isOpen ? "rotate-180" : ""}`} />
+      </button>
+
+      {isOpen && (
+        <div className="ml-2.5 grid gap-1.5 border-l border-[#d6e0e8]/14 pl-2.5">
+          {subGroup.items.map((item) => (
+            <NavLink key={item.path} to={item.path} onClick={onNavigate} className={linkClass}>
+              {item.label}
+            </NavLink>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
