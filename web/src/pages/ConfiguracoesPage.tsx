@@ -3,12 +3,14 @@ import { Panel } from "../components/ui/Panel";
 import { Icon } from "../components/ui/IconSprite";
 import { AparenciaTab } from "../components/configuracoes/AparenciaTab";
 import { MinhaContaTab } from "../components/configuracoes/MinhaContaTab";
+import { PermissoesTab } from "../components/configuracoes/PermissoesTab";
 
-type TabId = "aparencia" | "conta";
+type TabId = "aparencia" | "conta" | "permissoes";
 
 const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: "aparencia", label: "Aparência", icon: "icon-grid" },
   { id: "conta", label: "Minha Conta", icon: "icon-team" },
+  { id: "permissoes", label: "Permissões e Perfis", icon: "icon-shield" },
 ];
 
 export function ConfiguracoesPage() {
@@ -18,7 +20,7 @@ export function ConfiguracoesPage() {
     <Panel
       className="mx-auto max-w-[920px]"
       title="Configurações"
-      description="Preferências de aparência e informações da conta conectada."
+      description="Preferências de aparência, informações da conta e perfis de acesso do sistema."
     >
       <div className="mb-4 flex flex-wrap gap-2 border-b border-line pb-3.5">
         {TABS.map((item) => (
@@ -40,6 +42,7 @@ export function ConfiguracoesPage() {
 
       {tab === "aparencia" && <AparenciaTab />}
       {tab === "conta" && <MinhaContaTab />}
+      {tab === "permissoes" && <PermissoesTab />}
     </Panel>
   );
 }
