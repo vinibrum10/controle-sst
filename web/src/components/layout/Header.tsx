@@ -42,6 +42,8 @@ export function Header({ onToggleSidebar }: HeaderProps) {
     return best?.title ?? "SGEPI";
   }, [location.pathname]);
 
+  const mostrarCriarTarefa = !location.pathname.startsWith("/programas/rota-segura-2026");
+
   return (
     <header className="mb-6 flex flex-col gap-[14px] sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-6">
       <div className="flex min-w-0 items-center gap-3">
@@ -93,11 +95,13 @@ export function Header({ onToggleSidebar }: HeaderProps) {
           <Icon id="icon-logout" />
         </button>
 
-        <Link to="/tarefas/criar" className={buttonClasses({ className: "min-w-0" })}>
-          <Icon id="icon-plus" />
-          <span className="hidden sm:inline">Criar tarefa</span>
-          <span className="sm:hidden">Criar</span>
-        </Link>
+        {mostrarCriarTarefa && (
+          <Link to="/tarefas/criar" className={buttonClasses({ className: "min-w-0" })}>
+            <Icon id="icon-plus" />
+            <span className="hidden sm:inline">Criar tarefa</span>
+            <span className="sm:hidden">Criar</span>
+          </Link>
+        )}
       </div>
     </header>
   );
