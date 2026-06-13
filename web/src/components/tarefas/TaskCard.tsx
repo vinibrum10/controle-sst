@@ -9,7 +9,7 @@ const badgeBase = "inline-flex min-h-[24px] items-center whitespace-nowrap round
 const badgeDefault = `${badgeBase} bg-surface-strong text-muted`;
 
 const iconButtonBase =
-  "inline-flex min-h-[42px] min-w-0 items-center justify-start gap-[9px] rounded-[8px] border px-2.5 text-[0.8rem] font-black transition-transform duration-150 hover:-translate-y-px hover:shadow-[0_10px_20px_rgba(20,33,31,0.1)] active:translate-y-0 active:shadow-none disabled:cursor-not-allowed disabled:opacity-[0.58]";
+  "inline-flex min-h-[42px] min-w-0 items-center justify-center gap-[9px] rounded-[8px] border px-2.5 text-[0.8rem] font-black transition-transform duration-150 hover:-translate-y-px hover:shadow-[0_10px_20px_rgba(20,33,31,0.1)] active:translate-y-0 active:shadow-none disabled:cursor-not-allowed disabled:opacity-[0.58]";
 const iconButtonNeutral = "border-line bg-neutral-button text-text";
 const iconButtonHelp = "border-blue/25 bg-[#eef6ff] text-blue";
 const iconButtonDanger = "border-red/25 bg-red-soft text-red";
@@ -50,9 +50,9 @@ export function TaskCard({
       onDragStart={(event) => onDragStart?.(event, tarefa)}
       onDragEnd={onDragEnd}
     >
-      <div>
+      <div className="min-w-0">
         <div className="mb-2 flex flex-wrap items-center gap-2">
-          <h3 className="m-0 min-w-[180px] text-base font-extrabold">{tarefa.titulo}</h3>
+          <h3 className="m-0 min-w-0 break-words text-base font-extrabold">{tarefa.titulo}</h3>
           {done ? (
             <span className={`${badgeBase} bg-[#e2f4e6] text-green`}>Concluída</span>
           ) : late ? (
@@ -86,10 +86,10 @@ export function TaskCard({
           <span className={badgeDefault}>{tarefa.horasEstimadas}h</span>
           {tarefa.apoio && <span className={badgeDefault}>Apoio: {tarefa.apoio.nome}</span>}
         </div>
-        {tarefa.descricao && <p className="m-0 text-[0.9rem] text-muted">{tarefa.descricao}</p>}
+        {tarefa.descricao && <p className="m-0 min-w-0 break-words text-[0.9rem] text-muted">{tarefa.descricao}</p>}
       </div>
 
-      <div className="flex flex-wrap content-start items-start justify-start gap-2">
+      <div className="grid grid-cols-2 gap-2 border-t border-line pt-3 sm:flex sm:flex-wrap sm:justify-end sm:border-t-0 sm:pt-0">
         <button
           type="button"
           title="Alternar andamento"

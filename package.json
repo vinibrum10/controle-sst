@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "nodemon server/index.js",
     "start": "node server/index.js",
-    "build": "npm --prefix web install && npm --prefix web run build",
+    "build": "npm --prefix web install --include=dev && npm --prefix web run build",
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "migrate:dev": "prisma migrate dev",
