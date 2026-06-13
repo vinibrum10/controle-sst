@@ -15,15 +15,22 @@ export interface NavGroup {
   items: NavItem[];
 }
 
-export const DEFAULT_PATH = "/dashboard";
+export const DEFAULT_PATH = "/inicio";
 
 export const NAVIGATION_GROUPS: NavGroup[] = [
+  {
+    id: "home",
+    label: "Início",
+    icon: "icon-home",
+    defaultOpen: true,
+    items: [{ path: "/inicio", label: "Início", title: "Início" }],
+  },
   {
     id: "dashboard",
     label: "Dashboard",
     icon: "icon-dashboard",
     defaultOpen: true,
-    items: [{ path: "/dashboard", label: "Visão geral", title: "Plano semanal da equipe de SST" }],
+    items: [{ path: "/dashboard", label: "Visão geral", title: "Dashboard" }],
   },
   {
     id: "tasks",
@@ -54,25 +61,17 @@ export const NAVIGATION_GROUPS: NavGroup[] = [
       { path: "/programas/rota-segura", label: "Rota Segura", title: "Rota Segura" },
       { path: "/treinamentos", label: "Treinamentos", title: "Treinamentos" },
       { path: "/inspecoes", label: "Inspeções e Auditorias", title: "Inspeções e auditorias" },
-    ],
-  },
-  {
-    id: "rota-segura-2026",
-    label: "Rota Segura 2026",
-    icon: "icon-check",
-    defaultOpen: false,
-    items: [
-      { path: "/programas/rota-segura-2026", label: "Dashboard", title: "Rota Segura 2026 - Dashboard" },
+      { path: "/programas/rota-segura-2026", label: "Rota Segura 2026 - Dashboard", title: "Rota Segura 2026 - Dashboard" },
       {
         path: "/programas/rota-segura-2026/configuracao",
-        label: "Configuração da edição",
+        label: "Rota Segura 2026 - Configuração",
         title: "Rota Segura 2026 - Configuração da edição",
         roles: ["ADMIN"],
       },
-      { path: "/programas/rota-segura-2026/equipes", label: "Equipes e colaboradores", title: "Rota Segura 2026 - Equipes e colaboradores" },
-      { path: "/programas/rota-segura-2026/avaliacoes", label: "Avaliação de APR", title: "Rota Segura 2026 - Avaliação de APR" },
-      { path: "/programas/rota-segura-2026/penalidades", label: "Penalidades", title: "Rota Segura 2026 - Penalidades" },
-      { path: "/programas/rota-segura-2026/ranking", label: "Ranking", title: "Rota Segura 2026 - Ranking" },
+      { path: "/programas/rota-segura-2026/equipes", label: "Rota Segura 2026 - Equipes", title: "Rota Segura 2026 - Equipes e colaboradores" },
+      { path: "/programas/rota-segura-2026/avaliacoes", label: "Rota Segura 2026 - Avaliações", title: "Rota Segura 2026 - Avaliação de APR" },
+      { path: "/programas/rota-segura-2026/penalidades", label: "Rota Segura 2026 - Penalidades", title: "Rota Segura 2026 - Penalidades" },
+      { path: "/programas/rota-segura-2026/ranking", label: "Rota Segura 2026 - Ranking", title: "Rota Segura 2026 - Ranking" },
     ],
   },
   {

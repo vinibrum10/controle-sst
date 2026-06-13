@@ -34,16 +34,20 @@ export function Header({ onToggleSidebar }: HeaderProps) {
   }, []);
 
   const pageTitle = useMemo(() => {
-    const match = NAV_ITEMS.find((item) => location.pathname.startsWith(item.path));
-    return match?.title ?? "SGEPI";
+    const matches = NAV_ITEMS.filter((item) => location.pathname.startsWith(item.path));
+    const best = matches.reduce<typeof matches[number] | null>(
+      (acc, item) => (!acc || item.path.length > acc.path.length ? item : acc),
+      null,
+    );
+    return best?.title ?? "SGEPI";
   }, [location.pathname]);
 
   return (
-    <header className="mb-[22px] flex flex-wrap items-end justify-between gap-[18px]">
+    <header className="mb-[22px] flex flex-col gap-[14px] sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-[18px]">
       <div className="flex min-w-0 items-center gap-3">
         <button
           type="button"
-          className={`${iconButtonClasses} min-w-[44px] bg-white dark:bg-surface`}
+          className={`${iconButtonClasses} min-w-[44px] shrink-0 bg-white dark:bg-surface`}
           aria-label="Abrir/ocultar menu lateral"
           title="Abrir/ocultar menu lateral"
           onClick={onToggleSidebar}
@@ -52,11 +56,11 @@ export function Header({ onToggleSidebar }: HeaderProps) {
         </button>
         <div className="min-w-0">
           <p className="m-0 mb-[5px] text-eyebrow text-teal">{today}</p>
-          <h1 className="m-0 truncate text-2xl font-extrabold tracking-tight">{pageTitle}</h1>
+          <h1 className="m-0 break-words text-xl font-extrabold leading-tight tracking-tight sm:text-2xl">{pageTitle}</h1>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-end justify-end gap-2.5">
+      <div className="flex flex-wrap items-center justify-end gap-2.5">
         <button
           type="button"
           className={iconButtonClasses}
@@ -68,10 +72,10 @@ export function Header({ onToggleSidebar }: HeaderProps) {
         </button>
 
         {usuario && (
-          <div className="flex min-h-[42px] items-center gap-2.5 rounded-[8px] border border-line bg-surface-strong px-2.5 text-[0.85rem]">
+          <div className="flex min-h-[42px] min-w-0 items-center gap-2.5 rounded-[8px] border border-line bg-surface-strong px-2.5 text-[0.85rem]">
             <Avatar nome={usuario.nome} size="small" />
             <div className="min-w-0 leading-tight">
-              <span className="block truncate font-extrabold text-text">{usuario.nome}</span>
+              <span className="block max-w-[140px] truncate font-extrabold text-text">{usuario.nome}</span>
               <span className="block truncate text-[0.74rem] text-muted">{PAPEL_LABELS[usuario.papel] || usuario.papel}</span>
             </div>
           </div>
@@ -89,9 +93,10 @@ export function Header({ onToggleSidebar }: HeaderProps) {
           <Icon id="icon-logout" />
         </button>
 
-        <Link to="/tarefas/criar" className={buttonClasses()}>
+        <Link to="/tarefas/criar" className={buttonClasses({ className: "min-w-0" })}>
           <Icon id="icon-plus" />
-          Criar tarefa
+          <span className="hidden sm:inline">Criar tarefa</span>
+          <span className="sm:hidden">Criar</span>
         </Link>
       </div>
     </header>

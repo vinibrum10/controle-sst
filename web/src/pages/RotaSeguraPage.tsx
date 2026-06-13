@@ -11,7 +11,8 @@ import { useAuth } from "../hooks/useAuth";
 import { podeGerenciarProgramasSST } from "../lib/permissions";
 import { ApiError } from "../lib/api";
 import { achadoTipoLabel, frequenciaRotaLabel, gravidadeLabel, programaStatusLabel } from "../lib/enums";
-import { formatDate, startOfToday, toDateInputValue } from "../lib/format";
+import { formatDate, toDateInputValue } from "../lib/format";
+import { FREQUENCIA_DIAS, verificacaoAtrasada } from "../lib/rotaSegura";
 import type {
   Achado,
   FrequenciaRota,
@@ -39,13 +40,6 @@ const STATUS_ACHADO_OPTIONS: StatusAchado[] = ["ABERTO", "EM_TRATATIVA", "CONCLU
 const TIPO_ACHADO_OPTIONS: TipoAchado[] = ["NAO_CONFORMIDADE", "OBSERVACAO", "OPORTUNIDADE_MELHORIA"];
 const GRAVIDADE_OPTIONS: GravidadeAchado[] = ["BAIXA", "MEDIA", "ALTA", "CRITICA"];
 
-const FREQUENCIA_DIAS: Record<FrequenciaRota, number> = {
-  DIARIA: 1,
-  SEMANAL: 7,
-  QUINZENAL: 15,
-  MENSAL: 30,
-};
-
 function gravidadeVariant(gravidade: GravidadeAchado): BadgeVariant {
   if (gravidade === "CRITICA" || gravidade === "ALTA") return "danger";
   if (gravidade === "MEDIA") return "warning";
@@ -58,14 +52,6 @@ function extractErrorMessage(err: unknown, fallback: string): string {
     return primeiro.mensagem || err.message;
   }
   return err instanceof Error ? err.message : fallback;
-}
-
-function verificacaoAtrasada(rota: RotaSegura): boolean {
-  if (rota.status !== "ATIVA") return false;
-  if (!rota.ultimaVerificacao) return true;
-  const proxima = new Date(rota.ultimaVerificacao);
-  proxima.setDate(proxima.getDate() + FREQUENCIA_DIAS[rota.frequencia]);
-  return proxima < startOfToday();
 }
 
 function proximaVerificacao(rota: RotaSegura): string {
