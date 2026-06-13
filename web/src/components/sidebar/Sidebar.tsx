@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation, type Location } from "react-router-dom";
 import { Icon } from "../ui/IconSprite";
-import { useAuth } from "../../hooks/useAuth";
+import { usePermissoes } from "../../hooks/usePermissao";
 import { NAVIGATION_GROUPS, isNavSubGroup, type NavEntry, type NavItem } from "./navigation";
-import type { Papel } from "../../types";
+import type { ChavePermissao } from "../../lib/permissions";
 
 const NAV_GROUP_STORAGE_KEY = "controle-sst-nav-groups";
 
@@ -19,14 +19,14 @@ function containsPath(entries: NavEntry[], pathname: string): boolean {
   return entries.some((entry) => (isNavSubGroup(entry) ? containsPath(entry.items, pathname) : pathname.startsWith(entry.path)));
 }
 
-function filterEntries(entries: NavEntry[], papel?: Papel): NavEntry[] {
+function filterEntries(entries: NavEntry[], temPermissao: (chave: ChavePermissao) => boolean): NavEntry[] {
   return entries
     .map((entry) => {
       if (isNavSubGroup(entry)) {
-        const items = filterEntries(entry.items, papel) as NavItem[];
+        const items = filterEntries(entry.items, temPermissao) as NavItem[];
         return items.length > 0 ? { ...entry, items } : null;
       }
-      return !entry.roles || (papel && entry.roles.includes(papel)) ? entry : null;
+      return !entry.permissao || temPermissao(entry.permissao) ? entry : null;
     })
     .filter((entry): entry is NavEntry => entry !== null);
 }
@@ -43,12 +43,12 @@ interface SidebarProps {
 
 export function Sidebar({ className = "", onNavigate }: SidebarProps) {
   const location = useLocation();
-  const { usuario } = useAuth();
+  const { temPermissao } = usePermissoes();
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(readNavGroupState);
 
   const visibleGroups = NAVIGATION_GROUPS.map((group) => ({
     ...group,
-    items: filterEntries(group.items, usuario?.papel),
+    items: filterEntries(group.items, temPermissao),
   })).filter((group) => group.items.length > 0);
 
   useEffect(() => {

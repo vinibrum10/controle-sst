@@ -4,8 +4,8 @@ import { EdicaoSelector } from "../../components/rotaSegura2026/EdicaoSelector";
 import { useAuth } from "../../hooks/useAuth";
 import { useCrud } from "../../hooks/useCrud";
 import { useEdicoesRotaSegura } from "../../hooks/useEdicoesRotaSegura";
+import { usePermissao } from "../../hooks/usePermissao";
 import { tabButtonClasses } from "../../lib/formClasses";
-import { podeDecidirComiteRotaSegura, podeLancarAvaliacaoRotaSegura } from "../../lib/permissions";
 import type { RsEquipe } from "../../types/rotaSegura2026";
 import { AvaliacoesTab } from "./avaliacoes/AvaliacoesTab";
 import { ComiteTab } from "./avaliacoes/ComiteTab";
@@ -14,8 +14,8 @@ type Aba = "avaliacoes" | "comite";
 
 export function RotaSegura2026AvaliacoesPage() {
   const { usuario } = useAuth();
-  const podeLancar = podeLancarAvaliacaoRotaSegura(usuario?.papel);
-  const podeDecidir = podeDecidirComiteRotaSegura(usuario?.papel);
+  const podeLancar = usePermissao("LANCAR_AVALIACAO_ROTA_SEGURA");
+  const podeDecidir = usePermissao("DECIDIR_COMITE_ROTA_SEGURA");
 
   const { edicoes, edicaoAtiva } = useEdicoesRotaSegura();
   const [edicaoIdSelecionada, setEdicaoIdSelecionada] = useState("");

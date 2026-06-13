@@ -26,7 +26,7 @@ import { RelatoriosPage } from "../pages/RelatoriosPage";
 import { ConfiguracoesPage } from "../pages/ConfiguracoesPage";
 import { UsuariosPage } from "../pages/UsuariosPage";
 import { ProtectedRoute } from "./ProtectedRoute";
-import { RequireRole } from "./RequireRole";
+import { RequirePermissao } from "./RequirePermissao";
 import { DEFAULT_PATH } from "../components/sidebar/navigation";
 
 export function AppRoutes() {
@@ -59,9 +59,9 @@ export function AppRoutes() {
         <Route
           path="/programas/rota-segura-2026/configuracao"
           element={
-            <RequireRole roles={["ADMIN"]}>
+            <RequirePermissao chave="CONFIGURAR_ROTA_SEGURA">
               <RotaSegura2026ConfiguracaoPage />
-            </RequireRole>
+            </RequirePermissao>
           }
         />
         <Route path="/programas/rota-segura-2026/equipes" element={<RotaSegura2026EquipesPage />} />
@@ -75,9 +75,9 @@ export function AppRoutes() {
         <Route
           path="/usuarios"
           element={
-            <RequireRole roles={["ADMIN"]}>
+            <RequirePermissao chave="GERENCIAR_USUARIOS">
               <UsuariosPage />
-            </RequireRole>
+            </RequirePermissao>
           }
         />
         <Route path="/configuracoes" element={<ConfiguracoesPage />} />

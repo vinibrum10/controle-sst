@@ -7,8 +7,7 @@ import { SummaryCard } from "../components/ui/SummaryCard";
 import { useCrud } from "../hooks/useCrud";
 import { useFuncionarios } from "../hooks/useFuncionarios";
 import { useToast } from "../hooks/useToast";
-import { useAuth } from "../hooks/useAuth";
-import { podeGerenciarProgramasSST } from "../lib/permissions";
+import { usePermissao } from "../hooks/usePermissao";
 import { ApiError } from "../lib/api";
 import { achadoTipoLabel, frequenciaRotaLabel, gravidadeLabel, programaStatusLabel } from "../lib/enums";
 import { formatDate, toDateInputValue } from "../lib/format";
@@ -104,8 +103,7 @@ export function RotaSeguraPage() {
 
   const { funcionarios } = useFuncionarios();
   const { showToast } = useToast();
-  const { usuario } = useAuth();
-  const canManage = podeGerenciarProgramasSST(usuario?.papel);
+  const canManage = usePermissao("GERENCIAR_PROGRAMAS_SST");
   const ativos = funcionarios.filter((f) => f.ativo);
 
   const [rotaForm, setRotaForm] = useState(defaultRotaForm);

@@ -7,8 +7,7 @@ import { SummaryCard } from "../components/ui/SummaryCard";
 import { useCrud } from "../hooks/useCrud";
 import { useFuncionarios } from "../hooks/useFuncionarios";
 import { useToast } from "../hooks/useToast";
-import { useAuth } from "../hooks/useAuth";
-import { podeGerenciarProgramasSST } from "../lib/permissions";
+import { usePermissao } from "../hooks/usePermissao";
 import { ApiError } from "../lib/api";
 import { achadoTipoLabel, gravidadeLabel, programaStatusLabel } from "../lib/enums";
 import { formatDate, shiftDate, startOfToday } from "../lib/format";
@@ -138,8 +137,7 @@ export function InspecoesPage() {
 
   const { funcionarios } = useFuncionarios();
   const { showToast } = useToast();
-  const { usuario } = useAuth();
-  const canManage = podeGerenciarProgramasSST(usuario?.papel);
+  const canManage = usePermissao("GERENCIAR_PROGRAMAS_SST");
   const ativos = funcionarios.filter((f) => f.ativo);
 
   const [inspecaoForm, setInspecaoForm] = useState(defaultInspecaoForm);

@@ -3,20 +3,18 @@ import { Panel, EmptyState } from "../components/ui/Panel";
 import { Button } from "../components/ui/Button";
 import { Icon } from "../components/ui/IconSprite";
 import { useToast } from "../hooks/useToast";
-import { useAuth } from "../hooks/useAuth";
+import { usePermissao } from "../hooks/usePermissao";
 import { exportarDados, importarDados, restaurarDemo } from "../lib/dados";
-import { podeExportarDados, podeImportarDados, podeRestaurarDemo } from "../lib/permissions";
 import { ApiError } from "../lib/api";
 import { toDateInputValue } from "../lib/format";
 
 export function DadosPage() {
   const { showToast } = useToast();
-  const { usuario } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const podeExportar = podeExportarDados(usuario?.papel);
-  const podeImportar = podeImportarDados(usuario?.papel);
-  const podeRestaurar = podeRestaurarDemo(usuario?.papel);
+  const podeExportar = usePermissao("EXPORTAR_DADOS");
+  const podeImportar = usePermissao("IMPORTAR_DADOS");
+  const podeRestaurar = usePermissao("RESTAURAR_DEMO");
 
   async function handleExport() {
     try {

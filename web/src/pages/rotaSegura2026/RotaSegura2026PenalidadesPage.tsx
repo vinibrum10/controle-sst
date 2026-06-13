@@ -3,9 +3,9 @@ import { Panel, EmptyState } from "../../components/ui/Panel";
 import { Button } from "../../components/ui/Button";
 import { Icon } from "../../components/ui/IconSprite";
 import { EdicaoSelector } from "../../components/rotaSegura2026/EdicaoSelector";
-import { useAuth } from "../../hooks/useAuth";
 import { useCrud } from "../../hooks/useCrud";
 import { useEdicoesRotaSegura } from "../../hooks/useEdicoesRotaSegura";
+import { usePermissao } from "../../hooks/usePermissao";
 import { useQueryCrud } from "../../hooks/useQueryCrud";
 import { useToast } from "../../hooks/useToast";
 import {
@@ -17,7 +17,6 @@ import {
   twoColLayout,
 } from "../../lib/formClasses";
 import { toDateInputValue } from "../../lib/format";
-import { podeLancarAvaliacaoRotaSegura } from "../../lib/permissions";
 import { TIPO_INFRACAO_OPTIONS, tipoInfracaoLabel } from "../../lib/rotaSegura2026";
 import type { RsColaborador, RsEquipe, RsPenalidade, RsTipoInfracao } from "../../types/rotaSegura2026";
 
@@ -47,9 +46,8 @@ function defaultForm(): PenalidadeFormState {
 
 export function RotaSegura2026PenalidadesPage() {
   const { showToast } = useToast();
-  const { usuario } = useAuth();
-  const podeLancar = podeLancarAvaliacaoRotaSegura(usuario?.papel);
-  const podeExcluir = usuario?.papel === "ADMIN";
+  const podeLancar = usePermissao("LANCAR_AVALIACAO_ROTA_SEGURA");
+  const podeExcluir = usePermissao("EXCLUIR_AVALIACAO_ROTA_SEGURA");
 
   const { edicoes, edicaoAtiva } = useEdicoesRotaSegura();
   const [edicaoIdSelecionada, setEdicaoIdSelecionada] = useState("");

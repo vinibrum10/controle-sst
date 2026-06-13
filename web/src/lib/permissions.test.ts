@@ -1,72 +1,47 @@
 import { describe, expect, test } from "vitest";
-import {
-  podeExcluirFuncionario,
-  podeExportarDados,
-  podeGerenciarEquipe,
-  podeGerenciarProgramasSST,
-  podeGerenciarUsuarios,
-  podeImportarDados,
-  podeRestaurarDemo,
-} from "./permissions";
-import type { Papel } from "../types";
+import { CHAVES_PERMISSAO, MATRIZ_PADRAO, PAPEIS, PERMISSION_GROUPS } from "./permissions";
 
-const TODOS_PAPEIS: Papel[] = ["ADMIN", "GESTOR", "TST", "VISUALIZADOR", "COLABORADOR"];
-
-function papeisPermitidos(fn: (papel?: Papel | null) => boolean): Papel[] {
-  return TODOS_PAPEIS.filter((papel) => fn(papel));
-}
-
-describe("podeGerenciarEquipe", () => {
-  test("permite ADMIN, GESTOR e VISUALIZADOR", () => {
-    expect(papeisPermitidos(podeGerenciarEquipe)).toEqual(["ADMIN", "GESTOR", "VISUALIZADOR"]);
-  });
-
-  test("nega TST e COLABORADOR", () => {
-    expect(podeGerenciarEquipe("TST")).toBe(false);
-    expect(podeGerenciarEquipe("COLABORADOR")).toBe(false);
-  });
-
-  test("nega quando o papel nao e informado", () => {
-    expect(podeGerenciarEquipe(null)).toBe(false);
-    expect(podeGerenciarEquipe(undefined)).toBe(false);
+describe("CHAVES_PERMISSAO", () => {
+  test("contem 12 chaves unicas", () => {
+    expect(CHAVES_PERMISSAO).toHaveLength(12);
+    expect(new Set(CHAVES_PERMISSAO).size).toBe(12);
   });
 });
 
-describe("podeExcluirFuncionario", () => {
-  test("permite apenas ADMIN e GESTOR", () => {
-    expect(papeisPermitidos(podeExcluirFuncionario)).toEqual(["ADMIN", "GESTOR"]);
-  });
-
-  test("nega VISUALIZADOR mesmo podendo gerenciar a equipe", () => {
-    expect(podeGerenciarEquipe("VISUALIZADOR")).toBe(true);
-    expect(podeExcluirFuncionario("VISUALIZADOR")).toBe(false);
+describe("PERMISSION_GROUPS", () => {
+  test("cobre todas as chaves de permissao, sem duplicatas", () => {
+    const chaves = PERMISSION_GROUPS.flatMap((group) => group.items.map((item) => item.chave));
+    expect(chaves).toHaveLength(CHAVES_PERMISSAO.length);
+    expect(new Set(chaves)).toEqual(new Set(CHAVES_PERMISSAO));
   });
 });
 
-describe("podeGerenciarProgramasSST", () => {
-  test("permite ADMIN, GESTOR e TST", () => {
-    expect(papeisPermitidos(podeGerenciarProgramasSST)).toEqual(["ADMIN", "GESTOR", "TST"]);
+describe("MATRIZ_PADRAO", () => {
+  test("possui uma entrada para cada papel e cada chave de permissao", () => {
+    for (const papel of PAPEIS) {
+      for (const chave of CHAVES_PERMISSAO) {
+        expect(typeof MATRIZ_PADRAO[papel][chave]).toBe("boolean");
+      }
+    }
   });
 
-  test("nega VISUALIZADOR e COLABORADOR", () => {
-    expect(podeGerenciarProgramasSST("VISUALIZADOR")).toBe(false);
-    expect(podeGerenciarProgramasSST("COLABORADOR")).toBe(false);
-  });
-});
-
-describe("podeGerenciarUsuarios", () => {
-  test("permite apenas ADMIN", () => {
-    expect(papeisPermitidos(podeGerenciarUsuarios)).toEqual(["ADMIN"]);
-  });
-});
-
-describe("acoes administrativas de dados", () => {
-  test("exportar e permitido a ADMIN e GESTOR", () => {
-    expect(papeisPermitidos(podeExportarDados)).toEqual(["ADMIN", "GESTOR"]);
+  test("ADMIN possui todas as permissoes", () => {
+    for (const chave of CHAVES_PERMISSAO) {
+      expect(MATRIZ_PADRAO.ADMIN[chave]).toBe(true);
+    }
   });
 
-  test("importar e restaurar demo sao restritos a ADMIN", () => {
-    expect(papeisPermitidos(podeImportarDados)).toEqual(["ADMIN"]);
-    expect(papeisPermitidos(podeRestaurarDemo)).toEqual(["ADMIN"]);
+  test("GERENCIAR_EQUIPE permite ADMIN, GESTOR e VISUALIZADOR", () => {
+    expect(MATRIZ_PADRAO.ADMIN.GERENCIAR_EQUIPE).toBe(true);
+    expect(MATRIZ_PADRAO.GESTOR.GERENCIAR_EQUIPE).toBe(true);
+    expect(MATRIZ_PADRAO.VISUALIZADOR.GERENCIAR_EQUIPE).toBe(true);
+    expect(MATRIZ_PADRAO.TST.GERENCIAR_EQUIPE).toBe(false);
+    expect(MATRIZ_PADRAO.COLABORADOR.GERENCIAR_EQUIPE).toBe(false);
+  });
+
+  test("GERENCIAR_USUARIOS e restrito ao ADMIN", () => {
+    for (const papel of PAPEIS) {
+      expect(MATRIZ_PADRAO[papel].GERENCIAR_USUARIOS).toBe(papel === "ADMIN");
+    }
   });
 });

@@ -2,16 +2,18 @@ const express = require("express");
 
 const asyncHandler = require("./asyncHandler");
 const { validateBody } = require("../middleware/validate");
-const { requireAuth, requireRole } = require("../middleware/auth");
+const { requireAuth } = require("../middleware/auth");
+const { requirePermissao } = require("./permissions");
 
 // Cria um roteador REST (GET/POST/PUT/DELETE) generico para um model do Prisma.
-// "writeRoles" restringe POST/PUT/DELETE aos papeis informados (leitura
-// continua liberada para qualquer usuario autenticado).
-function createCrudRouter({ model, createSchema, updateSchema, include, orderBy, writeRoles }) {
+// "writePermissao" restringe POST/PUT/DELETE aos perfis com a permissao
+// informada na matriz (leitura continua liberada para qualquer usuario
+// autenticado).
+function createCrudRouter({ model, createSchema, updateSchema, include, orderBy, writePermissao }) {
   const router = express.Router();
   router.use(requireAuth);
 
-  const requireWriteAccess = writeRoles ? [requireRole(...writeRoles)] : [];
+  const requireWriteAccess = writePermissao ? [requirePermissao(writePermissao)] : [];
 
   router.get("/", asyncHandler(async (req, res) => {
     const items = await model.findMany({ include, orderBy });

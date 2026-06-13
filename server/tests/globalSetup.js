@@ -19,7 +19,9 @@ module.exports = async () => {
     SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename != '_prisma_migrations'
   `;
 
-  for (const { tablename } of tabelas) {
+  // PermissaoPerfil e' tabela de configuracao, semeada pela migration.
+  // Preserva seus dados entre execucoes da suite.
+  for (const { tablename } of tabelas.filter((t) => t.tablename !== "PermissaoPerfil")) {
     await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${tablename}" RESTART IDENTITY CASCADE`);
   }
 

@@ -18,9 +18,40 @@ export const PAPEL_DESCRICOES: Record<Papel, string> = {
   COLABORADOR: "Acesso de uso geral ao sistema, sem permissões administrativas.",
 };
 
+export type ChavePermissao =
+  | "GERENCIAR_EQUIPE"
+  | "EXCLUIR_FUNCIONARIO"
+  | "GERENCIAR_PROGRAMAS_SST"
+  | "GERENCIAR_USUARIOS"
+  | "EXPORTAR_DADOS"
+  | "IMPORTAR_DADOS"
+  | "RESTAURAR_DEMO"
+  | "CONFIGURAR_ROTA_SEGURA"
+  | "GERENCIAR_EQUIPES_ROTA_SEGURA"
+  | "LANCAR_AVALIACAO_ROTA_SEGURA"
+  | "DECIDIR_COMITE_ROTA_SEGURA"
+  | "EXCLUIR_AVALIACAO_ROTA_SEGURA";
+
+export const CHAVES_PERMISSAO: ChavePermissao[] = [
+  "GERENCIAR_EQUIPE",
+  "EXCLUIR_FUNCIONARIO",
+  "GERENCIAR_PROGRAMAS_SST",
+  "GERENCIAR_USUARIOS",
+  "EXPORTAR_DADOS",
+  "IMPORTAR_DADOS",
+  "RESTAURAR_DEMO",
+  "CONFIGURAR_ROTA_SEGURA",
+  "GERENCIAR_EQUIPES_ROTA_SEGURA",
+  "LANCAR_AVALIACAO_ROTA_SEGURA",
+  "DECIDIR_COMITE_ROTA_SEGURA",
+  "EXCLUIR_AVALIACAO_ROTA_SEGURA",
+];
+
+export type MatrizPermissoes = Record<Papel, Record<ChavePermissao, boolean>>;
+
 export interface PermissionItem {
   label: string;
-  roles: Papel[];
+  chave: ChavePermissao;
 }
 
 export interface PermissionGroup {
@@ -32,76 +63,98 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
   {
     title: "Geral",
     items: [
-      { label: "Gerenciar funcionários (cadastrar, editar, ativar/inativar)", roles: ["ADMIN", "GESTOR", "VISUALIZADOR"] },
-      { label: "Excluir funcionários", roles: ["ADMIN", "GESTOR"] },
-      { label: "Gerenciar programas de SST (treinamentos, inspeções, auditorias, achados, planos de ação, anexos)", roles: ["ADMIN", "GESTOR", "TST"] },
-      { label: "Gerenciar usuários (papel e status de acesso)", roles: ["ADMIN"] },
-      { label: "Exportar dados do sistema", roles: ["ADMIN", "GESTOR"] },
-      { label: "Importar dados para o sistema", roles: ["ADMIN"] },
-      { label: "Restaurar dados de demonstração", roles: ["ADMIN"] },
+      { label: "Gerenciar funcionários (cadastrar, editar, ativar/inativar)", chave: "GERENCIAR_EQUIPE" },
+      { label: "Excluir funcionários", chave: "EXCLUIR_FUNCIONARIO" },
+      { label: "Gerenciar programas de SST (treinamentos, inspeções, auditorias, achados, planos de ação, anexos)", chave: "GERENCIAR_PROGRAMAS_SST" },
+      { label: "Gerenciar usuários (papel e status de acesso)", chave: "GERENCIAR_USUARIOS" },
+      { label: "Exportar dados do sistema", chave: "EXPORTAR_DADOS" },
+      { label: "Importar dados para o sistema", chave: "IMPORTAR_DADOS" },
+      { label: "Restaurar dados de demonstração", chave: "RESTAURAR_DEMO" },
     ],
   },
   {
     title: "Rota Segura 2026",
     items: [
-      { label: "Configurar o programa (proposta, critérios, regras e premiação)", roles: ["ADMIN"] },
-      { label: "Gerenciar equipes e colaboradores", roles: ["ADMIN", "GESTOR", "TST"] },
-      { label: "Lançar avaliações de APR e penalidades", roles: ["ADMIN", "TST"] },
-      { label: "Decidir comitê (riscos e medidas adicionais)", roles: ["ADMIN", "GESTOR"] },
+      { label: "Configurar o programa (proposta, critérios, regras e premiação)", chave: "CONFIGURAR_ROTA_SEGURA" },
+      { label: "Gerenciar equipes e colaboradores", chave: "GERENCIAR_EQUIPES_ROTA_SEGURA" },
+      { label: "Lançar avaliações de APR e penalidades", chave: "LANCAR_AVALIACAO_ROTA_SEGURA" },
+      { label: "Decidir comitê (riscos e medidas adicionais)", chave: "DECIDIR_COMITE_ROTA_SEGURA" },
+      { label: "Excluir avaliações de APR e penalidades", chave: "EXCLUIR_AVALIACAO_ROTA_SEGURA" },
     ],
   },
 ];
 
-// Cadastrar, editar e ativar/inativar funcionarios.
-export function podeGerenciarEquipe(papel?: Papel | null): boolean {
-  return papel === "ADMIN" || papel === "GESTOR" || papel === "VISUALIZADOR";
-}
-
-// Excluir funcionarios (acao irreversivel).
-export function podeExcluirFuncionario(papel?: Papel | null): boolean {
-  return papel === "ADMIN" || papel === "GESTOR";
-}
-
-// Criar/editar/excluir registros dos programas de SST (treinamentos,
-// inspecoes, auditorias, achados, planos de acao, rotas seguras, anexos).
-export function podeGerenciarProgramasSST(papel?: Papel | null): boolean {
-  return papel === "ADMIN" || papel === "GESTOR" || papel === "TST";
-}
-
-// Alterar papel e status de outros usuarios.
-export function podeGerenciarUsuarios(papel?: Papel | null): boolean {
-  return papel === "ADMIN";
-}
-
-export function podeExportarDados(papel?: Papel | null): boolean {
-  return papel === "ADMIN" || papel === "GESTOR";
-}
-
-export function podeImportarDados(papel?: Papel | null): boolean {
-  return papel === "ADMIN";
-}
-
-export function podeRestaurarDemo(papel?: Papel | null): boolean {
-  return papel === "ADMIN";
-}
-
-// Rota Segura: somente o administrador cria edicoes, altera proposta,
-// criterios, regras condicionais, premiacao e clona edicoes.
-export function podeConfigurarRotaSegura(papel?: Papel | null): boolean {
-  return papel === "ADMIN";
-}
-
-// Rota Segura: cadastro de equipes e colaboradores.
-export function podeGerenciarEquipesRotaSegura(papel?: Papel | null): boolean {
-  return papel === "ADMIN" || papel === "GESTOR" || papel === "TST";
-}
-
-// Rota Segura: lancar/editar avaliacoes de APR e penalidades (SSO = TST).
-export function podeLancarAvaliacaoRotaSegura(papel?: Papel | null): boolean {
-  return papel === "ADMIN" || papel === "TST";
-}
-
-// Rota Segura: aprovar/reprovar riscos e medidas adicionais (Comite = GESTOR).
-export function podeDecidirComiteRotaSegura(papel?: Papel | null): boolean {
-  return papel === "ADMIN" || papel === "GESTOR";
-}
+// Matriz usada como fallback enquanto a matriz real (banco) ainda nao foi
+// carregada, evitando que toda a interface fique sem permissoes por um instante.
+export const MATRIZ_PADRAO: MatrizPermissoes = {
+  ADMIN: {
+    GERENCIAR_EQUIPE: true,
+    EXCLUIR_FUNCIONARIO: true,
+    GERENCIAR_PROGRAMAS_SST: true,
+    GERENCIAR_USUARIOS: true,
+    EXPORTAR_DADOS: true,
+    IMPORTAR_DADOS: true,
+    RESTAURAR_DEMO: true,
+    CONFIGURAR_ROTA_SEGURA: true,
+    GERENCIAR_EQUIPES_ROTA_SEGURA: true,
+    LANCAR_AVALIACAO_ROTA_SEGURA: true,
+    DECIDIR_COMITE_ROTA_SEGURA: true,
+    EXCLUIR_AVALIACAO_ROTA_SEGURA: true,
+  },
+  GESTOR: {
+    GERENCIAR_EQUIPE: true,
+    EXCLUIR_FUNCIONARIO: true,
+    GERENCIAR_PROGRAMAS_SST: true,
+    GERENCIAR_USUARIOS: false,
+    EXPORTAR_DADOS: true,
+    IMPORTAR_DADOS: false,
+    RESTAURAR_DEMO: false,
+    CONFIGURAR_ROTA_SEGURA: false,
+    GERENCIAR_EQUIPES_ROTA_SEGURA: true,
+    LANCAR_AVALIACAO_ROTA_SEGURA: false,
+    DECIDIR_COMITE_ROTA_SEGURA: true,
+    EXCLUIR_AVALIACAO_ROTA_SEGURA: false,
+  },
+  TST: {
+    GERENCIAR_EQUIPE: false,
+    EXCLUIR_FUNCIONARIO: false,
+    GERENCIAR_PROGRAMAS_SST: true,
+    GERENCIAR_USUARIOS: false,
+    EXPORTAR_DADOS: false,
+    IMPORTAR_DADOS: false,
+    RESTAURAR_DEMO: false,
+    CONFIGURAR_ROTA_SEGURA: false,
+    GERENCIAR_EQUIPES_ROTA_SEGURA: true,
+    LANCAR_AVALIACAO_ROTA_SEGURA: true,
+    DECIDIR_COMITE_ROTA_SEGURA: false,
+    EXCLUIR_AVALIACAO_ROTA_SEGURA: false,
+  },
+  VISUALIZADOR: {
+    GERENCIAR_EQUIPE: true,
+    EXCLUIR_FUNCIONARIO: false,
+    GERENCIAR_PROGRAMAS_SST: false,
+    GERENCIAR_USUARIOS: false,
+    EXPORTAR_DADOS: false,
+    IMPORTAR_DADOS: false,
+    RESTAURAR_DEMO: false,
+    CONFIGURAR_ROTA_SEGURA: false,
+    GERENCIAR_EQUIPES_ROTA_SEGURA: false,
+    LANCAR_AVALIACAO_ROTA_SEGURA: false,
+    DECIDIR_COMITE_ROTA_SEGURA: false,
+    EXCLUIR_AVALIACAO_ROTA_SEGURA: false,
+  },
+  COLABORADOR: {
+    GERENCIAR_EQUIPE: false,
+    EXCLUIR_FUNCIONARIO: false,
+    GERENCIAR_PROGRAMAS_SST: false,
+    GERENCIAR_USUARIOS: false,
+    EXPORTAR_DADOS: false,
+    IMPORTAR_DADOS: false,
+    RESTAURAR_DEMO: false,
+    CONFIGURAR_ROTA_SEGURA: false,
+    GERENCIAR_EQUIPES_ROTA_SEGURA: false,
+    LANCAR_AVALIACAO_ROTA_SEGURA: false,
+    DECIDIR_COMITE_ROTA_SEGURA: false,
+    EXCLUIR_AVALIACAO_ROTA_SEGURA: false,
+  },
+};
