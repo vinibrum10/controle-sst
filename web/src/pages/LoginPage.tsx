@@ -3,6 +3,7 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { ApiError } from "../lib/api";
 import { Button } from "../components/ui/Button";
+import { Icon } from "../components/ui/IconSprite";
 import { DEFAULT_PATH } from "../components/sidebar/navigation";
 
 const inputClasses = "w-full min-h-[40px] px-2.5 rounded-[8px] border border-line bg-surface-soft text-text outline-none focus:border-teal";
@@ -67,12 +68,12 @@ export function LoginPage() {
       className="fixed inset-0 z-[1000] flex items-center justify-center"
       style={{ background: "radial-gradient(ellipse at 60% 40%, #0f2d28 0%, #060f0d 100%)" }}
     >
-      <div className="w-full max-w-[400px] p-9 rounded-2xl bg-white/4 border border-white/10 backdrop-blur-xl text-center">
-        <div className="grid place-items-center w-[60px] h-[60px] mx-auto mb-5 rounded-[8px] bg-[#d8f2ed] text-[#0b524c] font-extrabold text-[1.2rem]">
-          SST
+      <div className="w-full max-w-[400px] p-9 rounded-2xl bg-white/4 border border-white/10 backdrop-blur-xl shadow-floating text-center">
+        <div className="grid place-items-center w-[60px] h-[60px] mx-auto mb-5 rounded-[8px] bg-gradient-to-b from-[#1ee0cb] to-teal text-[#06231f] shadow-card">
+          <Icon id="icon-shield" className="h-7 w-7" />
         </div>
-        <h1 className="text-[1.8rem] mb-1 text-white">SGEPI</h1>
-        <p className="text-[#91a39e] text-[0.78rem] mb-5 uppercase tracking-wide">Sistema de Gestão de Equipes, Programas e Indicadores</p>
+        <h1 className="text-[1.8rem] mb-1 font-extrabold tracking-tight text-white">SGEPI</h1>
+        <p className="text-[#91a39e] text-eyebrow uppercase mb-5">Sistema de Gestão de Equipes, Programas e Indicadores</p>
         <p className="text-[#91a39e] text-[0.92rem] mb-7 leading-relaxed">
           {mode === "login"
             ? "Entre com seu e-mail e senha para acessar o sistema."

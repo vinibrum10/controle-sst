@@ -43,8 +43,8 @@ export function TaskCard({
 
   return (
     <article
-      className={`grid min-w-0 grid-cols-1 gap-3.5 rounded-[8px] border border-line bg-[linear-gradient(180deg,#ffffff_0%,#fbfcfd_100%)] p-3.5 shadow-[0_8px_18px_rgba(20,33,31,0.05)] transition-[transform,box-shadow] duration-150 sm:grid-cols-[minmax(0,1fr)_auto] dark:bg-none dark:bg-surface ${
-        dragging ? "scale-[0.97] opacity-45" : "cursor-grab hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)]"
+      className={`grid min-w-0 grid-cols-1 gap-3 rounded-[8px] border border-line bg-surface p-3.5 shadow-card transition-[transform,box-shadow] duration-150 ${
+        dragging ? "scale-[0.97] opacity-45" : "cursor-grab hover:-translate-y-0.5 hover:shadow-card-lg"
       }`}
       draggable
       onDragStart={(event) => onDragStart?.(event, tarefa)}
@@ -89,7 +89,7 @@ export function TaskCard({
         {tarefa.descricao && <p className="m-0 min-w-0 break-words text-[0.9rem] text-muted">{tarefa.descricao}</p>}
       </div>
 
-      <div className="grid grid-cols-2 gap-2 border-t border-line pt-3 sm:flex sm:flex-wrap sm:justify-end sm:border-t-0 sm:pt-0">
+      <div className="grid grid-cols-2 gap-2 border-t border-line pt-3">
         <button
           type="button"
           title="Alternar andamento"

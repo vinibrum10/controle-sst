@@ -23,10 +23,7 @@ export function WorkloadList({ cargaPorPessoa }: WorkloadListProps) {
               : "Capacidade semanal comprometida.";
 
         return (
-          <article
-            key={funcionario.id}
-            className="rounded-[8px] border border-line bg-gradient-to-b from-white to-[#fbfcfd] p-3 shadow-[0_8px_18px_rgba(20,33,31,0.05)] dark:from-surface dark:to-surface"
-          >
+          <article key={funcionario.id} className="rounded-[8px] border border-line bg-surface-soft p-3 dark:bg-surface">
             <header className="flex items-center justify-between gap-2.5">
               <div className="min-w-0">
                 <strong className="block truncate">{funcionario.nome}</strong>

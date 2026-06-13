@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Icon } from "../ui/IconSprite";
+import { Avatar } from "../ui/Avatar";
 import { buttonClasses } from "../../lib/buttonClasses";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
@@ -8,7 +9,15 @@ import { formatLongDate } from "../../lib/format";
 import { NAV_ITEMS } from "../sidebar/navigation";
 
 const iconButtonClasses =
-  "inline-flex min-h-[42px] min-w-[42px] items-center justify-center gap-2 rounded-[8px] border border-line bg-neutral-button px-2.5 font-extrabold text-text transition-transform hover:-translate-y-px hover:shadow-[0_10px_20px_rgba(20,33,31,0.1)] active:translate-y-0 active:shadow-none";
+  "inline-flex min-h-[42px] min-w-[42px] items-center justify-center gap-2 rounded-[8px] border border-line bg-neutral-button px-2.5 font-extrabold text-text transition-all hover:-translate-y-px hover:shadow-card-lg active:translate-y-0 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal/35 focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
+
+const PAPEL_LABELS: Record<string, string> = {
+  ADMIN: "Administrador",
+  GESTOR: "Gestor",
+  TST: "Técnico de Segurança",
+  VISUALIZADOR: "Visualizador",
+  COLABORADOR: "Colaborador",
+};
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -41,9 +50,9 @@ export function Header({ onToggleSidebar }: HeaderProps) {
         >
           <Icon id="icon-sidebar" />
         </button>
-        <div>
-          <p className="m-0 mb-[5px] text-[0.78rem] font-extrabold uppercase text-teal">{today}</p>
-          <h1 className="m-0 text-xl font-extrabold">{pageTitle}</h1>
+        <div className="min-w-0">
+          <p className="m-0 mb-[5px] text-eyebrow text-teal">{today}</p>
+          <h1 className="m-0 truncate text-2xl font-extrabold tracking-tight">{pageTitle}</h1>
         </div>
       </div>
 
@@ -58,9 +67,15 @@ export function Header({ onToggleSidebar }: HeaderProps) {
           <Icon id={theme === "dark" ? "icon-sun" : "icon-moon"} />
         </button>
 
-        <div className="flex min-h-[42px] items-center gap-2.5 rounded-[8px] border border-line bg-surface-strong px-3.5 text-[0.85rem] text-muted">
-          <span className="font-extrabold text-text">{usuario?.nome}</span>
-        </div>
+        {usuario && (
+          <div className="flex min-h-[42px] items-center gap-2.5 rounded-[8px] border border-line bg-surface-strong px-2.5 text-[0.85rem]">
+            <Avatar nome={usuario.nome} size="small" />
+            <div className="min-w-0 leading-tight">
+              <span className="block truncate font-extrabold text-text">{usuario.nome}</span>
+              <span className="block truncate text-[0.74rem] text-muted">{PAPEL_LABELS[usuario.papel] || usuario.papel}</span>
+            </div>
+          </div>
+        )}
 
         <button
           type="button"

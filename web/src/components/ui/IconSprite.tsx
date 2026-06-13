@@ -65,6 +65,15 @@ export function IconSprite() {
         <path d="M12 15V3m0 0 4 4m-4-4-4 4"></path>
         <path d="M4 17v3h16v-3"></path>
       </symbol>
+      <symbol id="icon-alert" viewBox="0 0 24 24">
+        <path d="M12 9v4"></path>
+        <path d="M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.4 0z"></path>
+        <path d="M12 17h.01"></path>
+      </symbol>
+      <symbol id="icon-shield" viewBox="0 0 24 24">
+        <path d="M12 2.5 4 5.5v5.2c0 4.6 3.2 8.7 8 9.8 4.8-1.1 8-5.2 8-9.8V5.5z"></path>
+        <path d="m8.5 12 2.5 2.5 4.5-5"></path>
+      </symbol>
     </svg>
   );
 }

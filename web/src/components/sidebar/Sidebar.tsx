@@ -46,12 +46,12 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
       aria-label="Navegação principal"
     >
       <div className="flex min-h-[48px] items-center gap-3">
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-[8px] bg-[#dff4ef] font-extrabold text-teal-strong">
-          SST
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-[8px] bg-gradient-to-b from-[#1ee0cb] to-teal text-[#06231f] shadow-card" aria-hidden="true">
+          <Icon id="icon-shield" className="h-6 w-6" />
         </div>
         <div className="min-w-0">
-          <strong className="block text-base">SGEPI</strong>
-          <span className="mt-0.5 block truncate text-[0.82rem] text-[#b9c9c5]">Equipes, Programas e Indicadores</span>
+          <strong className="block text-base tracking-tight">SGEPI</strong>
+          <span className="mt-0.5 block truncate text-eyebrow text-[#8fa8a2]">Equipes, Programas e Indicadores</span>
         </div>
       </div>
 

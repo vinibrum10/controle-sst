@@ -17,9 +17,15 @@ export function RankingList({ ranking, suffix }: RankingListProps) {
       {ranking.map(({ funcionario, valor }, index) => (
         <article
           key={funcionario.id}
-          className="flex min-w-0 items-center justify-between gap-2.5 rounded-[8px] border border-line bg-gradient-to-b from-white to-[#fbfcfd] p-3 shadow-[0_8px_18px_rgba(20,33,31,0.05)] dark:from-surface dark:to-surface"
+          className="flex min-w-0 items-center justify-between gap-2.5 rounded-[8px] border border-line bg-surface-soft p-3 dark:bg-surface"
         >
-          <span className="inline-flex min-h-[24px] items-center rounded-full bg-surface-strong px-2">{index + 1}</span>
+          <span
+            className={`inline-flex h-6 min-w-[24px] items-center justify-center rounded-full px-1.5 text-[0.8rem] font-extrabold ${
+              index === 0 ? "bg-amber/15 text-amber" : "bg-surface-strong text-muted"
+            }`}
+          >
+            {index + 1}
+          </span>
           <Avatar nome={funcionario.nome} foto={funcionario.foto} size="small" />
           <div className="min-w-0 flex-1">
             <strong className="block truncate">{funcionario.nome}</strong>
