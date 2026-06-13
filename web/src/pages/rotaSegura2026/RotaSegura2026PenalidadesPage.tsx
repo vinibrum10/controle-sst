@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Panel, EmptyState } from "../../components/ui/Panel";
 import { Button } from "../../components/ui/Button";
 import { Icon } from "../../components/ui/IconSprite";
@@ -52,11 +52,9 @@ export function RotaSegura2026PenalidadesPage() {
   const podeExcluir = usuario?.papel === "ADMIN";
 
   const { edicoes, edicaoAtiva } = useEdicoesRotaSegura();
-  const [edicaoId, setEdicaoId] = useState("");
+  const [edicaoIdSelecionada, setEdicaoIdSelecionada] = useState("");
 
-  useEffect(() => {
-    if (!edicaoId && edicaoAtiva) setEdicaoId(edicaoAtiva.id);
-  }, [edicaoId, edicaoAtiva]);
+  const edicaoId = edicaoIdSelecionada || edicaoAtiva?.id || "";
 
   const { items: equipes } = useCrud<RsEquipe>("/rota-segura/equipes", "Não foi possível carregar as equipes.");
   const { items: colaboradores } = useCrud<RsColaborador>("/rota-segura/colaboradores", "Não foi possível carregar os colaboradores.");
@@ -138,7 +136,7 @@ export function RotaSegura2026PenalidadesPage() {
         description="Infrações registradas por equipe/colaborador, com a pontuação de penalidade calculada conforme os critérios da edição."
         headerExtra={
           <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-end sm:justify-end">
-            {edicoes.length > 0 && <EdicaoSelector edicoes={edicoes} value={edicaoId} onChange={setEdicaoId} />}
+            {edicoes.length > 0 && <EdicaoSelector edicoes={edicoes} value={edicaoId} onChange={setEdicaoIdSelecionada} />}
             <label className="grid gap-1.5 text-[0.82rem] font-bold text-muted">
               Equipe
               <select className={`${selectInlineClasses} w-full sm:min-w-[160px]`} value={filtroEquipeId} onChange={(e) => setFiltroEquipeId(e.target.value)}>

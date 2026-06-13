@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Panel, EmptyState } from "../../components/ui/Panel";
 import { Button } from "../../components/ui/Button";
 import { Icon } from "../../components/ui/IconSprite";
@@ -18,7 +18,7 @@ function csvCell(value: string | number): string {
 
 export function RotaSegura2026RankingPage() {
   const { edicoes, edicaoAtiva } = useEdicoesRotaSegura();
-  const [edicaoId, setEdicaoId] = useState("");
+  const [edicaoIdSelecionada, setEdicaoIdSelecionada] = useState("");
   const [mes, setMes] = useState("");
   const [ano, setAno] = useState("");
   const [area, setArea] = useState("");
@@ -26,9 +26,7 @@ export function RotaSegura2026RankingPage() {
   const [tst, setTst] = useState("");
   const [exportando, setExportando] = useState(false);
 
-  useEffect(() => {
-    if (!edicaoId && edicaoAtiva) setEdicaoId(edicaoAtiva.id);
-  }, [edicaoId, edicaoAtiva]);
+  const edicaoId = edicaoIdSelecionada || edicaoAtiva?.id || "";
 
   const params = new URLSearchParams();
   if (edicaoId) params.set("edicaoId", edicaoId);
@@ -106,7 +104,7 @@ export function RotaSegura2026RankingPage() {
       <Panel
         title="Ranking"
         description="Classificação das equipes por pontuação (APR + penalidades), conforme os critérios configurados na edição."
-        headerExtra={edicoes.length > 0 ? <EdicaoSelector edicoes={edicoes} value={edicaoId} onChange={setEdicaoId} /> : undefined}
+        headerExtra={edicoes.length > 0 ? <EdicaoSelector edicoes={edicoes} value={edicaoId} onChange={setEdicaoIdSelecionada} /> : undefined}
       >
         <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-end">
           <label className="grid gap-1.5 text-[0.82rem] font-bold text-muted">

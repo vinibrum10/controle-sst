@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Panel } from "../../components/ui/Panel";
 import { EdicaoSelector } from "../../components/rotaSegura2026/EdicaoSelector";
 import { useAuth } from "../../hooks/useAuth";
@@ -18,12 +18,10 @@ export function RotaSegura2026AvaliacoesPage() {
   const podeDecidir = podeDecidirComiteRotaSegura(usuario?.papel);
 
   const { edicoes, edicaoAtiva } = useEdicoesRotaSegura();
-  const [edicaoId, setEdicaoId] = useState("");
+  const [edicaoIdSelecionada, setEdicaoIdSelecionada] = useState("");
   const [aba, setAba] = useState<Aba>("avaliacoes");
 
-  useEffect(() => {
-    if (!edicaoId && edicaoAtiva) setEdicaoId(edicaoAtiva.id);
-  }, [edicaoId, edicaoAtiva]);
+  const edicaoId = edicaoIdSelecionada || edicaoAtiva?.id || "";
 
   const { items: equipes } = useCrud<RsEquipe>("/rota-segura/equipes", "Não foi possível carregar as equipes.");
 
@@ -32,7 +30,7 @@ export function RotaSegura2026AvaliacoesPage() {
       <Panel
         title="Avaliação de APR"
         description="Lançamento das avaliações de APR (amostral e via Forms) e decisões do comitê sobre riscos/medidas adicionais."
-        headerExtra={edicoes.length > 0 ? <EdicaoSelector edicoes={edicoes} value={edicaoId} onChange={setEdicaoId} /> : undefined}
+        headerExtra={edicoes.length > 0 ? <EdicaoSelector edicoes={edicoes} value={edicaoId} onChange={setEdicaoIdSelecionada} /> : undefined}
       >
         <div className="flex flex-wrap gap-2">
           <button type="button" className={tabButtonClasses(aba === "avaliacoes")} onClick={() => setAba("avaliacoes")}>

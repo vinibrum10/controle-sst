@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Panel, EmptyState } from "../../../components/ui/Panel";
 import { Button } from "../../../components/ui/Button";
 import { Icon } from "../../../components/ui/IconSprite";
@@ -96,10 +96,12 @@ export function PropostaTab({ edicaoId, edicaoNome, podeEditar }: PropostaTabPro
 
   const [form, setForm] = useState<PropostaFormState>(defaultForm);
   const [submitting, setSubmitting] = useState(false);
+  const [dataSincronizada, setDataSincronizada] = useState<RsProposta | null>(null);
 
-  useEffect(() => {
+  if (data !== dataSincronizada) {
+    setDataSincronizada(data);
     setForm(data ? toForm(data) : defaultForm());
-  }, [data]);
+  }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Panel, EmptyState } from "../../components/ui/Panel";
 import { SummaryCard } from "../../components/ui/SummaryCard";
 import { EdicaoSelector } from "../../components/rotaSegura2026/EdicaoSelector";
@@ -9,11 +9,9 @@ import type { RsDashboardResponse } from "../../types/rotaSegura2026";
 
 export function RotaSegura2026DashboardPage() {
   const { edicoes, edicaoAtiva, carregando: carregandoEdicoes, erro: erroEdicoes } = useEdicoesRotaSegura();
-  const [edicaoId, setEdicaoId] = useState("");
+  const [edicaoIdSelecionada, setEdicaoIdSelecionada] = useState("");
 
-  useEffect(() => {
-    if (!edicaoId && edicaoAtiva) setEdicaoId(edicaoAtiva.id);
-  }, [edicaoId, edicaoAtiva]);
+  const edicaoId = edicaoIdSelecionada || edicaoAtiva?.id || "";
 
   const path = edicaoId ? `/rota-segura/dashboard?edicaoId=${edicaoId}` : carregandoEdicoes ? null : "/rota-segura/dashboard";
   const { data, carregando, erro } = useApiResource<RsDashboardResponse>(path, "Não foi possível carregar o dashboard do Rota Segura.");
@@ -23,7 +21,7 @@ export function RotaSegura2026DashboardPage() {
       <Panel
         title="Rota Segura 2026"
         description={data?.edicao?.slogan || "Programa de avaliação da Análise Preliminar de Risco (APR) das equipes de campo."}
-        headerExtra={edicoes.length > 0 ? <EdicaoSelector edicoes={edicoes} value={edicaoId} onChange={setEdicaoId} /> : undefined}
+        headerExtra={edicoes.length > 0 ? <EdicaoSelector edicoes={edicoes} value={edicaoId} onChange={setEdicaoIdSelecionada} /> : undefined}
       >
         {(erro || erroEdicoes) && <p className="text-red">{erro || erroEdicoes}</p>}
         {carregando || carregandoEdicoes ? (

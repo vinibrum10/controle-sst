@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Panel } from "../../components/ui/Panel";
 import { EdicaoSelector } from "../../components/rotaSegura2026/EdicaoSelector";
 import { useAuth } from "../../hooks/useAuth";
@@ -28,12 +28,10 @@ export function RotaSegura2026ConfiguracaoPage() {
   const podeEditar = podeConfigurarRotaSegura(usuario?.papel);
 
   const { edicoes, carregando, erro, edicaoAtiva, criar, atualizar, remover } = useEdicoesRotaSegura();
-  const [edicaoId, setEdicaoId] = useState("");
+  const [edicaoIdSelecionada, setEdicaoIdSelecionada] = useState("");
   const [aba, setAba] = useState<Aba>("edicoes");
 
-  useEffect(() => {
-    if (!edicaoId && edicaoAtiva) setEdicaoId(edicaoAtiva.id);
-  }, [edicaoId, edicaoAtiva]);
+  const edicaoId = edicaoIdSelecionada || edicaoAtiva?.id || "";
 
   const edicaoSelecionada = edicoes.find((edicao) => edicao.id === edicaoId) || null;
   const edicaoNome = edicaoSelecionada ? `${edicaoSelecionada.nome} (${edicaoSelecionada.ano})` : "";
@@ -49,7 +47,7 @@ export function RotaSegura2026ConfiguracaoPage() {
       <Panel
         title="Configuração do Rota Segura"
         description="Cada edição anual tem sua própria proposta, critérios de pontuação, regras condicionais e premiação."
-        headerExtra={edicoes.length > 0 ? <EdicaoSelector edicoes={edicoes} value={edicaoId} onChange={setEdicaoId} /> : undefined}
+        headerExtra={edicoes.length > 0 ? <EdicaoSelector edicoes={edicoes} value={edicaoId} onChange={setEdicaoIdSelecionada} /> : undefined}
       >
         <div className="flex flex-wrap gap-2">
           {ABAS.map(({ id, label }) => (
