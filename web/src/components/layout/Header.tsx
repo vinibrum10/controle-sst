@@ -42,7 +42,7 @@ export function Header({ onToggleSidebar }: HeaderProps) {
     return best?.title ?? "SGEPI";
   }, [location.pathname]);
 
-  const ROTAS_SEM_CRIAR_TAREFA = ["/programas/rota-segura", "/treinamentos", "/inspecoes", "/funcionarios"];
+  const ROTAS_SEM_CRIAR_TAREFA = ["/inicio", "/programas/rota-segura", "/treinamentos", "/inspecoes", "/funcionarios"];
   const mostrarCriarTarefa = !ROTAS_SEM_CRIAR_TAREFA.some((rota) => location.pathname.startsWith(rota));
 
   return (
