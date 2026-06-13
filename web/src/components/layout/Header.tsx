@@ -42,7 +42,7 @@ export function Header({ onToggleSidebar }: HeaderProps) {
     return best?.title ?? "SGEPI";
   }, [location.pathname]);
 
-  const mostrarCriarTarefa = !location.pathname.startsWith("/programas/rota-segura-2026");
+  const mostrarCriarTarefa = !location.pathname.startsWith("/programas/rota-segura");
 
   return (
     <header className="mb-6 flex flex-col gap-[14px] sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-6">
