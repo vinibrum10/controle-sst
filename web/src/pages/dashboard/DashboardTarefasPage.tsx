@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { MetricGrid } from "../components/dashboard/MetricGrid";
-import { WorkloadList } from "../components/dashboard/WorkloadList";
-import { StatusChart } from "../components/dashboard/StatusChart";
-import { RankingList } from "../components/dashboard/RankingList";
-import { Panel } from "../components/ui/Panel";
-import { useDashboard } from "../hooks/useDashboard";
-import { currentWeekValue } from "../lib/format";
+import { MetricGrid } from "../../components/dashboard/MetricGrid";
+import { WorkloadList } from "../../components/dashboard/WorkloadList";
+import { StatusChart } from "../../components/dashboard/StatusChart";
+import { RankingList } from "../../components/dashboard/RankingList";
+import { Panel } from "../../components/ui/Panel";
+import { useDashboard } from "../../hooks/useDashboard";
+import { currentWeekValue } from "../../lib/format";
 
-export function DashboardPage() {
+export function DashboardTarefasPage() {
   const [semana, setSemana] = useState(currentWeekValue);
   const { dashboard, carregando, erro } = useDashboard(semana);
 

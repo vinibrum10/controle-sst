@@ -49,15 +49,46 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
         <div className="grid h-11 w-11 shrink-0 place-items-center rounded-[8px] bg-gradient-to-b from-[#6fa0c8] to-teal text-white shadow-card" aria-hidden="true">
           <Icon id="icon-shield" className="h-6 w-6" />
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <strong className="block text-base tracking-tight">SGEPI</strong>
           <span className="mt-0.5 block truncate text-eyebrow text-[#93a7b8]">Equipes, Programas e Indicadores</span>
         </div>
+        <button
+          type="button"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-[8px] border border-white/15 text-[#c9d4dc] transition-colors hover:border-white/30 hover:text-white lg:hidden"
+          aria-label="Fechar menu"
+          title="Fechar menu"
+          onClick={onNavigate}
+        >
+          <Icon id="icon-close" className="h-4 w-4" />
+        </button>
       </div>
 
       <nav className="grid content-start gap-2.5 overflow-y-auto pr-0.5" aria-label="Áreas do programa">
         {visibleGroups.map((group) => {
           const isActiveGroup = group.items.some((item) => location.pathname.startsWith(item.path));
+
+          if (group.items.length === 1) {
+            const item = group.items[0];
+            return (
+              <NavLink
+                key={group.id}
+                to={item.path}
+                onClick={onNavigate}
+                className={({ isActive }) =>
+                  `flex min-h-[42px] w-full items-center gap-2.5 rounded-[8px] border border-transparent px-2.5 font-extrabold transition-colors ${
+                    isActive
+                      ? "border-[#6fa0c8]/18 bg-sidebar-strong text-white dark:bg-[#17283c]"
+                      : "text-[#e8eef5] hover:border-[#6fa0c8]/18 hover:bg-sidebar-strong dark:hover:bg-[#17283c]"
+                  }`
+                }
+              >
+                <Icon id={group.icon} />
+                {group.label}
+              </NavLink>
+            );
+          }
+
           const isOpen = (openGroups[group.id] ?? group.defaultOpen) || isActiveGroup;
 
           return (
