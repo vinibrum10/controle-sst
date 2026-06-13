@@ -25,7 +25,7 @@ export function DadosPage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `controle-sst-${toDateInputValue(new Date())}.json`;
+      link.download = `sgepi-${toDateInputValue(new Date())}.json`;
       link.click();
       URL.revokeObjectURL(url);
       showToast("Dados exportados.");

@@ -51,7 +51,7 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
         </div>
         <div className="min-w-0">
           <strong className="block text-base">SGEPI</strong>
-          <span className="mt-0.5 block truncate text-[0.82rem] text-[#b9c9c5]">Equipes e Programas Institucionais</span>
+          <span className="mt-0.5 block truncate text-[0.82rem] text-[#b9c9c5]">Equipes, Programas e Indicadores</span>
         </div>
       </div>
 

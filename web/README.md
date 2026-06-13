@@ -1,4 +1,4 @@
-# Controle SST — Frontend (React)
+# SGEPI — Frontend (React)
 
 Front-end em Vite + React + TypeScript + Tailwind CSS. Substitui o antigo
 front-end vanilla JS e é o front-end servido em produção (ver

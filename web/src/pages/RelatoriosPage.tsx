@@ -64,7 +64,7 @@ export function RelatoriosPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `relatorio-controle-sst-${inicio}-a-${fim}.csv`;
+    link.download = `relatorio-sgepi-${inicio}-a-${fim}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   }

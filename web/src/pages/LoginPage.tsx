@@ -72,7 +72,7 @@ export function LoginPage() {
           SST
         </div>
         <h1 className="text-[1.8rem] mb-1 text-white">SGEPI</h1>
-        <p className="text-[#91a39e] text-[0.78rem] mb-5 uppercase tracking-wide">Sistema de Gestão de Equipes e Programas Institucionais</p>
+        <p className="text-[#91a39e] text-[0.78rem] mb-5 uppercase tracking-wide">Sistema de Gestão de Equipes, Programas e Indicadores</p>
         <p className="text-[#91a39e] text-[0.92rem] mb-7 leading-relaxed">
           {mode === "login"
             ? "Entre com seu e-mail e senha para acessar o sistema."
