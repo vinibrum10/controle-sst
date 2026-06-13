@@ -107,19 +107,19 @@ export function ExecucaoPage() {
       title="Execução de tarefas (Kanban)"
       description="Arraste os cards entre colunas ou use os botões para atualizar o andamento."
       headerExtra={
-        <div className="flex flex-wrap items-end justify-end gap-2">
+        <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-end sm:justify-end">
           <label className="grid gap-1.5 text-[0.82rem] font-bold text-muted">
             Semana
             <input
               type="week"
               value={semana}
               onChange={(event) => setSemana(event.target.value)}
-              className={`${fieldClasses} w-[160px]`}
+              className={`${fieldClasses} w-full sm:w-[160px]`}
             />
           </label>
           <select
             aria-label="Filtrar por responsável"
-            className={`${fieldClasses} w-[200px]`}
+            className={`${fieldClasses} w-full sm:w-[200px]`}
             value={responsavelFiltro}
             onChange={(event) => setResponsavelFiltro(event.target.value)}
           >
@@ -133,7 +133,7 @@ export function ExecucaoPage() {
           </select>
           <select
             aria-label="Filtrar por tipo"
-            className={`${fieldClasses} w-[160px]`}
+            className={`${fieldClasses} w-full sm:w-[160px]`}
             value={tipoFiltro}
             onChange={(event) => setTipoFiltro(event.target.value)}
           >

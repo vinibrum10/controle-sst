@@ -7,7 +7,7 @@ const { validateBody } = require("../middleware/validate");
 const { requireAuth } = require("../middleware/auth");
 const { findOrCreateSemana } = require("../utils/semana");
 const { tarefaInclude: include, serializeTarefa } = require("../utils/tarefaSerializer");
-const { notificarTarefaCriada } = require("../utils/notificacoes");
+const { enviarNotificacaoTarefaAtribuida } = require("../utils/notificacoes");
 
 const router = express.Router();
 
@@ -97,9 +97,9 @@ router.post("/", validateBody(tarefaSchema), asyncHandler(async (req, res) => {
     include
   });
 
-  const resultadoEmail = await notificarTarefaCriada(tarefa);
+  const notificacaoEmail = await enviarNotificacaoTarefaAtribuida(tarefa);
 
-  res.status(201).json({ ...serializeTarefa(tarefa), emailEnviado: resultadoEmail.sucesso });
+  res.status(201).json({ ...serializeTarefa(tarefa), notificacaoEmail });
 }));
 
 router.put("/:id", validateBody(tarefaUpdateSchema), asyncHandler(async (req, res) => {

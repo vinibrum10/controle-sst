@@ -7,6 +7,12 @@ import { ExecucaoPage } from "../pages/ExecucaoPage";
 import { FuncionariosPage } from "../pages/FuncionariosPage";
 import { AjudaPage } from "../pages/AjudaPage";
 import { RotaSeguraPage } from "../pages/RotaSeguraPage";
+import { RotaSegura2026DashboardPage } from "../pages/rotaSegura2026/RotaSegura2026DashboardPage";
+import { RotaSegura2026ConfiguracaoPage } from "../pages/rotaSegura2026/RotaSegura2026ConfiguracaoPage";
+import { RotaSegura2026EquipesPage } from "../pages/rotaSegura2026/RotaSegura2026EquipesPage";
+import { RotaSegura2026AvaliacoesPage } from "../pages/rotaSegura2026/RotaSegura2026AvaliacoesPage";
+import { RotaSegura2026PenalidadesPage } from "../pages/rotaSegura2026/RotaSegura2026PenalidadesPage";
+import { RotaSegura2026RankingPage } from "../pages/rotaSegura2026/RotaSegura2026RankingPage";
 import { TreinamentosPage } from "../pages/TreinamentosPage";
 import { InspecoesPage } from "../pages/InspecoesPage";
 import { DadosPage } from "../pages/DadosPage";
@@ -36,6 +42,19 @@ export function AppRoutes() {
         <Route path="/funcionarios" element={<FuncionariosPage />} />
         <Route path="/ajuda" element={<AjudaPage />} />
         <Route path="/programas/rota-segura" element={<RotaSeguraPage />} />
+        <Route path="/programas/rota-segura-2026" element={<RotaSegura2026DashboardPage />} />
+        <Route
+          path="/programas/rota-segura-2026/configuracao"
+          element={
+            <RequireRole roles={["ADMIN"]}>
+              <RotaSegura2026ConfiguracaoPage />
+            </RequireRole>
+          }
+        />
+        <Route path="/programas/rota-segura-2026/equipes" element={<RotaSegura2026EquipesPage />} />
+        <Route path="/programas/rota-segura-2026/avaliacoes" element={<RotaSegura2026AvaliacoesPage />} />
+        <Route path="/programas/rota-segura-2026/penalidades" element={<RotaSegura2026PenalidadesPage />} />
+        <Route path="/programas/rota-segura-2026/ranking" element={<RotaSegura2026RankingPage />} />
         <Route path="/treinamentos" element={<TreinamentosPage />} />
         <Route path="/inspecoes" element={<InspecoesPage />} />
         <Route path="/dados" element={<DadosPage />} />

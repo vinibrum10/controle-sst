@@ -2,6 +2,7 @@ require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const { PrismaClient } = require("@prisma/client");
 const { shiftDate, seedFuncionariosDemo, seedTarefasDemo } = require("../server/utils/seedDemo");
+const { seedEdicaoRotaSegura2026 } = require("../server/utils/seedRotaSegura2026");
 
 const prisma = new PrismaClient();
 
@@ -105,6 +106,9 @@ async function main() {
       }
     });
   }
+
+  // ----- Rota Segura 2026 (edicao, proposta, criterios, regras e premiacao) -----
+  await seedEdicaoRotaSegura2026(prisma);
 
   console.log("Seed concluido.");
   console.log(`Usuario admin: ${adminEmail} / senha: ${adminSenha}`);

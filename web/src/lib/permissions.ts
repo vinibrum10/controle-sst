@@ -42,3 +42,24 @@ export function podeImportarDados(papel?: Papel | null): boolean {
 export function podeRestaurarDemo(papel?: Papel | null): boolean {
   return papel === "ADMIN";
 }
+
+// Rota Segura: somente o administrador cria edicoes, altera proposta,
+// criterios, regras condicionais, premiacao e clona edicoes.
+export function podeConfigurarRotaSegura(papel?: Papel | null): boolean {
+  return papel === "ADMIN";
+}
+
+// Rota Segura: cadastro de equipes e colaboradores.
+export function podeGerenciarEquipesRotaSegura(papel?: Papel | null): boolean {
+  return papel === "ADMIN" || papel === "GESTOR" || papel === "TST";
+}
+
+// Rota Segura: lancar/editar avaliacoes de APR e penalidades (SSO = TST).
+export function podeLancarAvaliacaoRotaSegura(papel?: Papel | null): boolean {
+  return papel === "ADMIN" || papel === "TST";
+}
+
+// Rota Segura: aprovar/reprovar riscos e medidas adicionais (Comite = GESTOR).
+export function podeDecidirComiteRotaSegura(papel?: Papel | null): boolean {
+  return papel === "ADMIN" || papel === "GESTOR";
+}

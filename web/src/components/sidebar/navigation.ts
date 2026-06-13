@@ -57,6 +57,25 @@ export const NAVIGATION_GROUPS: NavGroup[] = [
     ],
   },
   {
+    id: "rota-segura-2026",
+    label: "Rota Segura 2026",
+    icon: "icon-check",
+    defaultOpen: false,
+    items: [
+      { path: "/programas/rota-segura-2026", label: "Dashboard", title: "Rota Segura 2026 - Dashboard" },
+      {
+        path: "/programas/rota-segura-2026/configuracao",
+        label: "Configuração da edição",
+        title: "Rota Segura 2026 - Configuração da edição",
+        roles: ["ADMIN"],
+      },
+      { path: "/programas/rota-segura-2026/equipes", label: "Equipes e colaboradores", title: "Rota Segura 2026 - Equipes e colaboradores" },
+      { path: "/programas/rota-segura-2026/avaliacoes", label: "Avaliação de APR", title: "Rota Segura 2026 - Avaliação de APR" },
+      { path: "/programas/rota-segura-2026/penalidades", label: "Penalidades", title: "Rota Segura 2026 - Penalidades" },
+      { path: "/programas/rota-segura-2026/ranking", label: "Ranking", title: "Rota Segura 2026 - Ranking" },
+    ],
+  },
+  {
     id: "admin",
     label: "Administração",
     icon: "icon-database",

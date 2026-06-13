@@ -1,7 +1,11 @@
-const { enviarEmail } = require("./email");
+const { enviarEmail } = require("./mailer");
 
-const TIPO_LABELS = { ROTINEIRA: "Rotineira", EVENTUAL: "Eventual" };
-const PERIODO_LABELS = {
+const TYPE_LABELS = {
+  ROTINEIRA: "Rotineira",
+  EVENTUAL: "Eventual"
+};
+
+const ROUTINE_PERIOD_LABELS = {
   SEMANAL: "Semanal",
   MENSAL: "Mensal",
   TRIMESTRAL: "Trimestral",
@@ -9,68 +13,75 @@ const PERIODO_LABELS = {
   ANUAL: "Anual"
 };
 
-function formatarData(data) {
-  if (!data) return "Nao informado";
-  return new Date(data).toLocaleDateString("pt-BR");
+function formatarData(value) {
+  if (!value) return "-";
+  return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(value));
 }
 
-function descreverTipo(tarefa) {
-  const tipo = TIPO_LABELS[tarefa.tipo] || tarefa.tipo;
-  if (tarefa.tipo !== "ROTINEIRA") return tipo;
-  const periodo = PERIODO_LABELS[tarefa.periodoRotina] || tarefa.periodoRotina;
-  return `${tipo} (${periodo})`;
+function tipoLabel(tarefa) {
+  const tipo = TYPE_LABELS[tarefa.tipo] || tarefa.tipo;
+  if (tarefa.tipo === "ROTINEIRA") {
+    return `${tipo} (${ROUTINE_PERIOD_LABELS[tarefa.periodoRotina] || ROUTINE_PERIOD_LABELS.SEMANAL})`;
+  }
+  return tipo;
 }
 
-// Notifica por e-mail o responsavel quando uma nova tarefa e atribuida a ele.
-async function notificarTarefaCriada(tarefa) {
+// Notifica o responsavel pela tarefa recem-criada.
+async function enviarNotificacaoTarefaAtribuida(tarefa) {
   const responsavel = tarefa.responsavel;
-  if (!responsavel?.email) return { sucesso: false, motivo: "sem-email" };
+  if (!responsavel?.email) {
+    return { enviado: false, motivo: "Responsavel sem e-mail cadastrado." };
+  }
 
-  const texto = [
-    `Ola, ${responsavel.nome}.`,
+  const linhas = [
+    `Olá, ${responsavel.nome}.`,
     "",
-    "Uma nova tarefa foi atribuida para voce no Controle SST.",
+    "Uma tarefa foi atribuída para você no SGEPI - Sistema de Gestão de Equipes e Programas Institucionais.",
     "",
     `Tarefa: ${tarefa.titulo}`,
-    `Tipo: ${descreverTipo(tarefa)}`,
+    `Tipo: ${tipoLabel(tarefa)}`,
     `Prazo: ${formatarData(tarefa.prazo)}`,
     `Horas estimadas: ${tarefa.horasEstimadas}h`,
-    tarefa.descricao ? `Observacoes: ${tarefa.descricao}` : "",
+    tarefa.descricao ? `Observações: ${tarefa.descricao}` : "",
     "",
     "Acesse o sistema para acompanhar e atualizar o andamento."
-  ].filter(Boolean).join("\n");
+  ].filter(Boolean);
 
   return enviarEmail({
     to: responsavel.email,
-    subject: `Nova tarefa atribuida: ${tarefa.titulo}`,
-    text: texto
+    subject: `Nova tarefa atribuída: ${tarefa.titulo}`,
+    text: linhas.join("\n"),
+    html: `<p>${linhas.join("</p><p>")}</p>`
   });
 }
 
-// Notifica por e-mail a pessoa designada para apoiar em uma tarefa.
-async function notificarApoioAtribuido(tarefa, apoio) {
-  if (!apoio?.email) return { sucesso: false, motivo: "sem-email" };
-  const responsavel = tarefa.responsavel;
+// Notifica a pessoa designada para apoiar uma tarefa.
+async function enviarNotificacaoApoioAtribuido(tarefa, apoio) {
+  if (!apoio?.email) {
+    return { enviado: false, motivo: "Pessoa de apoio sem e-mail cadastrado." };
+  }
 
-  const texto = [
-    `Ola, ${apoio.nome}.`,
+  const responsavel = tarefa.responsavel;
+  const linhas = [
+    `Olá, ${apoio.nome}.`,
     "",
-    `${responsavel?.nome || "Uma pessoa da equipe"} solicitou seu apoio em uma tarefa de SST.`,
+    `${responsavel?.nome || "Uma pessoa da equipe"} solicitou seu apoio em uma tarefa no SGEPI.`,
     "",
     `Tarefa: ${tarefa.titulo}`,
-    `Responsavel: ${responsavel?.nome || "Nao informado"}`,
-    `Tipo: ${descreverTipo(tarefa)}`,
+    `Responsável: ${responsavel?.nome || "Não informado"}`,
+    `Tipo: ${tipoLabel(tarefa)}`,
     `Prazo: ${formatarData(tarefa.prazo)}`,
     `Horas estimadas: ${tarefa.horasEstimadas}h`,
     "",
-    "Acesse o sistema para alinhar a execucao do apoio."
-  ].join("\n");
+    "Acesse o sistema para alinhar a execução do apoio."
+  ];
 
   return enviarEmail({
     to: apoio.email,
     subject: `Pedido de apoio: ${tarefa.titulo}`,
-    text: texto
+    text: linhas.join("\n"),
+    html: `<p>${linhas.join("</p><p>")}</p>`
   });
 }
 
-module.exports = { notificarTarefaCriada, notificarApoioAtribuido };
+module.exports = { enviarNotificacaoTarefaAtribuida, enviarNotificacaoApoioAtribuido };

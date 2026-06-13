@@ -15,6 +15,21 @@ const dataRoutes = require("./routes/data.routes");
 const {
   treinamentos, inspecoes, auditorias, achados, planosAcao, rotasSeguras, anexos
 } = require("./routes/programas.routes");
+const {
+  edicoes: rsEdicoes,
+  propostas: rsPropostas,
+  criterios: rsCriterios,
+  regras: rsRegras,
+  premiacoes: rsPremiacoes,
+  equipes: rsEquipes,
+  colaboradores: rsColaboradores,
+  avaliacoes: rsAvaliacoes,
+  comite: rsComite,
+  penalidades: rsPenalidades,
+  ranking: rsRanking,
+  dashboard: rsDashboard,
+  relatorios: rsRelatorios
+} = require("./routes/rotaSegura2026.routes");
 
 const app = express();
 
@@ -37,6 +52,19 @@ app.use("/api/achados", achados);
 app.use("/api/planos-acao", planosAcao);
 app.use("/api/rotas-seguras", rotasSeguras);
 app.use("/api/anexos", anexos);
+app.use("/api/rota-segura/edicoes", rsEdicoes);
+app.use("/api/rota-segura/propostas", rsPropostas);
+app.use("/api/rota-segura/criterios", rsCriterios);
+app.use("/api/rota-segura/regras", rsRegras);
+app.use("/api/rota-segura/premiacoes", rsPremiacoes);
+app.use("/api/rota-segura/equipes", rsEquipes);
+app.use("/api/rota-segura/colaboradores", rsColaboradores);
+app.use("/api/rota-segura/avaliacoes", rsAvaliacoes);
+app.use("/api/rota-segura/comite", rsComite);
+app.use("/api/rota-segura/penalidades", rsPenalidades);
+app.use("/api/rota-segura/ranking", rsRanking);
+app.use("/api/rota-segura/dashboard", rsDashboard);
+app.use("/api/rota-segura/relatorios", rsRelatorios);
 
 app.get("/api/health", async (req, res) => {
   try {
@@ -81,6 +109,9 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   }
   if (err?.code === "P2002") {
     return res.status(409).json({ error: "Ja existe um registro com esses dados (conflito de unicidade)." });
+  }
+  if (err?.code === "P2003") {
+    return res.status(409).json({ error: "Este registro esta em uso por outros dados e nao pode ser removido/alterado." });
   }
   res.status(500).json({ error: "Erro interno no servidor." });
 });

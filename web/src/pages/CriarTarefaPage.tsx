@@ -62,8 +62,10 @@ export function CriarTarefaPage() {
 
       setForm(() => defaultState(responsavelId));
 
-      if (tarefa.emailEnviado === false) {
-        showToast("Tarefa criada, mas houve falha no envio do e-mail.");
+      if (tarefa.notificacaoEmail?.enviado) {
+        showToast("Tarefa adicionada ao plano semanal. E-mail de notificação enviado ao responsável.");
+      } else if (tarefa.notificacaoEmail?.motivo) {
+        showToast(`Tarefa adicionada ao plano semanal. ${tarefa.notificacaoEmail.motivo}`);
       } else {
         showToast("Tarefa adicionada ao plano semanal.");
       }

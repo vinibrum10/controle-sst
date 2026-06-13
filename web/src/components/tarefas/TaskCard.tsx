@@ -43,7 +43,7 @@ export function TaskCard({
 
   return (
     <article
-      className={`flex min-w-0 flex-col gap-3 rounded-[8px] border border-line bg-[linear-gradient(180deg,#ffffff_0%,#fbfcfd_100%)] p-3.5 shadow-[0_8px_18px_rgba(20,33,31,0.05)] transition-[transform,box-shadow] duration-150 dark:bg-none dark:bg-surface ${
+      className={`grid min-w-0 grid-cols-1 gap-3.5 rounded-[8px] border border-line bg-[linear-gradient(180deg,#ffffff_0%,#fbfcfd_100%)] p-3.5 shadow-[0_8px_18px_rgba(20,33,31,0.05)] transition-[transform,box-shadow] duration-150 sm:grid-cols-[minmax(0,1fr)_auto] dark:bg-none dark:bg-surface ${
         dragging ? "scale-[0.97] opacity-45" : "cursor-grab hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)]"
       }`}
       draggable

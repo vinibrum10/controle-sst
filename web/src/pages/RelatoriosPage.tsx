@@ -75,12 +75,12 @@ export function RelatoriosPage() {
         title="Relatórios"
         description="Resumo de tarefas, equipe e programas de SST para o período selecionado."
         headerExtra={
-          <div className="flex flex-wrap items-end justify-end gap-2">
+          <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-end sm:justify-end">
             <label className="grid gap-1.5 text-[0.82rem] font-bold text-muted">
               De
               <input
                 type="date"
-                className={`${fieldClasses} w-[160px]`}
+                className={`${fieldClasses} w-full sm:w-[160px]`}
                 value={inicio}
                 max={fim}
                 onChange={(e) => setInicio(e.target.value)}
@@ -90,13 +90,13 @@ export function RelatoriosPage() {
               Até
               <input
                 type="date"
-                className={`${fieldClasses} w-[160px]`}
+                className={`${fieldClasses} w-full sm:w-[160px]`}
                 value={fim}
                 min={inicio}
                 onChange={(e) => setFim(e.target.value)}
               />
             </label>
-            <Button variant="download" onClick={handleExportCsv} disabled={!relatorio}>
+            <Button variant="download" onClick={handleExportCsv} disabled={!relatorio} full className="sm:w-auto">
               <Icon id="icon-download" />
               Exportar CSV
             </Button>

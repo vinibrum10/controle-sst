@@ -35,8 +35,10 @@ export function AjudaPage() {
     try {
       const resposta = await pedirAjuda(selectedId);
       setResultado(resposta.mensagem);
-      if (resposta.emailEnviado === false) {
-        showToast("Ajuda atribuída, mas houve falha no envio do e-mail.");
+      if (resposta.notificacaoEmail?.enviado) {
+        showToast("Ajuda atribuída automaticamente. E-mail de notificação enviado ao apoio.");
+      } else if (resposta.notificacaoEmail?.motivo) {
+        showToast(`Ajuda atribuída automaticamente. ${resposta.notificacaoEmail.motivo}`);
       } else {
         showToast("Ajuda atribuída automaticamente.");
       }
@@ -52,13 +54,13 @@ export function AjudaPage() {
   return (
     <div className="grid gap-[18px]">
       <div className="flex justify-end">
-        <label className="grid gap-1.5 text-[0.82rem] font-bold text-muted">
+        <label className="grid w-full gap-1.5 text-[0.82rem] font-bold text-muted sm:w-auto">
           Semana
           <input
             type="week"
             value={semana}
             onChange={(event) => setSemana(event.target.value)}
-            className="h-[40px] w-[160px] rounded-[8px] border border-line bg-surface-soft px-2.5 text-text outline-none focus:border-teal"
+            className="h-[40px] w-full rounded-[8px] border border-line bg-surface-soft px-2.5 text-text outline-none focus:border-teal sm:w-[160px]"
           />
         </label>
       </div>

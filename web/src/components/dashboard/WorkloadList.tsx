@@ -11,7 +11,7 @@ export function WorkloadList({ cargaPorPessoa }: WorkloadListProps) {
   }
 
   return (
-    <div className="grid gap-2.5">
+    <div className="grid grid-cols-1 gap-2.5">
       {cargaPorPessoa.map(({ funcionario, carga, capacidade, percentual, livre }) => {
         const fillClass = percentual >= 100 ? "bg-red" : percentual >= 80 ? "bg-amber" : "bg-teal";
         const ativo = funcionario.ativo !== false;
@@ -28,15 +28,15 @@ export function WorkloadList({ cargaPorPessoa }: WorkloadListProps) {
             className="rounded-[8px] border border-line bg-gradient-to-b from-white to-[#fbfcfd] p-3 shadow-[0_8px_18px_rgba(20,33,31,0.05)] dark:from-surface dark:to-surface"
           >
             <header className="flex items-center justify-between gap-2.5">
-              <div>
-                <strong className="block">{funcionario.nome}</strong>
-                <span className="text-muted">
+              <div className="min-w-0">
+                <strong className="block truncate">{funcionario.nome}</strong>
+                <span className="block truncate text-muted">
                   {funcionario.funcao}
                   {ativo ? "" : " - inativo"}
                 </span>
               </div>
               <span
-                className={`inline-flex min-h-[24px] items-center rounded-full px-2 ${
+                className={`inline-flex min-h-[24px] shrink-0 items-center whitespace-nowrap rounded-full px-2 ${
                   ativo ? "bg-surface-strong" : "bg-[#eef0f2] text-[#68736f]"
                 }`}
               >
