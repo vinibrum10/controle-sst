@@ -12,14 +12,13 @@ import { ApiError } from "../lib/api";
 import { listarTarefas } from "../lib/tarefas";
 import { currentWeekValue } from "../lib/format";
 import { isDone, isLate, wasOnTime } from "../lib/tarefaHelpers";
+import { resizePhoto } from "../lib/image";
 import type { Funcionario } from "../types/funcionario";
 import type { Tarefa } from "../types/tarefa";
 
 const fieldClasses =
   "min-h-[40px] w-full rounded-[8px] border border-line bg-surface-soft px-2.5 text-text outline-none transition-colors focus:border-teal focus:bg-white dark:focus:bg-surface-soft";
 const labelClasses = "grid gap-1.5 text-[0.83rem] font-extrabold text-muted";
-
-const PHOTO_SIZE = 160;
 
 function defaultForm() {
   return { nome: "", funcao: "", email: "", capacidade: 32 };
@@ -261,33 +260,3 @@ export function FuncionariosPage() {
   );
 }
 
-function resizePhoto(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    if (!file.type.startsWith("image/")) {
-      reject(new Error("Arquivo inválido"));
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onerror = reject;
-    reader.onload = () => {
-      const image = new Image();
-      image.onerror = reject;
-      image.onload = () => {
-        const size = PHOTO_SIZE;
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-        canvas.width = size;
-        canvas.height = size;
-
-        const side = Math.min(image.width, image.height);
-        const sourceX = (image.width - side) / 2;
-        const sourceY = (image.height - side) / 2;
-        context?.drawImage(image, sourceX, sourceY, side, side, 0, 0, size, size);
-        resolve(canvas.toDataURL("image/jpeg", 0.82));
-      };
-      image.src = reader.result as string;
-    };
-    reader.readAsDataURL(file);
-  });
-}

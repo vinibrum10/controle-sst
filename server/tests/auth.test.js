@@ -122,6 +122,58 @@ describe("GET /api/auth/me", () => {
   });
 });
 
+describe("PATCH /api/auth/me", () => {
+  test("retorna 401 sem token", async () => {
+    const res = await request(app).patch("/api/auth/me").send({ nome: "Novo Nome" });
+    expect(res.status).toBe(401);
+  });
+
+  test("atualiza dados de perfil do proprio usuario", async () => {
+    const usuario = await criarUsuario({ email: "perfil@teste.com" });
+
+    const res = await request(app)
+      .patch("/api/auth/me")
+      .set("Authorization", authHeader(usuario))
+      .send({
+        nome: "Nome Atualizado",
+        telefone: "(11) 99999-0000",
+        cargo: "Tecnico de Seguranca",
+        setor: "SST",
+        avatarUrl: "data:image/jpeg;base64,abc123"
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.usuario.nome).toBe("Nome Atualizado");
+    expect(res.body.usuario.telefone).toBe("(11) 99999-0000");
+    expect(res.body.usuario.cargo).toBe("Tecnico de Seguranca");
+    expect(res.body.usuario.setor).toBe("SST");
+    expect(res.body.usuario.avatarUrl).toBe("data:image/jpeg;base64,abc123");
+  });
+
+  test("rejeita e-mail ja usado por outro usuario", async () => {
+    const usuario = await criarUsuario({ email: "perfilA@teste.com" });
+    await criarUsuario({ email: "perfilB@teste.com" });
+
+    const res = await request(app)
+      .patch("/api/auth/me")
+      .set("Authorization", authHeader(usuario))
+      .send({ email: "perfilB@teste.com" });
+
+    expect(res.status).toBe(409);
+  });
+
+  test("rejeita dados invalidos", async () => {
+    const usuario = await criarUsuario({ email: "perfilinvalido@teste.com" });
+
+    const res = await request(app)
+      .patch("/api/auth/me")
+      .set("Authorization", authHeader(usuario))
+      .send({ email: "nao-e-email" });
+
+    expect(res.status).toBe(400);
+  });
+});
+
 describe("POST /api/auth/senha", () => {
   test("altera a senha com a senha atual correta", async () => {
     const usuario = await criarUsuario({ email: "trocasenha@teste.com" });

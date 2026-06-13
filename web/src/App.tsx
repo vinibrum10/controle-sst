@@ -1,6 +1,7 @@
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { AppearanceProvider } from "./contexts/AppearanceContext";
 import { ToastProvider } from "./contexts/ToastContext";
 import { AppRoutes } from "./routes/AppRoutes";
 import { IconSprite } from "./components/ui/IconSprite";
@@ -9,12 +10,14 @@ function App() {
   return (
     <BrowserRouter>
       <ThemeProvider>
-        <AuthProvider>
-          <ToastProvider>
-            <IconSprite />
-            <AppRoutes />
-          </ToastProvider>
-        </AuthProvider>
+        <AppearanceProvider>
+          <AuthProvider>
+            <ToastProvider>
+              <IconSprite />
+              <AppRoutes />
+            </ToastProvider>
+          </AuthProvider>
+        </AppearanceProvider>
       </ThemeProvider>
     </BrowserRouter>
   );

@@ -21,3 +21,16 @@ export function getMe() {
 export function changePassword(senhaAtual: string, novaSenha: string) {
   return apiFetch<{ mensagem: string }>("/auth/senha", { method: "POST", body: { senhaAtual, novaSenha } });
 }
+
+export interface AtualizarPerfilInput {
+  nome?: string;
+  email?: string;
+  telefone?: string | null;
+  cargo?: string | null;
+  setor?: string | null;
+  avatarUrl?: string | null;
+}
+
+export function updateMe(dados: AtualizarPerfilInput) {
+  return apiFetch<{ usuario: Usuario }>("/auth/me", { method: "PATCH", body: dados });
+}

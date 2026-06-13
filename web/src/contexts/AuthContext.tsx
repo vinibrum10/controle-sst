@@ -49,8 +49,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUsuario(null);
   }, []);
 
+  const atualizarUsuario = useCallback((atualizado: Usuario) => {
+    setUsuario(atualizado);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ usuario, carregando, login, register, logout }}>
+    <AuthContext.Provider value={{ usuario, carregando, login, register, logout, atualizarUsuario }}>
       {children}
     </AuthContext.Provider>
   );

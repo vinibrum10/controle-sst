@@ -7,4 +7,8 @@ export interface Usuario {
   papel: Papel;
   provedor: string;
   funcionarioId: string | null;
+  telefone: string | null;
+  cargo: string | null;
+  setor: string | null;
+  avatarUrl: string | null;
 }

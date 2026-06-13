@@ -28,6 +28,15 @@ const changePasswordSchema = z.object({
   novaSenha: z.string().min(6, "A nova senha deve ter pelo menos 6 caracteres.")
 });
 
+const updateMeSchema = z.object({
+  nome: z.string().trim().min(2, "Informe o nome completo.").optional(),
+  email: z.string().trim().email("Informe um e-mail valido.").optional(),
+  telefone: z.string().trim().max(30, "Telefone invalido.").nullable().optional(),
+  cargo: z.string().trim().max(120, "Cargo invalido.").nullable().optional(),
+  setor: z.string().trim().max(120, "Setor invalido.").nullable().optional(),
+  avatarUrl: z.string().trim().max(2_000_000, "Imagem muito grande.").nullable().optional()
+});
+
 function toPublicUser(usuario) {
   return {
     id: usuario.id,
@@ -35,7 +44,11 @@ function toPublicUser(usuario) {
     email: usuario.email,
     papel: usuario.papel,
     provedor: usuario.provedor,
-    funcionarioId: usuario.funcionarioId
+    funcionarioId: usuario.funcionarioId,
+    telefone: usuario.telefone,
+    cargo: usuario.cargo,
+    setor: usuario.setor,
+    avatarUrl: usuario.avatarUrl
   };
 }
 
@@ -118,6 +131,26 @@ router.get("/me", requireAuth, asyncHandler(async (req, res) => {
     return res.status(401).json({ error: "Usuario nao encontrado." });
   }
   return res.json({ usuario: toPublicUser(usuario) });
+}));
+
+// Atualiza os dados de perfil do proprio usuario autenticado (nome, e-mail,
+// cargo, setor, telefone e avatar). Papel/permissoes nao sao alteraveis aqui.
+router.patch("/me", requireAuth, validateBody(updateMeSchema), asyncHandler(async (req, res) => {
+  const usuario = await prisma.usuario.findUnique({ where: { id: req.user.sub } });
+  if (!usuario || !usuario.ativo) {
+    return res.status(401).json({ error: "Usuario nao encontrado." });
+  }
+
+  const { email } = req.body;
+  if (email && email !== usuario.email) {
+    const existente = await prisma.usuario.findUnique({ where: { email } });
+    if (existente) {
+      return res.status(409).json({ error: "Ja existe uma conta com este e-mail." });
+    }
+  }
+
+  const atualizado = await prisma.usuario.update({ where: { id: usuario.id }, data: req.body });
+  return res.json({ usuario: toPublicUser(atualizado) });
 }));
 
 module.exports = router;

@@ -37,6 +37,10 @@ model Usuario {
   provedor     ProvedorAuth @default(LOCAL)
   provedorId   String?
   ativo        Boolean      @default(true)
+  telefone     String?
+  cargo        String?
+  setor        String?
+  avatarUrl    String?
   funcionarioId String?     @unique
   funcionario  Funcionario? @relation(fields: [funcionarioId], references: [id])
   criadoEm     DateTime     @default(now())
