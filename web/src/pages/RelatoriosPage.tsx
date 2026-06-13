@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Panel, EmptyState } from "../components/ui/Panel";
 import { Button } from "../components/ui/Button";
 import { Icon } from "../components/ui/IconSprite";
+import { SummaryCard } from "../components/ui/SummaryCard";
 import { useRelatorio } from "../hooks/useRelatorio";
 import { programaStatusLabel } from "../lib/enums";
 import { shiftDate, toDateInputValue } from "../lib/format";
@@ -64,7 +65,7 @@ export function RelatoriosPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `relatorio-controle-sst-${inicio}-a-${fim}.csv`;
+    link.download = `relatorio-sgepi-${inicio}-a-${fim}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   }
@@ -108,10 +109,10 @@ export function RelatoriosPage() {
           <p className="text-muted">Carregando relatório...</p>
         ) : (
           <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
-            <ResumoCard label="Tarefas no período" value={relatorio.tarefas.total} hint={`${relatorio.tarefas.horasEstimadas}h estimadas`} />
-            <ResumoCard label="Concluídas" value={relatorio.tarefas.concluidas} hint={`${relatorio.tarefas.entregasNoPrazoPercent}% no prazo`} />
-            <ResumoCard label="Em andamento" value={relatorio.tarefas.emAndamento} hint={`${relatorio.tarefas.pendentes} pendentes`} />
-            <ResumoCard label="Atrasadas" value={relatorio.tarefas.atrasadas} hint="ainda não concluídas" />
+            <SummaryCard label="Tarefas no período" value={relatorio.tarefas.total} hint={`${relatorio.tarefas.horasEstimadas}h estimadas`} />
+            <SummaryCard label="Concluídas" value={relatorio.tarefas.concluidas} hint={`${relatorio.tarefas.entregasNoPrazoPercent}% no prazo`} />
+            <SummaryCard label="Em andamento" value={relatorio.tarefas.emAndamento} hint={`${relatorio.tarefas.pendentes} pendentes`} />
+            <SummaryCard label="Atrasadas" value={relatorio.tarefas.atrasadas} hint="ainda não concluídas" />
           </div>
         )}
       </Panel>
@@ -164,17 +165,6 @@ export function RelatoriosPage() {
         </Panel>
       )}
     </div>
-  );
-}
-
-function ResumoCard({ label, value, hint }: { label: string; value: number; hint: string }) {
-  return (
-    <article className="min-h-[112px] rounded-[8px] border border-[rgba(15,130,120,0.12)] bg-gradient-to-b from-white to-surface-soft p-[18px] shadow-[0_12px_30px_rgba(20,33,31,0.08)] dark:from-surface dark:to-surface">
-      <span className="mb-3 block h-[3px] w-[38px] rounded-full bg-teal" aria-hidden="true" />
-      <span className="block text-[0.82rem] font-bold text-muted">{label}</span>
-      <strong className="my-2 block text-[2rem] leading-none">{value}</strong>
-      <small className="text-muted">{hint}</small>
-    </article>
   );
 }
 

@@ -13,10 +13,11 @@
   --color-muted: #60716c;
   --color-line: #d9e2e4;
   --color-navy: #17324d;
-  --color-sidebar: #0f2522;
-  --color-sidebar-strong: #183631;
-  --color-teal: #0f8278;
-  --color-teal-strong: #0a6961;
+  --color-sidebar: #10283d;
+  --color-sidebar-strong: #1c3650;
+  --color-teal: #2c5d8a;
+  --color-teal-strong: #1f4567;
+  --color-teal-soft: #e2ebf2;
   --color-green: #24784c;
   --color-green-strong: #1c633e;
   --color-amber: #a76309;
@@ -27,6 +28,22 @@
   --color-neutral-button: #f4f6f7;
 
   --radius-base: 8px;
+
+  /* Escala tipográfica: números/destaques de painel e rótulos em caixa alta */
+  --text-display: 2rem;
+  --text-display--line-height: 1.1;
+  --text-display--letter-spacing: -0.01em;
+  --text-display--font-weight: 800;
+
+  --text-eyebrow: 0.74rem;
+  --text-eyebrow--line-height: 1.4;
+  --text-eyebrow--letter-spacing: 0.07em;
+  --text-eyebrow--font-weight: 800;
+
+  /* Elevação: sombra padrão sutil para cards estáticos, mais marcada para overlays/hover */
+  --shadow-card: 0 1px 2px rgba(15, 23, 22, 0.04), 0 1px 0 rgba(15, 23, 22, 0.03);
+  --shadow-card-lg: 0 12px 30px rgba(20, 33, 31, 0.08);
+  --shadow-floating: 0 24px 60px rgba(5, 14, 13, 0.45);
 }
 
 [data-theme="dark"] {
@@ -37,8 +54,9 @@
   --color-text: #edf2f0;
   --color-muted: #91a39e;
   --color-line: #2d423d;
-  --color-teal: #12c9b8;
-  --color-teal-strong: #10a89b;
+  --color-teal: #5b9bf0;
+  --color-teal-strong: #3f7bc7;
+  --color-teal-soft: rgba(91, 155, 240, 0.14);
   --color-green: #45c462;
   --color-green-strong: #39a855;
   --color-amber: #f2a913;

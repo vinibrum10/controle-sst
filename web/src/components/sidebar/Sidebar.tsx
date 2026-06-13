@@ -42,16 +42,16 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
 
   return (
     <aside
-      className={`flex h-screen flex-col gap-[22px] overflow-y-auto bg-gradient-to-b from-sidebar to-[#0b1917] p-[22px] text-[#f7fbfa] shadow-[12px_0_34px_rgba(15,37,34,0.14)] dark:from-[#080f0e] dark:to-[#080f0e] ${className}`}
+      className={`flex h-screen flex-col gap-[22px] overflow-y-auto bg-gradient-to-b from-sidebar to-[#0a1825] p-[22px] text-[#f5f8fb] shadow-[12px_0_34px_rgba(13,27,40,0.18)] dark:from-[#070f1a] dark:to-[#070f1a] ${className}`}
       aria-label="Navegação principal"
     >
       <div className="flex min-h-[48px] items-center gap-3">
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-[8px] bg-[#dff4ef] font-extrabold text-teal-strong">
-          SST
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-[8px] bg-gradient-to-b from-[#6fa0c8] to-teal text-white shadow-card" aria-hidden="true">
+          <Icon id="icon-shield" className="h-6 w-6" />
         </div>
         <div className="min-w-0">
-          <strong className="block text-base">SGEPI</strong>
-          <span className="mt-0.5 block truncate text-[0.82rem] text-[#b9c9c5]">Equipes e Programas Institucionais</span>
+          <strong className="block text-base tracking-tight">SGEPI</strong>
+          <span className="mt-0.5 block truncate text-eyebrow text-[#93a7b8]">Equipes, Programas e Indicadores</span>
         </div>
       </div>
 
@@ -64,8 +64,8 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
             <div key={group.id} className="grid gap-1.5">
               <button
                 type="button"
-                className={`flex min-h-[42px] w-full items-center justify-between gap-2.5 rounded-[8px] border border-transparent px-2.5 font-extrabold text-[#e6f0ed] transition-colors ${
-                  isOpen ? "border-[#7ed6cc]/18 bg-sidebar-strong dark:bg-[#16221f]" : "hover:border-[#7ed6cc]/18 hover:bg-sidebar-strong dark:hover:bg-[#16221f]"
+                className={`flex min-h-[42px] w-full items-center justify-between gap-2.5 rounded-[8px] border border-transparent px-2.5 font-extrabold text-[#e8eef5] transition-colors ${
+                  isOpen ? "border-[#6fa0c8]/18 bg-sidebar-strong dark:bg-[#17283c]" : "hover:border-[#6fa0c8]/18 hover:bg-sidebar-strong dark:hover:bg-[#17283c]"
                 }`}
                 aria-expanded={isOpen}
                 onClick={() => toggleGroup(group.id, group.defaultOpen)}
@@ -78,7 +78,7 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
               </button>
 
               {isOpen && (
-                <div className="ml-[18px] grid gap-1.5 border-l border-[#d4e1de]/14 pl-2.5">
+                <div className="ml-[18px] grid gap-1.5 border-l border-[#d6e0e8]/14 pl-2.5">
                   {group.items.map((item) => (
                     <NavLink
                       key={item.path}
@@ -87,8 +87,8 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
                       className={({ isActive }) =>
                         `flex min-h-[38px] w-full items-center justify-start rounded-[8px] px-2.5 text-[0.88rem] font-extrabold transition-colors ${
                           isActive
-                            ? "bg-[#213d38] text-white shadow-[inset_3px_0_0_#7ed6cc]"
-                            : "text-[#c6d6d2] hover:bg-[#213d38] hover:text-white"
+                            ? "bg-[#1f3a52] text-white shadow-[inset_3px_0_0_#6fa0c8]"
+                            : "text-[#c9d4dc] hover:bg-[#1f3a52] hover:text-white"
                         }`
                       }
                     >

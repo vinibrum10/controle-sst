@@ -36,7 +36,7 @@ async function enviarNotificacaoTarefaAtribuida(tarefa) {
   const linhas = [
     `Olá, ${responsavel.nome}.`,
     "",
-    "Uma tarefa foi atribuída para você no SGEPI - Sistema de Gestão de Equipes e Programas Institucionais.",
+    "Uma tarefa foi atribuída para você no SGEPI - Sistema de Gestão de Equipes, Programas e Indicadores.",
     "",
     `Tarefa: ${tarefa.titulo}`,
     `Tipo: ${tipoLabel(tarefa)}`,

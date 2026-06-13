@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Sidebar } from "../sidebar/Sidebar";
 import { Header } from "./Header";
-import { IconSprite } from "../ui/IconSprite";
 
 const SIDEBAR_STORAGE_KEY = "controle-sst-sidebar";
 
@@ -29,8 +28,6 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen lg:grid lg:transition-[grid-template-columns] lg:duration-200" style={{ gridTemplateColumns: collapsed ? "0 minmax(0,1fr)" : "260px minmax(0,1fr)" }}>
-      <IconSprite />
-
       {mobileOpen && (
         <div
           className="fixed inset-0 z-30 bg-black/50 lg:hidden"

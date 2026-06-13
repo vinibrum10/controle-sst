@@ -3,6 +3,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ToastProvider } from "./contexts/ToastContext";
 import { AppRoutes } from "./routes/AppRoutes";
+import { IconSprite } from "./components/ui/IconSprite";
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
       <ThemeProvider>
         <AuthProvider>
           <ToastProvider>
+            <IconSprite />
             <AppRoutes />
           </ToastProvider>
         </AuthProvider>

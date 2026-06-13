@@ -1,4 +1,4 @@
-# SGEPI — Sistema de Gestão de Equipes e Programas Institucionais
+# SGEPI — Sistema de Gestão de Equipes, Programas e Indicadores
 
 Sistema online para gerenciar tarefas semanais de equipes, prazos, pedidos de apoio e indicadores de desempenho, além de programas institucionais de SST (Rota Segura, Rota Segura 2026, Treinamentos, Inspeções e Auditorias). Os dados ficam armazenados em um banco PostgreSQL e podem ser acessados por toda a equipe, com login por usuário e controle de permissões por perfil.
 
@@ -126,22 +126,57 @@ Após o primeiro deploy, rode `npm run seed` (via Shell do Render) para criar o 
 
 ## Deploy no Railway
 
-O projeto inclui um `railway.json` com a configuração do build, start e health check:
+**Produção:** https://controle-sst-production.up.railway.app
 
-- Build Command: `npm install && npm run build && npx prisma migrate deploy`
-- Start Command: `npm start`
-- Health Check Path: `/api/health`
-- Variáveis de ambiente obrigatórias: `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `NODE_ENV=production`, `PORT` (o Railway define automaticamente). Para envio automático de e-mail, configure também `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`.
+O projeto inclui um único arquivo de configuração, `railway.toml` (fonte única de verdade do build/start - o antigo `railway.json`, que duplicava e conflitava com essa configuração, foi removido):
+
+- Build Command: `npm install && npm run build && npx prisma generate`
+- Start Command: `npx prisma migrate deploy && npm start`
+- Variáveis de ambiente obrigatórias: `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `NODE_ENV=production`, `PORT` (o Railway define automaticamente).
+- Variáveis opcionais (envio automático de e-mail): `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`. Sem elas, o sistema continua funcionando normalmente e apenas registra no log que o e-mail não foi enviado.
+
+> As migrações (`npx prisma migrate deploy`) rodam no `startCommand`, não no build, para garantir que o banco já esteja acessível no momento em que são aplicadas. Por isso, não há `healthcheckPath` configurado: o primeiro health check do Railway pode ocorrer antes do `prisma migrate deploy` terminar e gerar um falso negativo, derrubando o deploy. Verifique `/api/health` manualmente após o deploy (veja checklist abaixo).
 
 Requisitos:
 
 - Node.js `^20.19.0` ou `>=22.12.0` (definido em `.nvmrc` e em `engines` do `package.json`, exigido pelo Vite 8 usado no front-end).
 
-Checklist de verificação pós-deploy:
+### Como testar produção
 
-1. Acompanhe os logs do build no painel do Railway e confirme que `web/dist` foi gerado (procure por `vite build` e `built in`) e que `npx prisma migrate deploy` rodou sem erros.
+```bash
+curl https://controle-sst-production.up.railway.app/api/health
+# Resposta esperada: {"status":"ok","database":"ok"}
+```
+
+Em seguida, acesse `https://controle-sst-production.up.railway.app` no navegador e confirme que a tela de login do SGEPI carrega.
+
+### Checklist de smoke test
+
+Após cada deploy em produção, valide:
+
+1. **Deploy**
+   - `GET /api/health` retorna `{"status":"ok","database":"ok"}`.
+   - A SPA carrega na raiz do domínio (tela de login do SGEPI).
+   - Os logs do build mostram `web/dist` gerado (`vite build` / `built in`) e o `npx prisma migrate deploy` do start sem erros.
+2. **Login e RBAC**
+   - Login como `ADMIN` funciona e o menu mostra todas as áreas (Usuários, Configuração do Rota Segura 2026, Dados).
+   - Login como `COLABORADOR` não exibe e não permite acessar áreas administrativas (Usuários, Configuração do Rota Segura 2026, Dados).
+3. **Dashboard**: indicadores, carga por pessoa e rankings carregam sem erro.
+4. **Tarefas**
+   - Quadro Kanban carrega e permite criar uma tarefa.
+   - Ao criar uma tarefa com responsável com e-mail cadastrado (ou designar apoio), o log do servidor mostra `[email] Notificação ... enviada para ...` (ou o aviso de SMTP não configurado).
+5. **Funcionários, Treinamentos, Inspeções**: telas carregam, listam e permitem cadastro/edição conforme o perfil.
+6. **Rota Segura (legado)** e **Rota Segura 2026**: telas carregam; como `ADMIN`, a Configuração do Rota Segura 2026 (edições, critérios, regras, equipes) está acessível.
+7. **Ranking do Rota Segura 2026** exibe a classificação das equipes/colaboradores.
+8. **Responsividade mobile (375px de largura)**
+   - Não há overflow horizontal em nenhuma tela.
+   - Botões não ficam sobrepostos a textos, campos ou filtros.
+
+Checklist de verificação pós-deploy (primeira execução):
+
+1. Acompanhe os logs do build no painel do Railway e confirme que `web/dist` foi gerado (procure por `vite build` e `built in`) e que o `npx prisma migrate deploy` do start rodou sem erros.
 2. Acesse `https://<seu-dominio>.up.railway.app/api/health` e confirme `{"status":"ok","database":"ok"}`.
 3. Acesse a raiz do domínio e confirme que a SPA React carrega (tela de login).
 4. Confirme nas variáveis de ambiente do serviço: `DATABASE_URL` (apontando para o Postgres do projeto), `JWT_SECRET`, `JWT_EXPIRES_IN` e `NODE_ENV=production`.
 5. Após o primeiro deploy, rode `npm run seed` (via terminal/CLI do Railway) para criar o usuário administrador e os dados de demonstração, se necessário.
-6. Se for usar envio automático de e-mail, confirme `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS` e `SMTP_FROM` e cheque os logs do servidor ao criar uma tarefa para confirmar o envio (`[email] Notificação ... enviada para ...`).
+6. Se for usar envio automático de e-mail, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS` e `SMTP_FROM` e cheque os logs do servidor ao criar uma tarefa para confirmar o envio (`[email] Notificação ... enviada para ...`).
