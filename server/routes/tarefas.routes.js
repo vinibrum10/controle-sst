@@ -8,6 +8,7 @@ const { requireAuth } = require("../middleware/auth");
 const { findOrCreateSemana } = require("../utils/semana");
 const { tarefaInclude: include, serializeTarefa } = require("../utils/tarefaSerializer");
 const { enviarNotificacaoTarefaAtribuida } = require("../utils/notificacoes");
+const { notificarTarefaAtribuida } = require("../utils/notificacoesInApp");
 
 const router = express.Router();
 
@@ -98,6 +99,7 @@ router.post("/", validateBody(tarefaSchema), asyncHandler(async (req, res) => {
   });
 
   const notificacaoEmail = await enviarNotificacaoTarefaAtribuida(tarefa);
+  await notificarTarefaAtribuida(tarefa);
 
   res.status(201).json({ ...serializeTarefa(tarefa), notificacaoEmail });
 }));
@@ -133,6 +135,11 @@ router.put("/:id", validateBody(tarefaUpdateSchema), asyncHandler(async (req, re
   }
 
   const tarefa = await prisma.tarefa.update({ where: { id: req.params.id }, data, include });
+
+  if (body.responsavelId && body.responsavelId !== existente.responsavelId) {
+    await notificarTarefaAtribuida(tarefa);
+  }
+
   res.json(serializeTarefa(tarefa));
 }));
 

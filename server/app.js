@@ -13,6 +13,7 @@ const relatoriosRoutes = require("./routes/relatorios.routes");
 const ajudaRoutes = require("./routes/ajuda.routes");
 const dataRoutes = require("./routes/data.routes");
 const permissoesRoutes = require("./routes/permissoes.routes");
+const notificacoesRoutes = require("./routes/notificacoes.routes");
 const {
   treinamentos, inspecoes, auditorias, achados, planosAcao, rotasSeguras, anexos
 } = require("./routes/programas.routes");
@@ -47,6 +48,7 @@ app.use("/api/relatorios", relatoriosRoutes);
 app.use("/api/ajuda", ajudaRoutes);
 app.use("/api/dados", dataRoutes);
 app.use("/api/permissoes", permissoesRoutes);
+app.use("/api/notificacoes", notificacoesRoutes);
 app.use("/api/treinamentos", treinamentos);
 app.use("/api/inspecoes", inspecoes);
 app.use("/api/auditorias", auditorias);

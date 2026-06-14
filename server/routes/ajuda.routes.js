@@ -8,6 +8,7 @@ const { requireAuth } = require("../middleware/auth");
 const { tarefaInclude, serializeTarefa } = require("../utils/tarefaSerializer");
 const { isDone, isLate, tarefasDaSemana, cargaPessoa } = require("../utils/metrics");
 const { enviarNotificacaoApoioAtribuido } = require("../utils/notificacoes");
+const { notificarApoioSolicitado } = require("../utils/notificacoesInApp");
 
 const router = express.Router();
 
@@ -105,6 +106,7 @@ router.post("/solicitar", validateBody(z.object({ tarefaId: z.string().min(1) })
   ]);
 
   const notificacaoEmail = await enviarNotificacaoApoioAtribuido(serializeTarefa(tarefaAtualizada), escolhido.pessoa);
+  await notificarApoioSolicitado(escolhido.pessoa.id, tarefaAtualizada);
 
   res.json({
     tarefa: serializeTarefa(tarefaAtualizada),
