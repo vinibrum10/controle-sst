@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "ChavePermissao" ADD VALUE 'GERENCIAR_CADASTROS';

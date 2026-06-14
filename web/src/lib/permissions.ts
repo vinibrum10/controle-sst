@@ -30,7 +30,8 @@ export type ChavePermissao =
   | "GERENCIAR_EQUIPES_ROTA_SEGURA"
   | "LANCAR_AVALIACAO_ROTA_SEGURA"
   | "DECIDIR_COMITE_ROTA_SEGURA"
-  | "EXCLUIR_AVALIACAO_ROTA_SEGURA";
+  | "EXCLUIR_AVALIACAO_ROTA_SEGURA"
+  | "GERENCIAR_CADASTROS";
 
 export const CHAVES_PERMISSAO: ChavePermissao[] = [
   "GERENCIAR_EQUIPE",
@@ -45,6 +46,7 @@ export const CHAVES_PERMISSAO: ChavePermissao[] = [
   "LANCAR_AVALIACAO_ROTA_SEGURA",
   "DECIDIR_COMITE_ROTA_SEGURA",
   "EXCLUIR_AVALIACAO_ROTA_SEGURA",
+  "GERENCIAR_CADASTROS",
 ];
 
 export type MatrizPermissoes = Record<Papel, Record<ChavePermissao, boolean>>;
@@ -70,6 +72,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       { label: "Exportar dados do sistema", chave: "EXPORTAR_DADOS" },
       { label: "Importar dados para o sistema", chave: "IMPORTAR_DADOS" },
       { label: "Restaurar dados de demonstração", chave: "RESTAURAR_DEMO" },
+      { label: "Gerenciar cadastros gerais (unidades, áreas, cargos, equipes e tipos)", chave: "GERENCIAR_CADASTROS" },
     ],
   },
   {
@@ -105,6 +108,7 @@ export const MATRIZ_PADRAO: MatrizPermissoes = {
     LANCAR_AVALIACAO_ROTA_SEGURA: true,
     DECIDIR_COMITE_ROTA_SEGURA: true,
     EXCLUIR_AVALIACAO_ROTA_SEGURA: true,
+    GERENCIAR_CADASTROS: true,
   },
   GESTOR: {
     GERENCIAR_EQUIPE: true,
@@ -119,6 +123,7 @@ export const MATRIZ_PADRAO: MatrizPermissoes = {
     LANCAR_AVALIACAO_ROTA_SEGURA: false,
     DECIDIR_COMITE_ROTA_SEGURA: true,
     EXCLUIR_AVALIACAO_ROTA_SEGURA: false,
+    GERENCIAR_CADASTROS: true,
   },
   TST: {
     GERENCIAR_EQUIPE: false,
@@ -133,6 +138,7 @@ export const MATRIZ_PADRAO: MatrizPermissoes = {
     LANCAR_AVALIACAO_ROTA_SEGURA: true,
     DECIDIR_COMITE_ROTA_SEGURA: false,
     EXCLUIR_AVALIACAO_ROTA_SEGURA: false,
+    GERENCIAR_CADASTROS: false,
   },
   VISUALIZADOR: {
     GERENCIAR_EQUIPE: true,
@@ -147,6 +153,7 @@ export const MATRIZ_PADRAO: MatrizPermissoes = {
     LANCAR_AVALIACAO_ROTA_SEGURA: false,
     DECIDIR_COMITE_ROTA_SEGURA: false,
     EXCLUIR_AVALIACAO_ROTA_SEGURA: false,
+    GERENCIAR_CADASTROS: false,
   },
   COLABORADOR: {
     GERENCIAR_EQUIPE: false,
@@ -161,5 +168,6 @@ export const MATRIZ_PADRAO: MatrizPermissoes = {
     LANCAR_AVALIACAO_ROTA_SEGURA: false,
     DECIDIR_COMITE_ROTA_SEGURA: false,
     EXCLUIR_AVALIACAO_ROTA_SEGURA: false,
+    GERENCIAR_CADASTROS: false,
   },
 };

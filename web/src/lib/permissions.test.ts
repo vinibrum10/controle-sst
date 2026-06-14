@@ -2,9 +2,9 @@ import { describe, expect, test } from "vitest";
 import { CHAVES_PERMISSAO, MATRIZ_PADRAO, PAPEIS, PERMISSION_GROUPS } from "./permissions";
 
 describe("CHAVES_PERMISSAO", () => {
-  test("contem 12 chaves unicas", () => {
-    expect(CHAVES_PERMISSAO).toHaveLength(12);
-    expect(new Set(CHAVES_PERMISSAO).size).toBe(12);
+  test("contem 13 chaves unicas", () => {
+    expect(CHAVES_PERMISSAO).toHaveLength(13);
+    expect(new Set(CHAVES_PERMISSAO).size).toBe(13);
   });
 });
 

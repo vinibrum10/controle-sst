@@ -74,6 +74,12 @@ const DEFAULT_PERMISSOES = [
   { papel: "TST", chave: "EXCLUIR_AVALIACAO_ROTA_SEGURA", permitido: false },
   { papel: "VISUALIZADOR", chave: "EXCLUIR_AVALIACAO_ROTA_SEGURA", permitido: false },
   { papel: "COLABORADOR", chave: "EXCLUIR_AVALIACAO_ROTA_SEGURA", permitido: false },
+
+  { papel: "ADMIN", chave: "GERENCIAR_CADASTROS", permitido: true },
+  { papel: "GESTOR", chave: "GERENCIAR_CADASTROS", permitido: true },
+  { papel: "TST", chave: "GERENCIAR_CADASTROS", permitido: false },
+  { papel: "VISUALIZADOR", chave: "GERENCIAR_CADASTROS", permitido: false },
+  { papel: "COLABORADOR", chave: "GERENCIAR_CADASTROS", permitido: false },
 ];
 
 module.exports = { DEFAULT_PERMISSOES };

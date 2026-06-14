@@ -3,14 +3,16 @@ import { Panel } from "../components/ui/Panel";
 import { Icon } from "../components/ui/IconSprite";
 import { AparenciaTab } from "../components/configuracoes/AparenciaTab";
 import { MinhaContaTab } from "../components/configuracoes/MinhaContaTab";
+import { CadastrosGeraisTab } from "../components/configuracoes/CadastrosGeraisTab";
 import { PermissoesTab } from "../components/configuracoes/PermissoesTab";
 import { NotificacoesTab } from "../components/configuracoes/NotificacoesTab";
 
-type TabId = "aparencia" | "conta" | "permissoes" | "notificacoes";
+type TabId = "aparencia" | "conta" | "cadastros" | "permissoes" | "notificacoes";
 
 const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: "aparencia", label: "Aparência", icon: "icon-grid" },
   { id: "conta", label: "Minha Conta", icon: "icon-team" },
+  { id: "cadastros", label: "Cadastros Gerais", icon: "icon-database" },
   { id: "permissoes", label: "Permissões e Perfis", icon: "icon-shield" },
   { id: "notificacoes", label: "Notificações", icon: "icon-bell" },
 ];
@@ -44,6 +46,7 @@ export function ConfiguracoesPage() {
 
       {tab === "aparencia" && <AparenciaTab />}
       {tab === "conta" && <MinhaContaTab />}
+      {tab === "cadastros" && <CadastrosGeraisTab />}
       {tab === "permissoes" && <PermissoesTab />}
       {tab === "notificacoes" && <NotificacoesTab />}
     </Panel>
