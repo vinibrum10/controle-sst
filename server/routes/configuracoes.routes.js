@@ -7,6 +7,7 @@ const { validateBody } = require("../middleware/validate");
 const { requireAuth } = require("../middleware/auth");
 const { requirePermissao } = require("../utils/permissions");
 const createCrudRouter = require("../utils/crudRouter");
+const { registrarAuditoria } = require("../utils/auditoria");
 
 // ---------------------------------------------------------------------
 // Configuracao do sistema (singleton: nome do sistema, nome da empresa, logo)
@@ -30,6 +31,15 @@ sistema.patch("/", requirePermissao("GERENCIAR_CADASTROS"), validateBody(configu
   let configuracao = await prisma.configuracaoSistema.findFirst();
   if (!configuracao) configuracao = await prisma.configuracaoSistema.create({ data: req.body });
   else configuracao = await prisma.configuracaoSistema.update({ where: { id: configuracao.id }, data: req.body });
+
+  await registrarAuditoria({
+    usuario: req.user,
+    acao: "ATUALIZAR",
+    entidade: "ConfiguracaoSistema",
+    entidadeId: configuracao.id,
+    detalhes: req.body
+  });
+
   res.json(configuracao);
 }));
 
@@ -61,7 +71,8 @@ const cadastros = createCrudRouter({
   createSchema: cadastroGeralCreate,
   updateSchema: cadastroGeralUpdate,
   orderBy: [{ categoria: "asc" }, { ordem: "asc" }, { nome: "asc" }],
-  writePermissao: "GERENCIAR_CADASTROS"
+  writePermissao: "GERENCIAR_CADASTROS",
+  auditoria: { entidade: "CadastroGeral", rotulo: (item) => item.nome }
 });
 
 module.exports = { sistema, cadastros };

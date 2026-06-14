@@ -14,6 +14,7 @@ const ajudaRoutes = require("./routes/ajuda.routes");
 const dataRoutes = require("./routes/data.routes");
 const permissoesRoutes = require("./routes/permissoes.routes");
 const notificacoesRoutes = require("./routes/notificacoes.routes");
+const auditoriaRoutes = require("./routes/auditoria.routes");
 const { sistema: configuracaoSistemaRoutes, cadastros: cadastrosRoutes } = require("./routes/configuracoes.routes");
 const {
   treinamentos, inspecoes, auditorias, achados, planosAcao, rotasSeguras, anexos
@@ -50,6 +51,7 @@ app.use("/api/ajuda", ajudaRoutes);
 app.use("/api/dados", dataRoutes);
 app.use("/api/permissoes", permissoesRoutes);
 app.use("/api/notificacoes", notificacoesRoutes);
+app.use("/api/auditoria", auditoriaRoutes);
 app.use("/api/configuracoes/sistema", configuracaoSistemaRoutes);
 app.use("/api/cadastros", cadastrosRoutes);
 app.use("/api/treinamentos", treinamentos);

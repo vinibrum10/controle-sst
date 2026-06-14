@@ -148,6 +148,23 @@ model PreferenciaDashboard {
   @@unique([usuarioId, widget])
 }
 
+// Log de auditoria das principais acoes administrativas (cadastros gerais,
+// configuracao do sistema, permissoes e dados/backup), para que ADMINs
+// possam revisar quem fez o que e quando.
+model LogAuditoria {
+  id           String   @id @default(uuid())
+  usuarioId    String?
+  usuarioNome  String?
+  usuarioEmail String?
+  acao         String
+  entidade     String
+  entidadeId   String?
+  detalhes     Json?
+  criadoEm     DateTime @default(now())
+
+  @@index([criadoEm])
+}
+
 // =====================================================================
 // CADASTROS GERAIS / DADOS DO PROGRAMA
 // =====================================================================
