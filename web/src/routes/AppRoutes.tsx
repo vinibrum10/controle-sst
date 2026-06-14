@@ -21,7 +21,6 @@ import { RotaSegura2026PenalidadesPage } from "../pages/rotaSegura2026/RotaSegur
 import { RotaSegura2026RankingPage } from "../pages/rotaSegura2026/RotaSegura2026RankingPage";
 import { TreinamentosPage } from "../pages/TreinamentosPage";
 import { InspecoesPage } from "../pages/InspecoesPage";
-import { DadosPage } from "../pages/DadosPage";
 import { RelatoriosPage } from "../pages/RelatoriosPage";
 import { ConfiguracoesPage } from "../pages/ConfiguracoesPage";
 import { UsuariosPage } from "../pages/UsuariosPage";
@@ -70,7 +69,6 @@ export function AppRoutes() {
         <Route path="/programas/rota-segura-2026/ranking" element={<RotaSegura2026RankingPage />} />
         <Route path="/treinamentos" element={<TreinamentosPage />} />
         <Route path="/inspecoes" element={<InspecoesPage />} />
-        <Route path="/dados" element={<DadosPage />} />
         <Route path="/relatorios" element={<RelatoriosPage />} />
         <Route
           path="/usuarios"

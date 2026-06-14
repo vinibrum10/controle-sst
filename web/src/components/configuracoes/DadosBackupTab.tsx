@@ -1,14 +1,16 @@
 import { useRef, type ChangeEvent } from "react";
-import { Panel, EmptyState } from "../components/ui/Panel";
-import { Button } from "../components/ui/Button";
-import { Icon } from "../components/ui/IconSprite";
-import { useToast } from "../hooks/useToast";
-import { usePermissao } from "../hooks/usePermissao";
-import { exportarDados, importarDados, restaurarDemo } from "../lib/dados";
-import { ApiError } from "../lib/api";
-import { toDateInputValue } from "../lib/format";
+import { Button } from "../ui/Button";
+import { Icon } from "../ui/IconSprite";
+import { EmptyState } from "../ui/Panel";
+import { useToast } from "../../hooks/useToast";
+import { usePermissao } from "../../hooks/usePermissao";
+import { exportarDados, importarDados, restaurarDemo } from "../../lib/dados";
+import { ApiError } from "../../lib/api";
+import { toDateInputValue } from "../../lib/format";
 
-export function DadosPage() {
+const sectionTitleClasses = "text-[0.95rem] font-extrabold tracking-tight";
+
+export function DadosBackupTab() {
   const { showToast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -68,36 +70,39 @@ export function DadosPage() {
   }
 
   return (
-    <Panel
-      className="mx-auto max-w-[840px]"
-      title="Dados do programa"
-      description="Exporte uma cópia de segurança, importe dados ou restaure a demonstração."
-    >
-      {podeExportar || podeImportar || podeRestaurar ? (
-        <div className="flex flex-wrap gap-2.5">
-          {podeExportar && (
-            <Button variant="download" className="min-w-[190px] max-sm:w-full" onClick={handleExport}>
-              <Icon id="icon-download" />
-              Exportar dados
-            </Button>
-          )}
-          {podeImportar && (
-            <Button variant="secondary" className="min-w-[190px] max-sm:w-full" onClick={handleImportClick}>
-              <Icon id="icon-upload" />
-              Importar dados
-            </Button>
-          )}
-          {podeRestaurar && (
-            <Button variant="danger" className="min-w-[190px] max-sm:w-full" onClick={handleReset}>
-              <Icon id="icon-trash" />
-              Restaurar demonstração
-            </Button>
-          )}
-          <input ref={fileInputRef} type="file" accept="application/json" hidden onChange={handleImportChange} />
-        </div>
-      ) : (
-        <EmptyState message="Apenas administradores e gestores podem exportar, importar ou restaurar dados." />
-      )}
-    </Panel>
+    <div className="grid gap-4">
+      <article className="grid gap-3 rounded-[8px] border border-line bg-surface-soft p-3.5 dark:bg-surface">
+        <h3 className={sectionTitleClasses}>Backup e restauração</h3>
+        <p className="m-0 text-[0.85rem] text-muted">
+          Exporte uma cópia de segurança dos funcionários e tarefas, importe dados de um backup ou restaure a demonstração.
+        </p>
+
+        {podeExportar || podeImportar || podeRestaurar ? (
+          <div className="flex flex-wrap gap-2.5">
+            {podeExportar && (
+              <Button variant="download" className="min-w-[190px] max-sm:w-full" onClick={handleExport}>
+                <Icon id="icon-download" />
+                Exportar dados
+              </Button>
+            )}
+            {podeImportar && (
+              <Button variant="secondary" className="min-w-[190px] max-sm:w-full" onClick={handleImportClick}>
+                <Icon id="icon-upload" />
+                Importar dados
+              </Button>
+            )}
+            {podeRestaurar && (
+              <Button variant="danger" className="min-w-[190px] max-sm:w-full" onClick={handleReset}>
+                <Icon id="icon-trash" />
+                Restaurar demonstração
+              </Button>
+            )}
+            <input ref={fileInputRef} type="file" accept="application/json" hidden onChange={handleImportChange} />
+          </div>
+        ) : (
+          <EmptyState message="Apenas administradores e gestores podem exportar, importar ou restaurar dados." />
+        )}
+      </article>
+    </div>
   );
 }
