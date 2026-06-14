@@ -48,6 +48,7 @@ model Usuario {
 
   notificacoes Notificacao[]
   preferenciasNotificacao PreferenciaNotificacao[]
+  preferenciasDashboard   PreferenciaDashboard[]
 
   @@index([email])
 }
@@ -131,6 +132,20 @@ model PreferenciaNotificacao {
   email     Boolean         @default(true)
 
   @@unique([usuarioId, tipo])
+}
+
+// Preferencias de exibicao do Dashboard/Inicio por usuario: quais widgets
+// (indicadores e acessos rapidos) ficam visiveis e em que ordem. Quando nao
+// ha registro para um widget, assume-se o padrao de server/utils/dashboardWidgets.js.
+model PreferenciaDashboard {
+  id        String  @id @default(uuid())
+  usuarioId String
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  widget    String
+  visivel   Boolean @default(true)
+  ordem     Int     @default(0)
+
+  @@unique([usuarioId, widget])
 }
 
 // =====================================================================
