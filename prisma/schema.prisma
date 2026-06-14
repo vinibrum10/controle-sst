@@ -65,6 +65,7 @@ enum ChavePermissao {
   LANCAR_AVALIACAO_ROTA_SEGURA
   DECIDIR_COMITE_ROTA_SEGURA
   EXCLUIR_AVALIACAO_ROTA_SEGURA
+  GERENCIAR_CADASTROS
 }
 
 model PermissaoPerfil {
@@ -130,6 +131,48 @@ model PreferenciaNotificacao {
   email     Boolean         @default(true)
 
   @@unique([usuarioId, tipo])
+}
+
+// =====================================================================
+// CADASTROS GERAIS / DADOS DO PROGRAMA
+// =====================================================================
+
+// Dados gerais do programa (nome do sistema, nome da empresa, logo).
+// Tabela de configuracao unica (singleton): a aplicacao cria/atualiza um
+// unico registro.
+model ConfiguracaoSistema {
+  id           String   @id @default(uuid())
+  nomeSistema  String   @default("SGEPI")
+  nomeEmpresa  String?
+  logoUrl      String?
+  atualizadoEm DateTime @updatedAt
+}
+
+enum CategoriaCadastro {
+  UNIDADE
+  AREA_SETOR
+  CARGO_FUNCAO
+  EQUIPE
+  TIPO_ATIVIDADE
+  TIPO_INSPECAO
+  TIPO_TREINAMENTO
+}
+
+// Listas gerenciaveis usadas como referencia pelos demais modulos
+// (unidades, areas/setores, cargos/funcoes, equipes, tipos de atividade,
+// tipos de inspecao e tipos de treinamento).
+model CadastroGeral {
+  id           String            @id @default(uuid())
+  categoria    CategoriaCadastro
+  nome         String
+  descricao    String?
+  ativo        Boolean           @default(true)
+  ordem        Int               @default(0)
+  criadoEm     DateTime          @default(now())
+  atualizadoEm DateTime          @updatedAt
+
+  @@unique([categoria, nome])
+  @@index([categoria])
 }
 
 // =====================================================================
