@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Panel } from "../components/ui/Panel";
 import { SummaryCard } from "../components/ui/SummaryCard";
 import { QuickAccessCard, type QuickAccessLink } from "../components/home/QuickAccessCard";
 import { useAuth } from "../hooks/useAuth";
@@ -24,28 +23,19 @@ export function HomePage() {
   const primeiroNome = usuario?.nome?.split(" ")[0] || "";
 
   return (
-    <div className="grid gap-6">
-      <Panel className="border-none bg-gradient-to-br from-sidebar to-[#0a1825] text-white shadow-floating">
-        <p className="m-0 text-eyebrow text-[#9fc6e8]">SGEPI · Sistema de Gestão de Equipes, Programas e Indicadores</p>
-        <h1 className="mb-1.5 mt-2 text-[1.6rem] font-extrabold tracking-tight sm:text-[1.9rem]">
-          {primeiroNome ? `Bem-vindo(a), ${primeiroNome}!` : "Bem-vindo(a)!"}
+    <div className="grid gap-7">
+      <div>
+        <h1 className="m-0 text-[1.6rem] font-extrabold tracking-tight sm:text-[1.9rem]">
+          {primeiroNome ? `Bem-vindo(a), ${primeiroNome}` : "Bem-vindo(a)"}
         </h1>
-        <p className="m-0 max-w-[640px] text-[0.92rem] leading-relaxed text-[#c8d6d2]">
-          Acompanhe aqui os indicadores das suas equipes e acesse rapidamente o Dashboard, a gestão de tarefas e os
+        <p className="mt-1.5 max-w-[640px] text-[0.92rem] text-muted">
+          Acompanhe os indicadores das suas equipes e acesse rapidamente o Dashboard, a gestão de tarefas e os
           programas de Segurança e Saúde no Trabalho.
         </p>
-      </Panel>
+      </div>
 
       <section>
-        <h2 className="mb-3 text-[1.05rem] font-extrabold tracking-tight">Acesso rápido</h2>
-        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {QUICK_LINKS.map((link) => (
-            <QuickAccessCard key={link.to} {...link} />
-          ))}
-        </div>
-      </section>
-
-      <Panel title="Resumo da semana" description="Indicadores de tarefas da equipe para a semana atual.">
+        <h2 className="mb-3 text-[0.74rem] font-bold uppercase tracking-[0.14em] text-muted">Resumo da semana</h2>
         {erro && <p className="text-red">{erro}</p>}
         {!dashboard ? (
           <p className={carregando ? "animate-pulse text-muted" : "text-muted"}>Carregando indicadores...</p>
@@ -57,7 +47,16 @@ export function HomePage() {
             <SummaryCard label="Entregas no prazo" value={`${dashboard.metrics.entregasNoPrazoPercent}%`} hint="da semana atual" />
           </div>
         )}
-      </Panel>
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-[0.74rem] font-bold uppercase tracking-[0.14em] text-muted">Acesso rápido</h2>
+        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {QUICK_LINKS.map((link) => (
+            <QuickAccessCard key={link.to} {...link} />
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
