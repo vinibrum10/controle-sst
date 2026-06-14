@@ -1,12 +1,15 @@
 const express = require("express");
+const { z } = require("zod");
 
 const prisma = require("../db");
 const asyncHandler = require("../utils/asyncHandler");
+const { validateBody } = require("../middleware/validate");
 const { requireAuth } = require("../middleware/auth");
 const { tarefaInclude } = require("../utils/tarefaSerializer");
 const {
   isDone, isLate, wasOnTime, startOfToday, tarefasDaSemana, cargaPessoa
 } = require("../utils/metrics");
+const { WIDGET_IDS, serializePreferenciasDashboard } = require("../utils/dashboardWidgets");
 
 const router = express.Router();
 
@@ -117,6 +120,38 @@ router.get("/", asyncHandler(async (req, res) => {
     rankings,
     disponibilidade
   });
+}));
+
+const preferenciasUpdateSchema = z.object({
+  itens: z
+    .array(
+      z.object({
+        id: z.enum(WIDGET_IDS),
+        visivel: z.boolean(),
+        ordem: z.number().int().min(0)
+      })
+    )
+    .min(1)
+});
+
+router.get("/preferencias", asyncHandler(async (req, res) => {
+  const registros = await prisma.preferenciaDashboard.findMany({ where: { usuarioId: req.user.sub } });
+  res.json(serializePreferenciasDashboard(registros));
+}));
+
+router.put("/preferencias", validateBody(preferenciasUpdateSchema), asyncHandler(async (req, res) => {
+  await prisma.$transaction(
+    req.body.itens.map((item) =>
+      prisma.preferenciaDashboard.upsert({
+        where: { usuarioId_widget: { usuarioId: req.user.sub, widget: item.id } },
+        update: { visivel: item.visivel, ordem: item.ordem },
+        create: { usuarioId: req.user.sub, widget: item.id, visivel: item.visivel, ordem: item.ordem }
+      })
+    )
+  );
+
+  const registros = await prisma.preferenciaDashboard.findMany({ where: { usuarioId: req.user.sub } });
+  res.json(serializePreferenciasDashboard(registros));
 }));
 
 module.exports = router;
