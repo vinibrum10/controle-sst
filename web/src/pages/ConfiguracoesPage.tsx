@@ -7,8 +7,9 @@ import { CadastrosGeraisTab } from "../components/configuracoes/CadastrosGeraisT
 import { PermissoesTab } from "../components/configuracoes/PermissoesTab";
 import { NotificacoesTab } from "../components/configuracoes/NotificacoesTab";
 import { DashboardsTab } from "../components/configuracoes/DashboardsTab";
+import { DadosBackupTab } from "../components/configuracoes/DadosBackupTab";
 
-type TabId = "aparencia" | "conta" | "cadastros" | "permissoes" | "notificacoes" | "dashboards";
+type TabId = "aparencia" | "conta" | "cadastros" | "permissoes" | "notificacoes" | "dashboards" | "dados";
 
 const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: "aparencia", label: "Aparência", icon: "icon-grid" },
@@ -17,6 +18,7 @@ const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: "permissoes", label: "Permissões e Perfis", icon: "icon-shield" },
   { id: "notificacoes", label: "Notificações", icon: "icon-bell" },
   { id: "dashboards", label: "Dashboards", icon: "icon-dashboard" },
+  { id: "dados", label: "Dados e Backup", icon: "icon-download" },
 ];
 
 export function ConfiguracoesPage() {
@@ -52,6 +54,7 @@ export function ConfiguracoesPage() {
       {tab === "permissoes" && <PermissoesTab />}
       {tab === "notificacoes" && <NotificacoesTab />}
       {tab === "dashboards" && <DashboardsTab />}
+      {tab === "dados" && <DadosBackupTab />}
     </Panel>
   );
 }
