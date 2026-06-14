@@ -1,8 +1,11 @@
 const express = require("express");
+const { z } = require("zod");
 
 const prisma = require("../db");
 const asyncHandler = require("../utils/asyncHandler");
+const { validateBody } = require("../middleware/validate");
 const { requireAuth } = require("../middleware/auth");
+const { TIPOS_NOTIFICACAO, TIPOS_COM_EMAIL, TIPO_LABELS, getPreferencia } = require("../utils/notificacaoPreferencias");
 
 const router = express.Router();
 
@@ -14,6 +17,9 @@ router.use(requireAuth);
 // (responsavel ou apoio), nao persistidos como Notificacao.
 async function notificacoesDePrazo(usuario) {
   if (!usuario.funcionarioId) return [];
+
+  const preferencia = await getPreferencia(usuario.id, "TAREFA_PRAZO");
+  if (!preferencia.inApp) return [];
 
   const limite = new Date();
   limite.setDate(limite.getDate() + PRAZO_PROXIMO_DIAS);
@@ -77,6 +83,54 @@ router.post("/marcar-todas-lidas", asyncHandler(async (req, res) => {
     data: { lida: true }
   });
   res.json({ ok: true });
+}));
+
+const preferenciasUpdateSchema = z.object({
+  itens: z
+    .array(
+      z.object({
+        tipo: z.enum(TIPOS_NOTIFICACAO),
+        inApp: z.boolean(),
+        email: z.boolean()
+      })
+    )
+    .min(1)
+});
+
+// Monta a lista de preferencias efetivas (assumindo o padrao quando nao ha
+// registro salvo) a partir dos registros do usuario.
+function serializePreferencias(registros) {
+  const porTipo = new Map(registros.map((item) => [item.tipo, item]));
+  return TIPOS_NOTIFICACAO.map((tipo) => {
+    const registro = porTipo.get(tipo);
+    return {
+      tipo,
+      titulo: TIPO_LABELS[tipo],
+      inApp: registro ? registro.inApp : true,
+      email: registro ? registro.email : true,
+      emailDisponivel: TIPOS_COM_EMAIL.has(tipo)
+    };
+  });
+}
+
+router.get("/preferencias", asyncHandler(async (req, res) => {
+  const registros = await prisma.preferenciaNotificacao.findMany({ where: { usuarioId: req.user.sub } });
+  res.json(serializePreferencias(registros));
+}));
+
+router.put("/preferencias", validateBody(preferenciasUpdateSchema), asyncHandler(async (req, res) => {
+  await prisma.$transaction(
+    req.body.itens.map((item) =>
+      prisma.preferenciaNotificacao.upsert({
+        where: { usuarioId_tipo: { usuarioId: req.user.sub, tipo: item.tipo } },
+        update: { inApp: item.inApp, email: item.email },
+        create: { usuarioId: req.user.sub, tipo: item.tipo, inApp: item.inApp, email: item.email }
+      })
+    )
+  );
+
+  const registros = await prisma.preferenciaNotificacao.findMany({ where: { usuarioId: req.user.sub } });
+  res.json(serializePreferencias(registros));
 }));
 
 module.exports = router;

@@ -98,8 +98,10 @@ router.post("/", validateBody(tarefaSchema), asyncHandler(async (req, res) => {
     include
   });
 
-  const notificacaoEmail = await enviarNotificacaoTarefaAtribuida(tarefa);
-  await notificarTarefaAtribuida(tarefa);
+  const resultadoNotificacao = await notificarTarefaAtribuida(tarefa);
+  const notificacaoEmail = resultadoNotificacao && !resultadoNotificacao.preferencia.email
+    ? { enviado: false, motivo: "Notificações por e-mail desativadas pelo usuário." }
+    : await enviarNotificacaoTarefaAtribuida(tarefa);
 
   res.status(201).json({ ...serializeTarefa(tarefa), notificacaoEmail });
 }));
