@@ -28,6 +28,7 @@ afterEach(async () => {
       })
     )
   );
+  await prisma.permissaoHistorico.deleteMany({});
   invalidarMatriz();
 });
 
@@ -104,6 +105,62 @@ describe("PATCH /api/permissoes", () => {
       .send({ funcionarios: [], tarefas: [] });
 
     expect(resImportar.status).not.toBe(403);
+  });
+});
+
+describe("GET /api/permissoes/historico", () => {
+  test("requer autenticacao", async () => {
+    const res = await request(app).get("/api/permissoes/historico");
+    expect(res.status).toBe(401);
+  });
+
+  test("nao permite acesso a usuario nao-ADMIN", async () => {
+    const res = await request(app).get("/api/permissoes/historico").set("Authorization", authHeader(gestor));
+    expect(res.status).toBe(403);
+  });
+
+  test("PATCH registra apenas as chaves que de fato mudaram, com quem alterou", async () => {
+    await request(app)
+      .patch("/api/permissoes")
+      .set("Authorization", authHeader(admin))
+      .send({
+        itens: [
+          { papel: "GESTOR", chave: "IMPORTAR_DADOS", permitido: true }, // muda (era false)
+          { papel: "ADMIN", chave: "GERENCIAR_USUARIOS", permitido: true } // nao muda (ja era true)
+        ]
+      });
+
+    const res = await request(app).get("/api/permissoes/historico").set("Authorization", authHeader(admin));
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(1);
+
+    const [registro] = res.body;
+    expect(registro.papel).toBe("GESTOR");
+    expect(registro.chave).toBe("IMPORTAR_DADOS");
+    expect(registro.permitidoAntes).toBe(false);
+    expect(registro.permitidoDepois).toBe(true);
+    expect(registro.alteradoPorId).toBe(admin.id);
+    expect(registro.alteradoPorEmail).toBe(admin.email);
+  });
+
+  test("retorna o historico em ordem do mais recente para o mais antigo", async () => {
+    await request(app)
+      .patch("/api/permissoes")
+      .set("Authorization", authHeader(admin))
+      .send({ itens: [{ papel: "GESTOR", chave: "IMPORTAR_DADOS", permitido: true }] });
+
+    await request(app)
+      .patch("/api/permissoes")
+      .set("Authorization", authHeader(admin))
+      .send({ itens: [{ papel: "GESTOR", chave: "IMPORTAR_DADOS", permitido: false }] });
+
+    const res = await request(app).get("/api/permissoes/historico").set("Authorization", authHeader(admin));
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(2);
+    expect(res.body[0].permitidoAntes).toBe(true);
+    expect(res.body[0].permitidoDepois).toBe(false);
+    expect(res.body[1].permitidoAntes).toBe(false);
+    expect(res.body[1].permitidoDepois).toBe(true);
   });
 });
 

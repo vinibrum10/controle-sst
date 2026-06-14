@@ -8,6 +8,18 @@ export interface PermissaoItem {
   permitido: boolean;
 }
 
+export interface PermissaoHistoricoItem {
+  id: string;
+  papel: Papel;
+  chave: ChavePermissao;
+  permitidoAntes: boolean;
+  permitidoDepois: boolean;
+  alteradoPorId: string | null;
+  alteradoPorNome: string | null;
+  alteradoPorEmail: string | null;
+  criadoEm: string;
+}
+
 export function listarPermissoes() {
   return apiFetch<PermissaoItem[]>("/permissoes");
 }
