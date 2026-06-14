@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Icon } from "../ui/IconSprite";
 import { Avatar } from "../ui/Avatar";
+import { NotificationBell } from "./NotificationBell";
 import { buttonClasses } from "../../lib/buttonClasses";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
@@ -73,6 +74,8 @@ export function Header({ onToggleSidebar }: HeaderProps) {
         >
           <Icon id={theme === "dark" ? "icon-sun" : "icon-moon"} />
         </button>
+
+        {usuario && <NotificationBell />}
 
         {usuario && (
           <div className="flex min-h-[42px] min-w-0 items-center gap-2.5 rounded-[8px] border border-line bg-surface-strong px-2.5 text-[0.85rem]">

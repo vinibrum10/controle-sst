@@ -3,6 +3,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AppearanceProvider } from "./contexts/AppearanceContext";
 import { PermissionsProvider } from "./contexts/PermissionsContext";
+import { NotificationsProvider } from "./contexts/NotificationsContext";
 import { ToastProvider } from "./contexts/ToastContext";
 import { AppRoutes } from "./routes/AppRoutes";
 import { IconSprite } from "./components/ui/IconSprite";
@@ -14,10 +15,12 @@ function App() {
         <AppearanceProvider>
           <AuthProvider>
             <PermissionsProvider>
-              <ToastProvider>
-                <IconSprite />
-                <AppRoutes />
-              </ToastProvider>
+              <NotificationsProvider>
+                <ToastProvider>
+                  <IconSprite />
+                  <AppRoutes />
+                </ToastProvider>
+              </NotificationsProvider>
             </PermissionsProvider>
           </AuthProvider>
         </AppearanceProvider>

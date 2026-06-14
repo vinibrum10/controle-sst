@@ -46,6 +46,8 @@ model Usuario {
   criadoEm     DateTime     @default(now())
   atualizadoEm DateTime     @updatedAt
 
+  notificacoes Notificacao[]
+
   @@index([email])
 }
 
@@ -89,6 +91,30 @@ model PermissaoHistorico {
   alteradoPorEmail String?
   criadoEm         DateTime       @default(now())
 
+  @@index([criadoEm])
+}
+
+enum TipoNotificacao {
+  TAREFA_ATRIBUIDA
+  APOIO_SOLICITADO
+  PERMISSAO_ALTERADA
+  TAREFA_PRAZO
+}
+
+// Notificacoes in-app por usuario. Itens do tipo TAREFA_PRAZO sao calculados
+// dinamicamente (nao persistidos) a partir das tarefas com prazo proximo/vencido.
+model Notificacao {
+  id        String          @id @default(uuid())
+  usuarioId String
+  usuario   Usuario         @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  tipo      TipoNotificacao
+  titulo    String
+  mensagem  String
+  link      String?
+  lida      Boolean         @default(false)
+  criadoEm  DateTime        @default(now())
+
+  @@index([usuarioId, lida])
   @@index([criadoEm])
 }
 

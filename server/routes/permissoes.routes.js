@@ -6,6 +6,7 @@ const asyncHandler = require("../utils/asyncHandler");
 const { validateBody } = require("../middleware/validate");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { PAPEIS, CHAVES_PERMISSAO, getMatriz, invalidarMatriz } = require("../utils/permissions");
+const { NOTIFICACAO_PERMISSAO_ALTERADA } = require("../utils/notificacoesInApp");
 
 const router = express.Router();
 
@@ -51,6 +52,11 @@ router.patch("/", requireRole("ADMIN"), validateBody(permissaoUpdateSchema), asy
 
   const matrizAtual = await getMatriz();
   const mudancas = req.body.itens.filter((item) => matrizAtual[item.papel][item.chave] !== item.permitido);
+  const papeisAfetados = [...new Set(mudancas.map((item) => item.papel))];
+
+  const usuariosAfetados = papeisAfetados.length > 0
+    ? await prisma.usuario.findMany({ where: { papel: { in: papeisAfetados }, ativo: true }, select: { id: true } })
+    : [];
 
   await prisma.$transaction([
     ...req.body.itens.map((item) =>
@@ -72,7 +78,14 @@ router.patch("/", requireRole("ADMIN"), validateBody(permissaoUpdateSchema), asy
           alteradoPorEmail: req.user.email
         }
       })
-    )
+    ),
+    ...(usuariosAfetados.length > 0
+      ? [
+          prisma.notificacao.createMany({
+            data: usuariosAfetados.map((usuario) => ({ usuarioId: usuario.id, ...NOTIFICACAO_PERMISSAO_ALTERADA }))
+          })
+        ]
+      : [])
   ]);
 
   invalidarMatriz();
