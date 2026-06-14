@@ -8,8 +8,9 @@ import { PermissoesTab } from "../components/configuracoes/PermissoesTab";
 import { NotificacoesTab } from "../components/configuracoes/NotificacoesTab";
 import { DashboardsTab } from "../components/configuracoes/DashboardsTab";
 import { DadosBackupTab } from "../components/configuracoes/DadosBackupTab";
+import { AuditoriaTab } from "../components/configuracoes/AuditoriaTab";
 
-type TabId = "aparencia" | "conta" | "cadastros" | "permissoes" | "notificacoes" | "dashboards" | "dados";
+type TabId = "aparencia" | "conta" | "cadastros" | "permissoes" | "notificacoes" | "dashboards" | "dados" | "auditoria";
 
 const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: "aparencia", label: "Aparência", icon: "icon-grid" },
@@ -19,6 +20,7 @@ const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: "notificacoes", label: "Notificações", icon: "icon-bell" },
   { id: "dashboards", label: "Dashboards", icon: "icon-dashboard" },
   { id: "dados", label: "Dados e Backup", icon: "icon-download" },
+  { id: "auditoria", label: "Auditoria", icon: "icon-clock" },
 ];
 
 export function ConfiguracoesPage() {
@@ -55,6 +57,7 @@ export function ConfiguracoesPage() {
       {tab === "notificacoes" && <NotificacoesTab />}
       {tab === "dashboards" && <DashboardsTab />}
       {tab === "dados" && <DadosBackupTab />}
+      {tab === "auditoria" && <AuditoriaTab />}
     </Panel>
   );
 }

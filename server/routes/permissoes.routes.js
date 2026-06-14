@@ -8,6 +8,7 @@ const { requireAuth, requireRole } = require("../middleware/auth");
 const { PAPEIS, CHAVES_PERMISSAO, getMatriz, invalidarMatriz } = require("../utils/permissions");
 const { NOTIFICACAO_PERMISSAO_ALTERADA } = require("../utils/notificacoesInApp");
 const { filtrarPorPreferenciaInApp } = require("../utils/notificacaoPreferencias");
+const { registrarAuditoria } = require("../utils/auditoria");
 
 const router = express.Router();
 
@@ -92,6 +93,16 @@ router.patch("/", requireRole("ADMIN"), validateBody(permissaoUpdateSchema), asy
   ]);
 
   invalidarMatriz();
+
+  if (mudancas.length > 0) {
+    await registrarAuditoria({
+      usuario: req.user,
+      acao: "ATUALIZAR",
+      entidade: "PermissaoPerfil",
+      detalhes: { alteracoes: mudancas }
+    });
+  }
+
   const matriz = await getMatriz();
   res.json(toLista(matriz));
 }));

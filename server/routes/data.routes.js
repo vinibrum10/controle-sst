@@ -8,6 +8,7 @@ const { requirePermissao } = require("../utils/permissions");
 const { tarefaInclude, serializeTarefa } = require("../utils/tarefaSerializer");
 const { findOrCreateSemana } = require("../utils/semana");
 const { seedFuncionariosDemo, seedTarefasDemo } = require("../utils/seedDemo");
+const { registrarAuditoria } = require("../utils/auditoria");
 
 const router = express.Router();
 
@@ -53,6 +54,13 @@ router.get("/exportar", requirePermissao("EXPORTAR_DADOS"), asyncHandler(async (
     prisma.funcionario.findMany({ orderBy: { nome: "asc" } }),
     prisma.tarefa.findMany({ include: tarefaInclude, orderBy: { criadoEm: "asc" } })
   ]);
+
+  await registrarAuditoria({
+    usuario: req.user,
+    acao: "EXPORTAR",
+    entidade: "Dados",
+    detalhes: { funcionarios: funcionarios.length, tarefas: tarefas.length }
+  });
 
   res.json({
     exportadoEm: new Date().toISOString(),
@@ -124,6 +132,13 @@ router.post("/importar", requirePermissao("IMPORTAR_DADOS"), asyncHandler(async 
     tarefasImportadas += 1;
   }
 
+  await registrarAuditoria({
+    usuario: req.user,
+    acao: "IMPORTAR",
+    entidade: "Dados",
+    detalhes: { funcionariosImportados, tarefasImportadas, erros: erros.length }
+  });
+
   res.json({ funcionariosImportados, tarefasImportadas, erros });
 }));
 
@@ -136,6 +151,8 @@ router.post("/restaurar-demo", requirePermissao("RESTAURAR_DEMO"), asyncHandler(
 
   const pessoas = await seedFuncionariosDemo(prisma);
   await seedTarefasDemo(prisma, pessoas);
+
+  await registrarAuditoria({ usuario: req.user, acao: "RESTAURAR_DEMO", entidade: "Dados" });
 
   res.json({ mensagem: "Dados de demonstracao restaurados." });
 }));

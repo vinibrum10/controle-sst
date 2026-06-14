@@ -29,6 +29,7 @@ afterEach(async () => {
     )
   );
   await prisma.permissaoHistorico.deleteMany({});
+  await prisma.logAuditoria.deleteMany({});
   invalidarMatriz();
 });
 
@@ -141,6 +142,14 @@ describe("GET /api/permissoes/historico", () => {
     expect(registro.permitidoDepois).toBe(true);
     expect(registro.alteradoPorId).toBe(admin.id);
     expect(registro.alteradoPorEmail).toBe(admin.email);
+
+    const auditoria = await request(app).get("/api/auditoria").set("Authorization", authHeader(admin));
+    const logAlteracao = auditoria.body.find((item) => item.entidade === "PermissaoPerfil");
+    expect(logAlteracao).toBeDefined();
+    expect(logAlteracao.acao).toBe("ATUALIZAR");
+    expect(logAlteracao.usuarioId).toBe(admin.id);
+    expect(logAlteracao.detalhes.alteracoes).toHaveLength(1);
+    expect(logAlteracao.detalhes.alteracoes[0].papel).toBe("GESTOR");
   });
 
   test("retorna o historico em ordem do mais recente para o mais antigo", async () => {
