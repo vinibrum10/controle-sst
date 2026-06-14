@@ -105,8 +105,10 @@ router.post("/solicitar", validateBody(z.object({ tarefaId: z.string().min(1) })
     })
   ]);
 
-  const notificacaoEmail = await enviarNotificacaoApoioAtribuido(serializeTarefa(tarefaAtualizada), escolhido.pessoa);
-  await notificarApoioSolicitado(escolhido.pessoa.id, tarefaAtualizada);
+  const resultadoNotificacao = await notificarApoioSolicitado(escolhido.pessoa.id, tarefaAtualizada);
+  const notificacaoEmail = resultadoNotificacao && !resultadoNotificacao.preferencia.email
+    ? { enviado: false, motivo: "Notificações por e-mail desativadas pelo usuário." }
+    : await enviarNotificacaoApoioAtribuido(serializeTarefa(tarefaAtualizada), escolhido.pessoa);
 
   res.json({
     tarefa: serializeTarefa(tarefaAtualizada),

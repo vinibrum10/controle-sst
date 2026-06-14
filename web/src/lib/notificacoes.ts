@@ -17,6 +17,14 @@ export interface NotificacoesResponse {
   naoLidas: number;
 }
 
+export interface PreferenciaNotificacaoItem {
+  tipo: TipoNotificacao;
+  titulo: string;
+  inApp: boolean;
+  email: boolean;
+  emailDisponivel: boolean;
+}
+
 export function listarNotificacoes() {
   return apiFetch<NotificacoesResponse>("/notificacoes");
 }
@@ -27,4 +35,12 @@ export function marcarNotificacaoLida(id: string) {
 
 export function marcarTodasNotificacoesLidas() {
   return apiFetch<{ ok: boolean }>("/notificacoes/marcar-todas-lidas", { method: "POST" });
+}
+
+export function listarPreferenciasNotificacao() {
+  return apiFetch<PreferenciaNotificacaoItem[]>("/notificacoes/preferencias");
+}
+
+export function atualizarPreferenciasNotificacao(itens: { tipo: TipoNotificacao; inApp: boolean; email: boolean }[]) {
+  return apiFetch<PreferenciaNotificacaoItem[]>("/notificacoes/preferencias", { method: "PUT", body: { itens } });
 }

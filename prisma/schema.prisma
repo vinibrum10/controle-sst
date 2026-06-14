@@ -47,6 +47,7 @@ model Usuario {
   atualizadoEm DateTime     @updatedAt
 
   notificacoes Notificacao[]
+  preferenciasNotificacao PreferenciaNotificacao[]
 
   @@index([email])
 }
@@ -116,6 +117,19 @@ model Notificacao {
 
   @@index([usuarioId, lida])
   @@index([criadoEm])
+}
+
+// Preferencias de notificacao por usuario e tipo. Quando nao ha registro
+// para um par (usuarioId, tipo), assume-se inApp=true e email=true.
+model PreferenciaNotificacao {
+  id        String          @id @default(uuid())
+  usuarioId String
+  usuario   Usuario         @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  tipo      TipoNotificacao
+  inApp     Boolean         @default(true)
+  email     Boolean         @default(true)
+
+  @@unique([usuarioId, tipo])
 }
 
 // =====================================================================

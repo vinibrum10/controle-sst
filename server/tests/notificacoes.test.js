@@ -18,6 +18,7 @@ afterAll(async () => {
 
 afterEach(async () => {
   await prisma.notificacao.deleteMany({});
+  await prisma.preferenciaNotificacao.deleteMany({});
 
   // Restaura a matriz padrao apos os testes que a alteram.
   await prisma.$transaction(
@@ -271,5 +272,154 @@ describe("Marcar notificacoes como lidas", () => {
     const after = await request(app).get("/api/notificacoes").set("Authorization", authHeader(usuario));
     expect(after.body.naoLidas).toBe(0);
     expect(after.body.itens.every((item) => item.lida)).toBe(true);
+  });
+});
+
+describe("Preferencias de notificacao", () => {
+  test("GET /preferencias requer autenticacao", async () => {
+    const res = await request(app).get("/api/notificacoes/preferencias");
+    expect(res.status).toBe(401);
+  });
+
+  test("GET /preferencias retorna os padroes (tudo habilitado) para usuario sem preferencias salvas", async () => {
+    const usuario = await criarUsuario({ email: "notif-pref-padrao@teste.com" });
+
+    const res = await request(app).get("/api/notificacoes/preferencias").set("Authorization", authHeader(usuario));
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(4);
+    expect(res.body.every((item) => item.inApp === true && item.email === true)).toBe(true);
+
+    const tarefaAtribuida = res.body.find((item) => item.tipo === "TAREFA_ATRIBUIDA");
+    expect(tarefaAtribuida.emailDisponivel).toBe(true);
+
+    const prazo = res.body.find((item) => item.tipo === "TAREFA_PRAZO");
+    expect(prazo.emailDisponivel).toBe(false);
+  });
+
+  test("PUT /preferencias salva e retorna os novos valores", async () => {
+    const usuario = await criarUsuario({ email: "notif-pref-salvar@teste.com" });
+
+    const res = await request(app)
+      .put("/api/notificacoes/preferencias")
+      .set("Authorization", authHeader(usuario))
+      .send({ itens: [{ tipo: "TAREFA_ATRIBUIDA", inApp: false, email: false }] });
+    expect(res.status).toBe(200);
+
+    const tarefaAtribuida = res.body.find((item) => item.tipo === "TAREFA_ATRIBUIDA");
+    expect(tarefaAtribuida.inApp).toBe(false);
+    expect(tarefaAtribuida.email).toBe(false);
+
+    // Demais tipos permanecem no padrao.
+    const apoio = res.body.find((item) => item.tipo === "APOIO_SOLICITADO");
+    expect(apoio.inApp).toBe(true);
+    expect(apoio.email).toBe(true);
+
+    const recarregado = await request(app).get("/api/notificacoes/preferencias").set("Authorization", authHeader(usuario));
+    expect(recarregado.body.find((item) => item.tipo === "TAREFA_ATRIBUIDA").inApp).toBe(false);
+  });
+
+  test("desativar notificacao in-app de tarefa atribuida impede a criacao da notificacao", async () => {
+    const funcionario = await criarFuncionario({ email: "notif-pref-tarefa-resp@teste.com" });
+    const usuario = await criarUsuario({ email: "notif-pref-tarefa-resp-login@teste.com", funcionarioId: funcionario.id });
+
+    await request(app)
+      .put("/api/notificacoes/preferencias")
+      .set("Authorization", authHeader(usuario))
+      .send({ itens: [{ tipo: "TAREFA_ATRIBUIDA", inApp: false, email: true }] });
+
+    const { codigo } = semanaInfoFromDate(new Date());
+    const resTarefa = await request(app)
+      .post("/api/tarefas")
+      .set("Authorization", authHeader(admin))
+      .send({
+        titulo: "Tarefa com notificacao desativada",
+        responsavelId: funcionario.id,
+        semana: codigo,
+        prazo: daquiADias(10).toISOString(),
+        tipo: "EVENTUAL",
+        horasEstimadas: 4
+      });
+    expect(resTarefa.status).toBe(201);
+
+    const res = await request(app).get("/api/notificacoes").set("Authorization", authHeader(usuario));
+    expect(res.body.itens.some((item) => item.tipo === "TAREFA_ATRIBUIDA")).toBe(false);
+  });
+
+  test("desativar e-mail de tarefa atribuida impede o envio mas mantem a notificacao in-app", async () => {
+    const funcionario = await criarFuncionario({ email: "notif-pref-tarefa-email@teste.com" });
+    const usuario = await criarUsuario({ email: "notif-pref-tarefa-email-login@teste.com", funcionarioId: funcionario.id });
+
+    await request(app)
+      .put("/api/notificacoes/preferencias")
+      .set("Authorization", authHeader(usuario))
+      .send({ itens: [{ tipo: "TAREFA_ATRIBUIDA", inApp: true, email: false }] });
+
+    const { codigo } = semanaInfoFromDate(new Date());
+    const resTarefa = await request(app)
+      .post("/api/tarefas")
+      .set("Authorization", authHeader(admin))
+      .send({
+        titulo: "Tarefa com e-mail desativado",
+        responsavelId: funcionario.id,
+        semana: codigo,
+        prazo: daquiADias(10).toISOString(),
+        tipo: "EVENTUAL",
+        horasEstimadas: 4
+      });
+    expect(resTarefa.status).toBe(201);
+    expect(resTarefa.body.notificacaoEmail).toEqual({
+      enviado: false,
+      motivo: "Notificações por e-mail desativadas pelo usuário."
+    });
+
+    const res = await request(app).get("/api/notificacoes").set("Authorization", authHeader(usuario));
+    expect(res.body.itens.some((item) => item.tipo === "TAREFA_ATRIBUIDA")).toBe(true);
+  });
+
+  test("desativar notificacao de prazo remove os itens TAREFA_PRAZO da listagem", async () => {
+    const funcionario = await criarFuncionario({ email: "notif-pref-prazo@teste.com" });
+    const usuario = await criarUsuario({ email: "notif-pref-prazo-login@teste.com", funcionarioId: funcionario.id });
+
+    const { codigo } = semanaInfoFromDate(new Date());
+    const semana = await findOrCreateSemana(codigo);
+    await prisma.tarefa.create({
+      data: {
+        titulo: "Tarefa com prazo vencido (pref)",
+        responsavelId: funcionario.id,
+        semanaId: semana.id,
+        prazo: daquiADias(-1),
+        horasEstimadas: 2,
+        status: "PENDENTE"
+      }
+    });
+
+    const antes = await request(app).get("/api/notificacoes").set("Authorization", authHeader(usuario));
+    expect(antes.body.itens.some((item) => item.tipo === "TAREFA_PRAZO")).toBe(true);
+
+    await request(app)
+      .put("/api/notificacoes/preferencias")
+      .set("Authorization", authHeader(usuario))
+      .send({ itens: [{ tipo: "TAREFA_PRAZO", inApp: false, email: false }] });
+
+    const depois = await request(app).get("/api/notificacoes").set("Authorization", authHeader(usuario));
+    expect(depois.body.itens.some((item) => item.tipo === "TAREFA_PRAZO")).toBe(false);
+  });
+
+  test("desativar notificacao de alteracao de permissoes impede a notificacao desse usuario", async () => {
+    const gestor = await criarUsuario({ email: "notif-pref-permissao-gestor@teste.com", papel: "GESTOR" });
+
+    await request(app)
+      .put("/api/notificacoes/preferencias")
+      .set("Authorization", authHeader(gestor))
+      .send({ itens: [{ tipo: "PERMISSAO_ALTERADA", inApp: false, email: false }] });
+
+    const res = await request(app)
+      .patch("/api/permissoes")
+      .set("Authorization", authHeader(admin))
+      .send({ itens: [{ papel: "GESTOR", chave: "IMPORTAR_DADOS", permitido: true }] });
+    expect(res.status).toBe(200);
+
+    const resGestor = await request(app).get("/api/notificacoes").set("Authorization", authHeader(gestor));
+    expect(resGestor.body.itens.some((item) => item.tipo === "PERMISSAO_ALTERADA")).toBe(false);
   });
 });

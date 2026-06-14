@@ -7,6 +7,7 @@ const { validateBody } = require("../middleware/validate");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { PAPEIS, CHAVES_PERMISSAO, getMatriz, invalidarMatriz } = require("../utils/permissions");
 const { NOTIFICACAO_PERMISSAO_ALTERADA } = require("../utils/notificacoesInApp");
+const { filtrarPorPreferenciaInApp } = require("../utils/notificacaoPreferencias");
 
 const router = express.Router();
 
@@ -54,9 +55,11 @@ router.patch("/", requireRole("ADMIN"), validateBody(permissaoUpdateSchema), asy
   const mudancas = req.body.itens.filter((item) => matrizAtual[item.papel][item.chave] !== item.permitido);
   const papeisAfetados = [...new Set(mudancas.map((item) => item.papel))];
 
-  const usuariosAfetados = papeisAfetados.length > 0
-    ? await prisma.usuario.findMany({ where: { papel: { in: papeisAfetados }, ativo: true }, select: { id: true } })
+  const idsUsuariosComPapelAfetado = papeisAfetados.length > 0
+    ? (await prisma.usuario.findMany({ where: { papel: { in: papeisAfetados }, ativo: true }, select: { id: true } })).map((item) => item.id)
     : [];
+  const idsUsuariosAfetados = await filtrarPorPreferenciaInApp(idsUsuariosComPapelAfetado, "PERMISSAO_ALTERADA");
+  const usuariosAfetados = idsUsuariosAfetados.map((id) => ({ id }));
 
   await prisma.$transaction([
     ...req.body.itens.map((item) =>

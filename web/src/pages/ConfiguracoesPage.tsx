@@ -4,13 +4,15 @@ import { Icon } from "../components/ui/IconSprite";
 import { AparenciaTab } from "../components/configuracoes/AparenciaTab";
 import { MinhaContaTab } from "../components/configuracoes/MinhaContaTab";
 import { PermissoesTab } from "../components/configuracoes/PermissoesTab";
+import { NotificacoesTab } from "../components/configuracoes/NotificacoesTab";
 
-type TabId = "aparencia" | "conta" | "permissoes";
+type TabId = "aparencia" | "conta" | "permissoes" | "notificacoes";
 
 const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: "aparencia", label: "Aparência", icon: "icon-grid" },
   { id: "conta", label: "Minha Conta", icon: "icon-team" },
   { id: "permissoes", label: "Permissões e Perfis", icon: "icon-shield" },
+  { id: "notificacoes", label: "Notificações", icon: "icon-bell" },
 ];
 
 export function ConfiguracoesPage() {
@@ -43,6 +45,7 @@ export function ConfiguracoesPage() {
       {tab === "aparencia" && <AparenciaTab />}
       {tab === "conta" && <MinhaContaTab />}
       {tab === "permissoes" && <PermissoesTab />}
+      {tab === "notificacoes" && <NotificacoesTab />}
     </Panel>
   );
 }
