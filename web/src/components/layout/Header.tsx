@@ -5,7 +5,6 @@ import { Avatar } from "../ui/Avatar";
 import { NotificationBell } from "./NotificationBell";
 import { buttonClasses } from "../../lib/buttonClasses";
 import { useAuth } from "../../hooks/useAuth";
-import { useTheme } from "../../hooks/useTheme";
 import { formatLongDate } from "../../lib/format";
 import { NAV_ITEMS } from "../sidebar/navigation";
 
@@ -26,7 +25,6 @@ interface HeaderProps {
 
 export function Header({ onToggleSidebar }: HeaderProps) {
   const { usuario, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
 
   const today = useMemo(() => {
@@ -65,16 +63,6 @@ export function Header({ onToggleSidebar }: HeaderProps) {
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-2.5">
-        <button
-          type="button"
-          className={iconButtonClasses}
-          aria-label="Alternar tema"
-          title="Alternar tema"
-          onClick={toggleTheme}
-        >
-          <Icon id={theme === "dark" ? "icon-sun" : "icon-moon"} />
-        </button>
-
         {usuario && <NotificationBell />}
 
         {usuario && (
