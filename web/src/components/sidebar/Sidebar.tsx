@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation, type Location } from "react-router-dom";
 import { Icon } from "../ui/IconSprite";
+import { Logo } from "../ui/Logo";
 import { usePermissoes } from "../../hooks/usePermissao";
 import { NAVIGATION_GROUPS, isNavSubGroup, type NavEntry, type NavItem } from "./navigation";
 import type { ChavePermissao } from "../../lib/permissions";
@@ -81,15 +82,7 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
       aria-label="Navegação principal"
     >
       <div className="flex min-h-[44px] items-center gap-3 px-1">
-        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/10 text-white" aria-hidden="true">
-          <Icon id="icon-shield" className="h-[18px] w-[18px]" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <strong className="block text-[0.95rem] font-bold leading-tight tracking-tight text-white">SGEPI</strong>
-          <span className="mt-0.5 block truncate text-[0.62rem] font-bold uppercase tracking-[0.14em] text-[#5e7488]">
-            Equipes, Programas e Indicadores
-          </span>
-        </div>
+        <Logo variant="light" className="min-w-0 flex-1" />
         <button
           type="button"
           className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[#a3b7cc] transition-colors hover:bg-white/[0.06] hover:text-white lg:hidden"
