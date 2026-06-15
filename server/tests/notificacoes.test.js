@@ -275,6 +275,21 @@ describe("Marcar notificacoes como lidas", () => {
   });
 });
 
+describe("GET /api/notificacoes/email-status", () => {
+  test("requer autenticacao", async () => {
+    const res = await request(app).get("/api/notificacoes/email-status");
+    expect(res.status).toBe(401);
+  });
+
+  test("informa que o envio de e-mail nao esta habilitado sem configuracao SMTP", async () => {
+    const usuario = await criarUsuario({ email: "notif-email-status@teste.com" });
+
+    const res = await request(app).get("/api/notificacoes/email-status").set("Authorization", authHeader(usuario));
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ habilitado: false });
+  });
+});
+
 describe("Preferencias de notificacao", () => {
   test("GET /preferencias requer autenticacao", async () => {
     const res = await request(app).get("/api/notificacoes/preferencias");

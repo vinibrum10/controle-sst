@@ -37,6 +37,14 @@ export function marcarTodasNotificacoesLidas() {
   return apiFetch<{ ok: boolean }>("/notificacoes/marcar-todas-lidas", { method: "POST" });
 }
 
+export interface StatusEmail {
+  habilitado: boolean;
+}
+
+export function buscarStatusEmailNotificacao() {
+  return apiFetch<StatusEmail>("/notificacoes/email-status");
+}
+
 export function listarPreferenciasNotificacao() {
   return apiFetch<PreferenciaNotificacaoItem[]>("/notificacoes/preferencias");
 }
