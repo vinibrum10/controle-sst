@@ -4,7 +4,7 @@ import { Icon } from "../ui/IconSprite";
 import { useApiResource } from "../../hooks/useApiResource";
 import { useToast } from "../../hooks/useToast";
 import { extractErrorMessage } from "../../lib/formClasses";
-import { atualizarPreferenciasNotificacao, type PreferenciaNotificacaoItem } from "../../lib/notificacoes";
+import { atualizarPreferenciasNotificacao, type PreferenciaNotificacaoItem, type StatusEmail } from "../../lib/notificacoes";
 
 const sectionTitleClasses = "text-[0.95rem] font-extrabold tracking-tight";
 
@@ -14,6 +14,7 @@ export function NotificacoesTab() {
     "/notificacoes/preferencias",
     "Não foi possível carregar as preferências de notificação.",
   );
+  const { data: statusEmail } = useApiResource<StatusEmail>("/notificacoes/email-status");
 
   const [original, setOriginal] = useState<PreferenciaNotificacaoItem[] | null>(null);
   const [draft, setDraft] = useState<PreferenciaNotificacaoItem[] | null>(null);
@@ -67,6 +68,14 @@ export function NotificacoesTab() {
         <p className="m-0 text-[0.85rem] text-muted">
           Escolha quais avisos você deseja receber dentro do sistema (sino de notificações) e por e-mail.
         </p>
+
+        {statusEmail?.habilitado === false && (
+          <p className="m-0 flex items-start gap-2 rounded-[8px] border border-line bg-surface p-2.5 text-[0.78rem] text-muted">
+            <Icon id="icon-alert" className="mt-0.5 shrink-0 text-amber" />
+            O envio de e-mails ainda não está configurado neste sistema. As preferências de e-mail abaixo ficam
+            salvas, mas nenhum e-mail será enviado até que um administrador configure o servidor de e-mail.
+          </p>
+        )}
 
         {erro && <p className="text-red">{erro}</p>}
         {carregando ? (

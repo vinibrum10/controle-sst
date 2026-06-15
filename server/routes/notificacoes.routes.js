@@ -6,6 +6,7 @@ const asyncHandler = require("../utils/asyncHandler");
 const { validateBody } = require("../middleware/validate");
 const { requireAuth } = require("../middleware/auth");
 const { TIPOS_NOTIFICACAO, TIPOS_COM_EMAIL, TIPO_LABELS, getPreferencia } = require("../utils/notificacaoPreferencias");
+const { emailHabilitado } = require("../utils/mailer");
 
 const router = express.Router();
 
@@ -112,6 +113,13 @@ function serializePreferencias(registros) {
     };
   });
 }
+
+// Indica se o servidor esta configurado para enviar e-mails de notificacao
+// (variaveis SMTP_*), para a interface poder avisar quando o envio nao
+// esta ativo.
+router.get("/email-status", asyncHandler(async (req, res) => {
+  res.json({ habilitado: emailHabilitado });
+}));
 
 router.get("/preferencias", asyncHandler(async (req, res) => {
   const registros = await prisma.preferenciaNotificacao.findMany({ where: { usuarioId: req.user.sub } });
