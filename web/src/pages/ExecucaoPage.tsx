@@ -104,7 +104,7 @@ export function ExecucaoPage() {
 
   return (
     <Panel
-      title="Execução de tarefas (Kanban)"
+      title="Execução de tarefa"
       description="Arraste os cards entre colunas ou use os botões para atualizar o andamento."
       headerExtra={
         <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-end sm:justify-end">

@@ -52,7 +52,7 @@ export const NAVIGATION_GROUPS: NavGroup[] = [
     defaultOpen: true,
     items: [
       { path: "/tarefas/criar", label: "Criar tarefa", title: "Criação de tarefas" },
-      { path: "/tarefas/executar", label: "Execução / Kanban", title: "Execução de tarefas" },
+      { path: "/tarefas/executar", label: "Execução de tarefa", title: "Execução de tarefa" },
     ],
   },
   {
