@@ -80,7 +80,7 @@ export const QUICK_LINKS_BY_ID: Record<string, QuickAccessLink> = {
   link_dashboard: { to: "/dashboard", label: "Dashboard", description: "Indicadores gerais de todos os programas de SST.", icon: "icon-dashboard" },
   link_tarefas: { to: "/dashboard/tarefas", label: "Tarefas da Equipe", description: "Plano semanal, carga por pessoa e status das tarefas.", icon: "icon-task" },
   link_rotaSegura: { to: "/dashboard/rota-segura", label: "Rota Segura", description: "Ranking, avaliações de APR e penalidades das equipes.", icon: "icon-shield" },
-  link_treinamentos: { to: "/dashboard/treinamentos", label: "Treinamentos", description: "Status, vencimentos e indicadores de treinamentos.", icon: "icon-check" },
+  link_treinamentos: { to: "/dashboard/treinamentos", label: "Treinamentos", description: "Status, vencimentos e indicadores de treinamentos.", icon: "icon-graduation-cap" },
   link_inspecoes: { to: "/dashboard/inspecoes", label: "Inspeções", description: "Inspeções, auditorias e achados em aberto.", icon: "icon-alert" },
   link_funcionarios: { to: "/funcionarios", label: "Funcionários", description: "Cadastro, carga de trabalho e gestão da equipe.", icon: "icon-team" },
   link_ajuda: { to: "/ajuda", label: "Apoio / Ajuda", description: "Solicitações de apoio entre os membros da equipe.", icon: "icon-help" }

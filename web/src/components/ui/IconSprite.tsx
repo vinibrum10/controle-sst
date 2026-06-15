@@ -74,6 +74,11 @@ export function IconSprite() {
         <path d="M12 2.5 4 5.5v5.2c0 4.6 3.2 8.7 8 9.8 4.8-1.1 8-5.2 8-9.8V5.5z"></path>
         <path d="m8.5 12 2.5 2.5 4.5-5"></path>
       </symbol>
+      <symbol id="icon-graduation-cap" viewBox="0 0 24 24">
+        <path d="M21.42 10.92a1 1 0 0 0-.02-1.84l-8.57-3.9a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.83l8.57 3.91a2 2 0 0 0 1.66 0z"></path>
+        <path d="M22 10v6"></path>
+        <path d="M6 12.5V17a6 3 0 0 0 12 0v-4.5"></path>
+      </symbol>
       <symbol id="icon-home" viewBox="0 0 24 24">
         <path d="m3 11 9-8 9 8"></path>
         <path d="M5 10v10h14V10"></path>
