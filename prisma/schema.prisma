@@ -197,7 +197,7 @@ model Funcionario {
   nome      String
   funcao    String
   email     String   @unique
-  capacidade Int     @default(32)
+  capacidade Int     @default(42)
   foto      String?
   ativo     Boolean  @default(true)
   criadoEm  DateTime @default(now())
@@ -352,14 +352,15 @@ model TarefaApontamento {
 // =====================================================================
 
 model AtendimentoOS {
-  id              String       @id @default(uuid())
-  numeroOS        String
-  responsavelId   String?
-  responsavel     Funcionario? @relation(fields: [responsavelId], references: [id])
-  iniciadoEm      DateTime
-  finalizadoEm    DateTime?
-  duracaoSegundos Int?
-  criadoEm        DateTime     @default(now())
+  id                String       @id @default(uuid())
+  numeroOS          String
+  responsavelId     String?
+  responsavel       Funcionario? @relation(fields: [responsavelId], references: [id])
+  iniciadoEm        DateTime
+  finalizadoEm      DateTime?
+  duracaoSegundos   Int?
+  tarefaVinculadaId String?
+  criadoEm          DateTime     @default(now())
 
   @@index([responsavelId])
   @@index([iniciadoEm])

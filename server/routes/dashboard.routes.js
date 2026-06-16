@@ -10,6 +10,7 @@ const {
   isDone, isLate, wasOnTime, startOfToday, tarefasDaSemana, cargaPessoa, realizadoPessoa
 } = require("../utils/metrics");
 const { WIDGET_IDS, serializePreferenciasDashboard } = require("../utils/dashboardWidgets");
+const { semanaInfoFromCodigo } = require("../utils/semana");
 
 const router = express.Router();
 
@@ -31,12 +32,32 @@ function rankPessoas(pessoas, scoreFn, limite = 5, apenasPositivos = false) {
 router.get("/", asyncHandler(async (req, res) => {
   const semana = req.query.semana;
 
-  const [pessoas, tarefasSemana, todasTarefas, todosPedidos] = await Promise.all([
+  const semanaInfo = semana ? semanaInfoFromCodigo(semana) : null;
+  const fimSemana = semanaInfo
+    ? new Date(semanaInfo.dataFim.getTime() + 24 * 3600 * 1000)
+    : null;
+
+  const [pessoas, tarefasSemana, todasTarefas, todosPedidos, osAtendimentos] = await Promise.all([
     prisma.funcionario.findMany({ orderBy: { nome: "asc" } }),
     tarefasDaSemana(semana),
     prisma.tarefa.findMany({ include: tarefaInclude }),
-    prisma.pedidoAjuda.findMany()
+    prisma.pedidoAjuda.findMany(),
+    semanaInfo
+      ? prisma.atendimentoOS.findMany({
+          where: {
+            finalizadoEm: { gte: semanaInfo.dataInicio, lt: fimSemana },
+            responsavelId: { not: null },
+            duracaoSegundos: { not: null }
+          },
+          select: { responsavelId: true, duracaoSegundos: true }
+        })
+      : Promise.resolve([])
   ]);
+
+  const osHorasPessoa = (funcionarioId) =>
+    osAtendimentos
+      .filter((a) => a.responsavelId === funcionarioId)
+      .reduce((soma, a) => soma + (a.duracaoSegundos ?? 0) / 3600, 0);
 
   // ---- Cards de metricas (semana selecionada) ----
   const ativas = tarefasSemana.filter((tarefa) => !isDone(tarefa));
@@ -56,7 +77,9 @@ router.get("/", asyncHandler(async (req, res) => {
     .filter((pessoa) => pessoa.ativo || cargaPessoa(tarefasSemana, pessoa.id) > 0)
     .map((pessoa) => {
       const carga = cargaPessoa(tarefasSemana, pessoa.id);
-      const realizado = Math.round(realizadoPessoa(tarefasSemana, pessoa.id) * 10) / 10;
+      const realizado = Math.round(
+        (realizadoPessoa(tarefasSemana, pessoa.id) + osHorasPessoa(pessoa.id)) * 10
+      ) / 10;
       return {
         funcionario: pessoa,
         carga,
@@ -103,7 +126,8 @@ router.get("/", asyncHandler(async (req, res) => {
     .filter((pessoa) => pessoa.ativo)
     .map((pessoa) => {
       const carga = cargaPessoa(tarefasSemana, pessoa.id);
-      return { funcionario: pessoa, carga, livre: Math.max(pessoa.capacidade - carga, 0) };
+      const os = osHorasPessoa(pessoa.id);
+      return { funcionario: pessoa, carga, livre: Math.max(pessoa.capacidade - carga - os, 0) };
     })
     .sort((a, b) => (b.funcionario.capacidade - b.carga) - (a.funcionario.capacidade - a.carga));
 
