@@ -6,6 +6,15 @@ export type PeriodoRotina = "SEMANAL" | "MENSAL" | "TRIMESTRAL" | "SEMESTRAL" | 
 export type StatusTarefa = "PENDENTE" | "EM_ANDAMENTO" | "CONCLUIDA";
 export type StatusPedidoAjuda = "ABERTO" | "ATENDIDO" | "CANCELADO";
 
+export interface TarefaApontamento {
+  id: string;
+  tarefaId: string;
+  funcionarioId: string | null;
+  iniciadoEm: string;
+  finalizadoEm: string | null;
+  duracaoSegundos: number | null;
+}
+
 export interface PedidoAjuda {
   id: string;
   tarefaId: string;
@@ -39,8 +48,10 @@ export interface Tarefa extends NovaTarefa {
   status: StatusTarefa;
   criadoEm: string;
   concluidaEm: string | null;
+  horasRealizadas: number;
   responsavel: Funcionario | null;
   apoio: Funcionario | null;
   pedidosAjuda: PedidoAjuda[];
+  apontamentoAtivo: TarefaApontamento | null;
   notificacaoEmail?: NotificacaoEmail;
 }

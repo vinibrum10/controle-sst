@@ -222,6 +222,7 @@ model Funcionario {
   atendimentosOS AtendimentoOS[]
 
   anexosCriados Anexo[]
+  apontamentosTarefa TarefaApontamento[]
 
   @@index([email])
 }
@@ -287,13 +288,15 @@ model Tarefa {
   tipo           TipoTarefa       @default(EVENTUAL)
   prioridade     PrioridadeTarefa @default(MEDIA)
   periodoRotina  PeriodoRotina?
-  horasEstimadas Int              @default(4)
-  status         StatusTarefa     @default(PENDENTE)
-  criadoEm       DateTime         @default(now())
-  concluidaEm    DateTime?
+  horasEstimadas  Int              @default(4)
+  horasRealizadas Float            @default(0)
+  status          StatusTarefa     @default(PENDENTE)
+  criadoEm        DateTime         @default(now())
+  concluidaEm     DateTime?
 
   pedidosAjuda PedidoAjuda[]
   anexos       Anexo[]
+  apontamentos TarefaApontamento[]
 
   @@index([responsavelId])
   @@index([semanaId])
@@ -324,6 +327,24 @@ model PedidoAjuda {
 
   @@index([tarefaId])
   @@index([status])
+}
+
+// =====================================================================
+// APONTAMENTO DE HORAS EM TAREFAS
+// =====================================================================
+
+model TarefaApontamento {
+  id              String       @id @default(uuid())
+  tarefaId        String
+  tarefa          Tarefa       @relation(fields: [tarefaId], references: [id], onDelete: Cascade)
+  funcionarioId   String?
+  funcionario     Funcionario? @relation(fields: [funcionarioId], references: [id])
+  iniciadoEm      DateTime     @default(now())
+  finalizadoEm    DateTime?
+  duracaoSegundos Int?
+
+  @@index([tarefaId])
+  @@index([funcionarioId])
 }
 
 // =====================================================================

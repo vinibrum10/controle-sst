@@ -14,6 +14,7 @@ export interface DashboardMetrics {
 export interface CargaPorPessoa {
   funcionario: Funcionario;
   carga: number;
+  realizado: number;
   capacidade: number;
   percentual: number;
   livre: number;

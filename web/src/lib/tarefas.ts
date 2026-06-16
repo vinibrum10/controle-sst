@@ -28,3 +28,11 @@ export function atualizarStatusTarefa(id: string, status: StatusTarefa) {
 export function excluirTarefa(id: string) {
   return apiFetch<null>(`/tarefas/${id}`, { method: "DELETE" });
 }
+
+export function iniciarTarefa(id: string) {
+  return apiFetch<Tarefa>(`/tarefas/${id}/iniciar`, { method: "PATCH" });
+}
+
+export function pausarTarefa(id: string) {
+  return apiFetch<Tarefa>(`/tarefas/${id}/pausar`, { method: "PATCH" });
+}
