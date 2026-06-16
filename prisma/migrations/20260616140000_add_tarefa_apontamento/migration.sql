@@ -1,8 +1,8 @@
 -- Adiciona horasRealizadas à tabela Tarefa
-ALTER TABLE "Tarefa" ADD COLUMN "horasRealizadas" DOUBLE PRECISION NOT NULL DEFAULT 0;
+ALTER TABLE "Tarefa" ADD COLUMN IF NOT EXISTS "horasRealizadas" DOUBLE PRECISION NOT NULL DEFAULT 0;
 
 -- Cria tabela de apontamentos de horas em tarefas
-CREATE TABLE "TarefaApontamento" (
+CREATE TABLE IF NOT EXISTS "TarefaApontamento" (
     "id" TEXT NOT NULL,
     "tarefaId" TEXT NOT NULL,
     "funcionarioId" TEXT,
@@ -14,15 +14,26 @@ CREATE TABLE "TarefaApontamento" (
 );
 
 -- CreateIndex
-CREATE INDEX "TarefaApontamento_tarefaId_idx" ON "TarefaApontamento"("tarefaId");
+CREATE INDEX IF NOT EXISTS "TarefaApontamento_tarefaId_idx" ON "TarefaApontamento"("tarefaId");
 
 -- CreateIndex
-CREATE INDEX "TarefaApontamento_funcionarioId_idx" ON "TarefaApontamento"("funcionarioId");
+CREATE INDEX IF NOT EXISTS "TarefaApontamento_funcionarioId_idx" ON "TarefaApontamento"("funcionarioId");
 
--- AddForeignKey
-ALTER TABLE "TarefaApontamento" ADD CONSTRAINT "TarefaApontamento_tarefaId_fkey"
-    FOREIGN KEY ("tarefaId") REFERENCES "Tarefa"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+-- AddForeignKey (idempotente)
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'TarefaApontamento_tarefaId_fkey'
+  ) THEN
+    ALTER TABLE "TarefaApontamento" ADD CONSTRAINT "TarefaApontamento_tarefaId_fkey"
+      FOREIGN KEY ("tarefaId") REFERENCES "Tarefa"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+  END IF;
+END $$;
 
--- AddForeignKey
-ALTER TABLE "TarefaApontamento" ADD CONSTRAINT "TarefaApontamento_funcionarioId_fkey"
-    FOREIGN KEY ("funcionarioId") REFERENCES "Funcionario"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'TarefaApontamento_funcionarioId_fkey'
+  ) THEN
+    ALTER TABLE "TarefaApontamento" ADD CONSTRAINT "TarefaApontamento_funcionarioId_fkey"
+      FOREIGN KEY ("funcionarioId") REFERENCES "Funcionario"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+  END IF;
+END $$;
