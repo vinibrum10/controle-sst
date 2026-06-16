@@ -22,7 +22,7 @@ export function ExecucaoPage() {
   const [dragOverStatus, setDragOverStatus] = useState<StatusTarefa | null>(null);
 
   const { funcionarios } = useFuncionarios();
-  const { tarefas, carregando, erro, alterarStatus, remover, pedirAjuda } = useTarefas(semana);
+  const { tarefas, carregando, erro, alterarStatus, iniciar, pausar, remover, pedirAjuda } = useTarefas(semana);
   const { showToast } = useToast();
 
   const tarefasFiltradas = useMemo(() => {
@@ -39,13 +39,21 @@ export function ExecucaoPage() {
     return grupos;
   }, [tarefasFiltradas]);
 
-  async function handleToggleProgresso(tarefa: Tarefa) {
+  async function handleIniciar(tarefa: Tarefa) {
     try {
-      const novoStatus: StatusTarefa = tarefa.status === "EM_ANDAMENTO" ? "PENDENTE" : "EM_ANDAMENTO";
-      await alterarStatus(tarefa.id, novoStatus);
-      showToast("Status da tarefa atualizado.");
+      await iniciar(tarefa.id);
+      showToast("Timer iniciado.");
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "Erro ao atualizar a tarefa.");
+      showToast(err instanceof Error ? err.message : "Erro ao iniciar o timer.");
+    }
+  }
+
+  async function handlePausar(tarefa: Tarefa) {
+    try {
+      await pausar(tarefa.id);
+      showToast("Timer pausado. Horas registradas.");
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Erro ao pausar o timer.");
     }
   }
 
@@ -183,7 +191,8 @@ export function ExecucaoPage() {
                         dragging={draggedTaskId === tarefa.id}
                         onDragStart={handleDragStart}
                         onDragEnd={handleDragEnd}
-                        onToggleProgresso={handleToggleProgresso}
+                        onIniciar={handleIniciar}
+                        onPausar={handlePausar}
                         onToggleConcluida={handleToggleConcluida}
                         onExcluir={handleExcluir}
                         onSolicitarAjuda={handleSolicitarAjuda}

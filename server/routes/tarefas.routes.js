@@ -173,12 +173,79 @@ router.patch("/:id/status", validateBody(statusSchema), asyncHandler(async (req,
   if (!existente) return res.status(404).json({ error: "Tarefa nao encontrada." });
 
   const { status } = req.body;
-  const data = {
-    status,
-    concluidaEm: status === "CONCLUIDA" ? new Date() : null
-  };
+  const data = { status, concluidaEm: status === "CONCLUIDA" ? new Date() : null };
+
+  // Fecha apontamento ativo ao sair de EM_ANDAMENTO.
+  if (status !== "EM_ANDAMENTO") {
+    const ativo = await prisma.tarefaApontamento.findFirst({
+      where: { tarefaId: req.params.id, finalizadoEm: null }
+    });
+    if (ativo) {
+      const finalizadoEm = new Date();
+      const duracaoSegundos = Math.round((finalizadoEm.getTime() - ativo.iniciadoEm.getTime()) / 1000);
+      await prisma.tarefaApontamento.update({
+        where: { id: ativo.id },
+        data: { finalizadoEm, duracaoSegundos }
+      });
+      data.horasRealizadas = { increment: duracaoSegundos / 3600 };
+    }
+  }
 
   const tarefa = await prisma.tarefa.update({ where: { id: req.params.id }, data, include });
+  res.json(serializeTarefa(tarefa));
+}));
+
+// Inicia o timer da tarefa (cria TarefaApontamento, status -> EM_ANDAMENTO).
+router.patch("/:id/iniciar", asyncHandler(async (req, res) => {
+  const existente = await prisma.tarefa.findUnique({ where: { id: req.params.id } });
+  if (!existente) return res.status(404).json({ error: "Tarefa nao encontrada." });
+
+  const ativo = await prisma.tarefaApontamento.findFirst({
+    where: { tarefaId: req.params.id, finalizadoEm: null }
+  });
+  if (ativo) return res.status(409).json({ error: "Tarefa ja iniciada." });
+
+  const usuario = await prisma.usuario.findUnique({
+    where: { id: req.user.sub },
+    select: { funcionarioId: true }
+  });
+
+  await prisma.$transaction([
+    prisma.tarefa.update({ where: { id: req.params.id }, data: { status: "EM_ANDAMENTO" } }),
+    prisma.tarefaApontamento.create({
+      data: { tarefaId: req.params.id, funcionarioId: usuario?.funcionarioId || null }
+    })
+  ]);
+
+  const tarefa = await prisma.tarefa.findUnique({ where: { id: req.params.id }, include });
+  res.json(serializeTarefa(tarefa));
+}));
+
+// Pausa o timer da tarefa (fecha TarefaApontamento, acumula horasRealizadas, status -> PENDENTE).
+router.patch("/:id/pausar", asyncHandler(async (req, res) => {
+  const existente = await prisma.tarefa.findUnique({ where: { id: req.params.id } });
+  if (!existente) return res.status(404).json({ error: "Tarefa nao encontrada." });
+
+  const ativo = await prisma.tarefaApontamento.findFirst({
+    where: { tarefaId: req.params.id, finalizadoEm: null }
+  });
+  if (!ativo) return res.status(400).json({ error: "Nenhum timer ativo para esta tarefa." });
+
+  const finalizadoEm = new Date();
+  const duracaoSegundos = Math.round((finalizadoEm.getTime() - ativo.iniciadoEm.getTime()) / 1000);
+
+  await prisma.$transaction([
+    prisma.tarefaApontamento.update({
+      where: { id: ativo.id },
+      data: { finalizadoEm, duracaoSegundos }
+    }),
+    prisma.tarefa.update({
+      where: { id: req.params.id },
+      data: { status: "PENDENTE", horasRealizadas: { increment: duracaoSegundos / 3600 } }
+    })
+  ]);
+
+  const tarefa = await prisma.tarefa.findUnique({ where: { id: req.params.id }, include });
   res.json(serializeTarefa(tarefa));
 }));
 

@@ -7,7 +7,7 @@ const { validateBody } = require("../middleware/validate");
 const { requireAuth } = require("../middleware/auth");
 const { tarefaInclude } = require("../utils/tarefaSerializer");
 const {
-  isDone, isLate, wasOnTime, startOfToday, tarefasDaSemana, cargaPessoa
+  isDone, isLate, wasOnTime, startOfToday, tarefasDaSemana, cargaPessoa, realizadoPessoa
 } = require("../utils/metrics");
 const { WIDGET_IDS, serializePreferenciasDashboard } = require("../utils/dashboardWidgets");
 
@@ -56,9 +56,11 @@ router.get("/", asyncHandler(async (req, res) => {
     .filter((pessoa) => pessoa.ativo || cargaPessoa(tarefasSemana, pessoa.id) > 0)
     .map((pessoa) => {
       const carga = cargaPessoa(tarefasSemana, pessoa.id);
+      const realizado = Math.round(realizadoPessoa(tarefasSemana, pessoa.id) * 10) / 10;
       return {
         funcionario: pessoa,
         carga,
+        realizado,
         capacidade: pessoa.capacidade,
         percentual: Math.min(Math.round((carga / pessoa.capacidade) * 100), 140),
         livre: Math.max(pessoa.capacidade - carga, 0)

@@ -12,7 +12,7 @@ export function WorkloadList({ cargaPorPessoa }: WorkloadListProps) {
 
   return (
     <div className="grid grid-cols-1 gap-2.5">
-      {cargaPorPessoa.map(({ funcionario, carga, capacidade, percentual, livre }) => {
+      {cargaPorPessoa.map(({ funcionario, carga, realizado, capacidade, percentual, livre }) => {
         const fillClass = percentual >= 100 ? "bg-red" : percentual >= 80 ? "bg-amber" : "bg-teal";
         const ativo = funcionario.ativo !== false;
         const support =
@@ -43,7 +43,14 @@ export function WorkloadList({ cargaPorPessoa }: WorkloadListProps) {
             <div className="relative mt-2.5 h-2.5 overflow-hidden rounded-full bg-[#e7eeec] dark:bg-surface-strong" aria-label={`Carga de ${funcionario.nome}`}>
               <div className={`h-full rounded-full ${fillClass}`} style={{ width: `${Math.min(percentual, 100)}%` }} />
             </div>
-            <small className="mt-1 block text-muted">{support}</small>
+            <div className="mt-1 flex items-center justify-between gap-2">
+              <small className="text-muted">{support}</small>
+              {realizado > 0 && (
+                <small className="shrink-0 text-green">
+                  ✓ {realizado < 1 ? `${Math.round(realizado * 60)}min` : `${realizado.toFixed(1)}h`} realizadas
+                </small>
+              )}
+            </div>
           </article>
         );
       })}

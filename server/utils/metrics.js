@@ -57,4 +57,11 @@ function cargaPessoa(tarefas, funcionarioId) {
     .reduce((soma, tarefa) => soma + tarefa.horasEstimadas, 0);
 }
 
-module.exports = { isDone, isLate, wasOnTime, startOfToday, endOfDay, tarefasDaSemana, cargaPessoa };
+// Soma de horas realizadas (via timer) em tarefas da semana onde a pessoa e responsavel ou apoio.
+function realizadoPessoa(tarefas, funcionarioId) {
+  return tarefas
+    .filter((tarefa) => tarefa.responsavelId === funcionarioId || tarefa.apoioId === funcionarioId)
+    .reduce((soma, tarefa) => soma + (tarefa.horasRealizadas || 0), 0);
+}
+
+module.exports = { isDone, isLate, wasOnTime, startOfToday, endOfDay, tarefasDaSemana, cargaPessoa, realizadoPessoa };

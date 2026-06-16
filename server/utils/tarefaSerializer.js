@@ -2,7 +2,12 @@ const tarefaInclude = {
   responsavel: { select: { id: true, nome: true, email: true, foto: true } },
   apoio: { select: { id: true, nome: true, email: true, foto: true } },
   semana: true,
-  pedidosAjuda: true
+  pedidosAjuda: true,
+  apontamentos: {
+    where: { finalizadoEm: null },
+    orderBy: { iniciadoEm: "desc" },
+    take: 1
+  }
 };
 
 function serializeTarefa(tarefa) {
@@ -20,10 +25,12 @@ function serializeTarefa(tarefa) {
     prioridade: tarefa.prioridade,
     periodoRotina: tarefa.periodoRotina,
     horasEstimadas: tarefa.horasEstimadas,
+    horasRealizadas: tarefa.horasRealizadas ?? 0,
     status: tarefa.status,
     criadoEm: tarefa.criadoEm,
     concluidaEm: tarefa.concluidaEm,
-    pedidosAjuda: tarefa.pedidosAjuda || []
+    pedidosAjuda: tarefa.pedidosAjuda || [],
+    apontamentoAtivo: tarefa.apontamentos?.[0] ?? null
   };
 }
 
