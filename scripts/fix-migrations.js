@@ -1,31 +1,30 @@
 /**
- * Remove da tabela _prisma_migrations os registros que falharam e ficaram
- * com checksum inconsistente, permitindo que prisma migrate deploy reaplique.
+ * Remove registros de migrações recentes de _prisma_migrations antes do deploy.
+ * As migrações usam IF NOT EXISTS / IF EXISTS, portanto são idempotentes:
+ * podem ser reaplicadas a cada deploy sem risco de duplicar objetos.
  */
 
 require("dotenv").config();
 const { PrismaClient } = require("@prisma/client");
 
+const MIGRATIONS_PARA_LIMPAR = [
+  "20260616140000_add_tarefa_apontamento",
+  "20260616160000_fix_tarefa_apontamento",
+  "20260616170000_capacidade_42_os_vinculada"
+];
+
 async function main() {
   const prisma = new PrismaClient();
 
-  const broken = [
-    "20260616140000_add_tarefa_apontamento"
-  ];
-
-  for (const name of broken) {
+  for (const name of MIGRATIONS_PARA_LIMPAR) {
     try {
-      const result = await prisma.$executeRawUnsafe(
+      const rows = await prisma.$executeRawUnsafe(
         `DELETE FROM "_prisma_migrations" WHERE migration_name = $1`,
         name
       );
-      if (result > 0) {
-        console.log(`[fix-migrations] Registro removido: ${name}`);
-      } else {
-        console.log(`[fix-migrations] Nada a remover: ${name}`);
-      }
+      if (rows > 0) console.log(`[fix-migrations] Removido: ${name}`);
     } catch (err) {
-      console.log(`[fix-migrations] Aviso: ${err.message}`);
+      console.log(`[fix-migrations] Aviso ao limpar ${name}: ${err.message}`);
     }
   }
 
@@ -34,5 +33,5 @@ async function main() {
 
 main().catch((err) => {
   console.error("[fix-migrations] Erro:", err.message);
-  process.exit(0); // Não bloqueia o startup
+  process.exit(0); // nunca bloqueia o startup
 });
