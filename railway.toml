@@ -3,4 +3,4 @@ builder = "nixpacks"
 buildCommand = "npm install && npm run build && npx prisma generate"
 
 [deploy]
-startCommand = "npx prisma migrate resolve --applied '20260616140000_add_tarefa_apontamento' 2>/dev/null || true; npx prisma migrate deploy && npm start"
+startCommand = "node scripts/fix-migrations.js && npx prisma migrate deploy && npm start"
