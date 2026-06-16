@@ -20,9 +20,10 @@ function diasAte(data) {
   return Math.ceil(diff / 86400000);
 }
 
-function rankPessoas(pessoas, scoreFn, limite = 5) {
+function rankPessoas(pessoas, scoreFn, limite = 5, apenasPositivos = false) {
   return pessoas
     .map((pessoa) => ({ funcionario: pessoa, valor: scoreFn(pessoa.id) }))
+    .filter((item) => !apenasPositivos || item.valor > 0)
     .sort((a, b) => b.valor - a.valor || a.funcionario.nome.localeCompare(b.funcionario.nome, "pt-BR"))
     .slice(0, limite);
 }
@@ -92,7 +93,7 @@ router.get("/", asyncHandler(async (req, res) => {
   const rankings = {
     maisPedemAjuda: rankPessoas(pessoas, pedidosPorPessoa),
     entregasNoPrazo: rankPessoas(pessoas, entregasNoPrazoPorPessoa),
-    atrasos: rankPessoas(pessoas, atrasosPorPessoa)
+    atrasos: rankPessoas(pessoas, atrasosPorPessoa, 5, true)
   };
 
   // ---- Disponibilidade para apoio (semana selecionada) ----
