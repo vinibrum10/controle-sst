@@ -27,13 +27,26 @@ function wasOnTime(tarefa) {
   return new Date(tarefa.concluidaEm).getTime() <= endOfDay(tarefa.prazo).getTime();
 }
 
-// Todas as tarefas de uma semana (codigo "AAAA-Www"), com responsavel/apoio.
+// Tarefas da semana selecionada + tarefas atrasadas nao concluidas de semanas anteriores.
 async function tarefasDaSemana(semanaCodigo) {
   if (!semanaCodigo) return [];
-  return prisma.tarefa.findMany({
-    where: { semana: { codigo: semanaCodigo } },
-    include: tarefaInclude
-  });
+  const hoje = startOfToday();
+  const [daSemana, atrasadas] = await Promise.all([
+    prisma.tarefa.findMany({
+      where: { semana: { codigo: semanaCodigo } },
+      include: tarefaInclude
+    }),
+    prisma.tarefa.findMany({
+      where: {
+        status: { not: "CONCLUIDA" },
+        prazo: { lt: hoje },
+        NOT: { semana: { codigo: semanaCodigo } }
+      },
+      include: tarefaInclude
+    })
+  ]);
+  const ids = new Set(daSemana.map((t) => t.id));
+  return [...daSemana, ...atrasadas.filter((t) => !ids.has(t.id))];
 }
 
 // Soma de horas estimadas de tarefas abertas onde a pessoa e responsavel ou apoio.

@@ -6,13 +6,23 @@ import { Button } from "../components/ui/Button";
 import { useFuncionarios } from "../hooks/useFuncionarios";
 import { useToast } from "../hooks/useToast";
 import { criarTarefa } from "../lib/tarefas";
-import { currentWeekValue, shiftDate } from "../lib/format";
+import { currentWeekValue, shiftDate, weekDayDate } from "../lib/format";
 import { ApiError } from "../lib/api";
 import type { PeriodoRotina, PrioridadeTarefa, TipoTarefa } from "../types/tarefa";
 
 const fieldClasses =
   "min-h-[40px] w-full rounded-[8px] border border-line bg-surface-soft px-2.5 text-text outline-none transition-colors focus:border-teal focus:bg-white dark:focus:bg-surface-soft";
 const labelClasses = "grid gap-1.5 text-[0.83rem] font-extrabold text-muted";
+
+const DIAS_SEMANA = [
+  { value: "SEG", label: "Seg", jsDay: 1 },
+  { value: "TER", label: "Ter", jsDay: 2 },
+  { value: "QUA", label: "Qua", jsDay: 3 },
+  { value: "QUI", label: "Qui", jsDay: 4 },
+  { value: "SEX", label: "Sex", jsDay: 5 },
+  { value: "SAB", label: "Sáb", jsDay: 6 },
+  { value: "DOM", label: "Dom", jsDay: 0 },
+];
 
 function defaultState(responsavelId = "") {
   return {
@@ -25,6 +35,7 @@ function defaultState(responsavelId = "") {
     periodoRotina: "SEMANAL" as PeriodoRotina,
     horasEstimadas: 4,
     descricao: "",
+    diasSemana: [] as string[],
   };
 }
 
@@ -39,6 +50,15 @@ export function CriarTarefaPage() {
   const ativos = funcionarios.filter((f) => f.ativo);
   const responsavelId = form.responsavelId || ativos[0]?.id || "";
 
+  function toggleDia(dia: string) {
+    setForm((current) => {
+      const dias = current.diasSemana.includes(dia)
+        ? current.diasSemana.filter((d) => d !== dia)
+        : [...current.diasSemana, dia];
+      return { ...current, diasSemana: dias };
+    });
+  }
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     if (!form.titulo.trim() || !responsavelId || !form.prazo || !form.horasEstimadas) {
@@ -48,27 +68,44 @@ export function CriarTarefaPage() {
 
     setSubmitting(true);
     try {
-      const tarefa = await criarTarefa({
+      const dadosBase = {
         titulo: form.titulo.trim(),
         responsavelId,
         semana: form.semana,
-        prazo: form.prazo,
         tipo: form.tipo,
         prioridade: form.prioridade,
         periodoRotina: form.tipo === "ROTINEIRA" ? form.periodoRotina : null,
         horasEstimadas: Number(form.horasEstimadas),
         descricao: form.descricao.trim(),
-      });
+      };
+
+      let mensagem = "";
+
+      if (form.tipo === "ROTINEIRA" && form.diasSemana.length > 0) {
+        const tarefasCriadas = await Promise.all(
+          form.diasSemana.map((dia) => {
+            const diaDef = DIAS_SEMANA.find((d) => d.value === dia)!;
+            const prazo = weekDayDate(form.semana, diaDef.jsDay);
+            return criarTarefa({ ...dadosBase, prazo });
+          })
+        );
+        const ultima = tarefasCriadas[tarefasCriadas.length - 1];
+        mensagem = ultima.notificacaoEmail?.enviado
+          ? `${tarefasCriadas.length} tarefas rotineiras criadas. E-mail de notificação enviado.`
+          : ultima.notificacaoEmail?.motivo
+          ? `${tarefasCriadas.length} tarefas rotineiras criadas. ${ultima.notificacaoEmail.motivo}`
+          : `${tarefasCriadas.length} tarefas rotineiras criadas na semana.`;
+      } else {
+        const tarefa = await criarTarefa({ ...dadosBase, prazo: form.prazo });
+        mensagem = tarefa.notificacaoEmail?.enviado
+          ? "Tarefa adicionada ao plano semanal. E-mail de notificação enviado ao responsável."
+          : tarefa.notificacaoEmail?.motivo
+          ? `Tarefa adicionada ao plano semanal. ${tarefa.notificacaoEmail.motivo}`
+          : "Tarefa adicionada ao plano semanal.";
+      }
 
       setForm(() => defaultState(responsavelId));
-
-      if (tarefa.notificacaoEmail?.enviado) {
-        showToast("Tarefa adicionada ao plano semanal. E-mail de notificação enviado ao responsável.");
-      } else if (tarefa.notificacaoEmail?.motivo) {
-        showToast(`Tarefa adicionada ao plano semanal. ${tarefa.notificacaoEmail.motivo}`);
-      } else {
-        showToast("Tarefa adicionada ao plano semanal.");
-      }
+      showToast(mensagem);
       navigate("/tarefas/executar");
     } catch (err) {
       if (err instanceof ApiError && Array.isArray(err.detalhes) && err.detalhes.length > 0) {
@@ -148,7 +185,9 @@ export function CriarTarefaPage() {
               required
               className={fieldClasses}
               value={form.tipo}
-              onChange={(e) => setForm((current) => ({ ...current, tipo: e.target.value as TipoTarefa }))}
+              onChange={(e) =>
+                setForm((current) => ({ ...current, tipo: e.target.value as TipoTarefa, diasSemana: [] }))
+              }
             >
               <option value="ROTINEIRA">Rotineira</option>
               <option value="EVENTUAL">Eventual</option>
@@ -171,20 +210,50 @@ export function CriarTarefaPage() {
         </div>
 
         {form.tipo === "ROTINEIRA" && (
-          <label className={labelClasses}>
-            Período da rotina
-            <select
-              className={fieldClasses}
-              value={form.periodoRotina}
-              onChange={(e) => setForm((current) => ({ ...current, periodoRotina: e.target.value as PeriodoRotina }))}
-            >
-              <option value="SEMANAL">Semanal</option>
-              <option value="MENSAL">Mensal</option>
-              <option value="TRIMESTRAL">Trimestral</option>
-              <option value="SEMESTRAL">Semestral</option>
-              <option value="ANUAL">Anual</option>
-            </select>
-          </label>
+          <>
+            <label className={labelClasses}>
+              Período da rotina
+              <select
+                className={fieldClasses}
+                value={form.periodoRotina}
+                onChange={(e) =>
+                  setForm((current) => ({ ...current, periodoRotina: e.target.value as PeriodoRotina }))
+                }
+              >
+                <option value="SEMANAL">Semanal</option>
+                <option value="MENSAL">Mensal</option>
+                <option value="TRIMESTRAL">Trimestral</option>
+                <option value="SEMESTRAL">Semestral</option>
+                <option value="ANUAL">Anual</option>
+              </select>
+            </label>
+
+            <div className="grid gap-1.5">
+              <span className="text-[0.83rem] font-extrabold text-muted">Dias da semana</span>
+              <p className="text-[0.78rem] text-muted">
+                Selecione os dias para criar automaticamente uma tarefa por dia na semana escolhida.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {DIAS_SEMANA.map((dia) => {
+                  const ativo = form.diasSemana.includes(dia.value);
+                  return (
+                    <button
+                      key={dia.value}
+                      type="button"
+                      onClick={() => toggleDia(dia.value)}
+                      className={`min-w-[44px] rounded-[8px] border px-3 py-1.5 text-[0.82rem] font-bold transition-colors ${
+                        ativo
+                          ? "border-teal bg-teal text-white"
+                          : "border-line bg-surface-soft text-muted hover:border-teal"
+                      }`}
+                    >
+                      {dia.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </>
         )}
 
         <label className={labelClasses}>

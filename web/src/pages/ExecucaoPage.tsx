@@ -5,7 +5,7 @@ import { useFuncionarios } from "../hooks/useFuncionarios";
 import { useTarefas } from "../hooks/useTarefas";
 import { useToast } from "../hooks/useToast";
 import { KANBAN_COLUMNS, statusLabel } from "../lib/enums";
-import { currentWeekValue } from "../lib/format";
+import { currentWeekValue, formatWeekLabel } from "../lib/format";
 import { isDone } from "../lib/tarefaHelpers";
 import type { StatusTarefa, Tarefa } from "../types/tarefa";
 
@@ -108,7 +108,7 @@ export function ExecucaoPage() {
       description="Arraste os cards entre colunas ou use os botões para atualizar o andamento."
       headerExtra={
         <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-end sm:justify-end">
-          <label className="grid gap-1.5 text-[0.82rem] font-bold text-muted">
+          <label className="grid gap-1 text-[0.82rem] font-bold text-muted">
             Semana
             <input
               type="week"
@@ -116,6 +116,7 @@ export function ExecucaoPage() {
               onChange={(event) => setSemana(event.target.value)}
               className={`${fieldClasses} w-full sm:w-[160px]`}
             />
+            <span className="text-[0.72rem] font-normal text-muted">{formatWeekLabel(semana)}</span>
           </label>
           <select
             aria-label="Filtrar por responsável"
