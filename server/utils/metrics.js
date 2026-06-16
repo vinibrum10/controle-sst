@@ -49,10 +49,10 @@ async function tarefasDaSemana(semanaCodigo) {
   return [...daSemana, ...atrasadas.filter((t) => !ids.has(t.id))];
 }
 
-// Soma de horas estimadas de tarefas abertas onde a pessoa e responsavel ou apoio.
+// Soma de horas estimadas de todas as tarefas da semana da pessoa (ativas e concluídas),
+// pois horas planejadas consumem capacidade independentemente do status.
 function cargaPessoa(tarefas, funcionarioId) {
   return tarefas
-    .filter((tarefa) => !isDone(tarefa))
     .filter((tarefa) => tarefa.responsavelId === funcionarioId || tarefa.apoioId === funcionarioId)
     .reduce((soma, tarefa) => soma + tarefa.horasEstimadas, 0);
 }

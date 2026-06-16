@@ -6,32 +6,46 @@ import {
   iniciarAtendimento,
   finalizarAtendimento,
   excluirAtendimento,
+  isPausadaFimDeSemana,
 } from "../../lib/atendimentoOS";
 import { useToast } from "../../hooks/useToast";
+import { useAuth } from "../../hooks/useAuth";
 import { toDateInputValue } from "../../lib/format";
 
 const MAX_ATIVOS = 3;
 
 export function AtendimentoOSCard() {
   const { showToast } = useToast();
+  const { usuario } = useAuth();
   const [numeroOS, setNumeroOS] = useState("");
   const [ativos, setAtivos] = useState<AtendimentoOS[]>([]);
   const [historico, setHistorico] = useState<AtendimentoOS[]>([]);
   const [carregando, setCarregando] = useState(false);
+  const [pausada, setPausada] = useState(isPausadaFimDeSemana());
 
   const hoje = toDateInputValue(new Date());
+  const funcId = usuario?.funcionarioId ?? undefined;
 
   const carregar = useCallback(async () => {
     try {
-      const lista = await listarAtendimentos({ data: hoje });
-      setAtivos(lista.filter((a) => !a.finalizadoEm));
-      setHistorico(lista.filter((a) => !!a.finalizadoEm));
+      const [ativas, hist] = await Promise.all([
+        listarAtendimentos({ responsavelId: funcId, ativos: true }),
+        listarAtendimentos({ data: hoje, responsavelId: funcId }),
+      ]);
+      setAtivos(ativas);
+      setHistorico(hist.filter((a) => !!a.finalizadoEm));
     } catch {
       // ignora erros no carregamento inicial
     }
-  }, [hoje]);
+  }, [hoje, funcId]);
 
   useEffect(() => { carregar(); }, [carregar]);
+
+  // Atualiza estado pausada a cada minuto (cobre a virada das 17h na sexta)
+  useEffect(() => {
+    const id = setInterval(() => setPausada(isPausadaFimDeSemana()), 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   async function handleIniciar() {
     if (!numeroOS.trim()) { showToast("Informe o número da OS."); return; }
@@ -81,8 +95,8 @@ export function AtendimentoOSCard() {
       description="Registre o número da OS que você está atendendo."
     >
       <div className="grid gap-3">
-        {/* Input + Iniciar (visível enquanto houver vagas) */}
-        {ativos.length < MAX_ATIVOS && (
+        {/* Input + Iniciar (visível enquanto houver vagas e não for fim de semana) */}
+        {ativos.length < MAX_ATIVOS && !pausada && (
           <div className="flex gap-2">
             <input
               type="text"
@@ -103,28 +117,41 @@ export function AtendimentoOSCard() {
           </div>
         )}
 
+        {/* Aviso de pausa no fim de semana */}
+        {pausada && (
+          <p className="rounded-[8px] bg-amber-50 px-3 py-2 text-[0.82rem] font-semibold text-amber-700">
+            OS pausadas — retomam na segunda-feira.
+          </p>
+        )}
+
         {/* OS em atendimento ativo */}
         {ativos.length > 0 && (
           <div className="grid gap-1.5">
             {ativos.map((a) => (
               <div
                 key={a.id}
-                className="flex items-center justify-between gap-3 rounded-[8px] border border-teal bg-teal-soft px-3 py-2.5"
+                className={`flex items-center justify-between gap-3 rounded-[8px] border px-3 py-2.5 ${
+                  pausada
+                    ? "border-amber-300 bg-amber-50"
+                    : "border-teal bg-teal-soft"
+                }`}
               >
                 <div className="grid gap-0.5">
-                  <span className="text-[0.7rem] font-extrabold uppercase tracking-widest text-teal">
-                    Em atendimento
+                  <span className={`text-[0.7rem] font-extrabold uppercase tracking-widest ${pausada ? "text-amber-600" : "text-teal"}`}>
+                    {pausada ? "Pausada" : "Em atendimento"}
                   </span>
                   <span className="font-extrabold text-text">OS {a.numeroOS}</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleFinalizar(a.id)}
-                  disabled={carregando}
-                  className="min-h-[36px] rounded-[8px] bg-red px-4 text-[0.85rem] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-                >
-                  Finalizar
-                </button>
+                {!pausada && (
+                  <button
+                    type="button"
+                    onClick={() => handleFinalizar(a.id)}
+                    disabled={carregando}
+                    className="min-h-[36px] rounded-[8px] bg-red px-4 text-[0.85rem] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                  >
+                    Finalizar
+                  </button>
+                )}
               </div>
             ))}
           </div>

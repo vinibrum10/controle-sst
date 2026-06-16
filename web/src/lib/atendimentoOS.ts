@@ -11,18 +11,19 @@ export interface AtendimentoOS {
   criadoEm: string;
 }
 
-export function listarAtendimentos(params: { data?: string; responsavelId?: string } = {}) {
+export function listarAtendimentos(params: { data?: string; responsavelId?: string; ativos?: boolean } = {}) {
   const query = new URLSearchParams();
   if (params.data) query.set("data", params.data);
   if (params.responsavelId) query.set("responsavelId", params.responsavelId);
+  if (params.ativos) query.set("ativos", "true");
   const qs = query.toString();
   return apiFetch<AtendimentoOS[]>(`/atendimentos-os${qs ? `?${qs}` : ""}`);
 }
 
-export function iniciarAtendimento(numeroOS: string, responsavelId?: string | null) {
+export function iniciarAtendimento(numeroOS: string) {
   return apiFetch<AtendimentoOS>("/atendimentos-os", {
     method: "POST",
-    body: { numeroOS, responsavelId: responsavelId ?? null }
+    body: { numeroOS }
   });
 }
 
@@ -41,4 +42,13 @@ export function formatarDuracao(segundos: number): string {
   if (h > 0)
     return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+/** Retorna true se o momento atual está dentro do período de pausa (Sex 17h → Seg 00h). */
+export function isPausadaFimDeSemana(): boolean {
+  const now = new Date();
+  const dia = now.getDay(); // 0=Dom, 1=Seg, ..., 5=Sex, 6=Sab
+  if (dia === 0 || dia === 6) return true;
+  if (dia === 5 && now.getHours() >= 17) return true;
+  return false;
 }

@@ -19,14 +19,17 @@ const funcionarioSchema = z.object({
   nome: z.string().trim().min(2, "Informe o nome."),
   funcao: z.string().trim().min(2, "Informe a funcao."),
   email: z.string().trim().email("Informe um e-mail valido."),
-  capacidade: z.number({ invalid_type_error: "Capacidade deve ser um numero." })
-    .int("Capacidade deve ser um numero inteiro.")
-    .positive("Capacidade semanal deve ser maior que zero."),
   foto: z.string().nullable().optional(),
   ativo: z.boolean().optional()
 });
 
-const funcionarioUpdateSchema = funcionarioSchema.partial();
+const capacidadeSchema = z.number({ invalid_type_error: "Capacidade deve ser um numero." })
+  .int("Capacidade deve ser um numero inteiro.")
+  .positive("Capacidade semanal deve ser maior que zero.");
+
+const funcionarioUpdateSchema = funcionarioSchema.partial().extend({
+  capacidade: capacidadeSchema.optional()
+});
 
 router.use(requireAuth);
 
@@ -52,6 +55,11 @@ router.post("/", requireGestao, validateBody(funcionarioSchema), asyncHandler(as
 router.put("/:id", requireGestao, validateBody(funcionarioUpdateSchema), asyncHandler(async (req, res) => {
   const funcionario = await prisma.funcionario.findUnique({ where: { id: req.params.id } });
   if (!funcionario) return res.status(404).json({ error: "Funcionario nao encontrado." });
+
+  const papel = req.user.papel;
+  if ("capacidade" in req.body && papel !== "ADMIN" && papel !== "GESTOR") {
+    return res.status(403).json({ error: "Apenas gestores e administradores podem alterar a carga horária." });
+  }
 
   const atualizado = await prisma.funcionario.update({
     where: { id: req.params.id },

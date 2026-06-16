@@ -17,7 +17,7 @@ export function WorkloadList({ cargaPorPessoa }: WorkloadListProps) {
         const ativo = funcionario.ativo !== false;
         const support =
           carga === 0
-            ? "Sem tarefa aberta na semana selecionada."
+            ? "Sem tarefa atribuída na semana selecionada."
             : livre > 0
               ? `${livre}h livres para apoio.`
               : "Capacidade semanal comprometida.";

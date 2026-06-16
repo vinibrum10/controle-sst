@@ -7,6 +7,7 @@ import { PersonCard } from "../components/funcionarios/PersonCard";
 import { useFuncionarios } from "../hooks/useFuncionarios";
 import { useToast } from "../hooks/useToast";
 import { usePermissao } from "../hooks/usePermissao";
+import { useAuth } from "../hooks/useAuth";
 import { ApiError } from "../lib/api";
 import { listarTarefas } from "../lib/tarefas";
 import { currentWeekValue } from "../lib/format";
@@ -20,14 +21,16 @@ const fieldClasses =
 const labelClasses = "grid gap-1.5 text-[0.83rem] font-extrabold text-muted";
 
 function defaultForm() {
-  return { nome: "", funcao: "", email: "", capacidade: 32 };
+  return { nome: "", funcao: "", email: "" };
 }
 
 export function FuncionariosPage() {
   const { funcionarios, carregando, criar, alternarAtivo, remover } = useFuncionarios();
   const { showToast } = useToast();
+  const { usuario } = useAuth();
   const canManage = usePermissao("GERENCIAR_EQUIPE");
   const canDelete = usePermissao("EXCLUIR_FUNCIONARIO");
+  const canEditCapacidade = usuario?.papel === "ADMIN" || usuario?.papel === "GESTOR";
 
   const [tarefas, setTarefas] = useState<Tarefa[]>([]);
   const [form, setForm] = useState(defaultForm);
@@ -51,7 +54,7 @@ export function FuncionariosPage() {
       const tarefasDaSemana = tarefas.filter((t) => t.semana === semanaAtual);
 
       const carga = tarefasDaSemana
-        .filter((t) => !isDone(t) && (t.responsavelId === funcionario.id || t.apoioId === funcionario.id))
+        .filter((t) => t.responsavelId === funcionario.id || t.apoioId === funcionario.id)
         .reduce((soma, t) => soma + Number(t.horasEstimadas || 0), 0);
 
       const tarefasProprias = tarefasDaSemana.filter((t) => t.responsavelId === funcionario.id && !isDone(t));
@@ -86,16 +89,15 @@ export function FuncionariosPage() {
     const nome = form.nome.trim();
     const funcao = form.funcao.trim();
     const email = form.email.trim();
-    const capacidade = Number(form.capacidade);
 
-    if (!nome || !funcao || !email || !capacidade) {
-      showToast("Preencha nome, função, e-mail e capacidade.");
+    if (!nome || !funcao || !email) {
+      showToast("Preencha nome, função e e-mail.");
       return;
     }
 
     setSubmitting(true);
     try {
-      await criar({ nome, funcao, email, capacidade, foto: foto || null });
+      await criar({ nome, funcao, email, foto: foto || null });
       setForm(defaultForm());
       setFoto(null);
       showToast("Pessoa adicionada à equipe.");
@@ -183,7 +185,7 @@ export function FuncionariosPage() {
       </Panel>
 
       {canManage && (
-      <Panel title="Cadastro de funcionário" description="Inclua membros da equipe de SST e a capacidade semanal.">
+      <Panel title="Cadastro de funcionário" description="Inclua membros da equipe de SST. A carga horária padrão é de 42h semanais.">
         <form className="grid gap-3" onSubmit={handleSubmit}>
           <label className={labelClasses}>
             Nome
@@ -219,18 +221,6 @@ export function FuncionariosPage() {
               className={fieldClasses}
               value={form.email}
               onChange={(e) => setForm((current) => ({ ...current, email: e.target.value }))}
-            />
-          </label>
-          <label className={labelClasses}>
-            Capacidade semanal em horas
-            <input
-              type="number"
-              min={1}
-              max={80}
-              required
-              className={fieldClasses}
-              value={form.capacidade}
-              onChange={(e) => setForm((current) => ({ ...current, capacidade: Number(e.target.value) }))}
             />
           </label>
           <label className={labelClasses}>

@@ -1,9 +1,11 @@
 const prisma = require("../db");
 const { semanaInfoFromDate, findOrCreateSemana } = require("./semana");
+const { calcularDuracaoUtil } = require("./duracaoUtil");
 
 /**
  * Converte automaticamente OS Interliga abertas em semanas anteriores
  * (não finalizadas) em tarefas atrasadas na semana vigente.
+ * Fecha a OS com duração calculada excluindo fins de semana.
  * Executa no startup do servidor — idempotente.
  */
 async function converterOSAtrasadas() {
@@ -28,6 +30,13 @@ async function converterOSAtrasadas() {
 
   for (const os of osAtrasadas) {
     try {
+      // Fecha a OS com duração excluindo fins de semana (pausa Sex 17h → Seg 00h)
+      const finalizadoEm = hoje;
+      const duracaoSegundos = calcularDuracaoUtil(
+        os.iniciadoEm.getTime(),
+        finalizadoEm.getTime()
+      );
+
       const tarefa = await prisma.tarefa.create({
         data: {
           titulo: `OS Interliga: ${os.numeroOS}`,
@@ -43,7 +52,7 @@ async function converterOSAtrasadas() {
 
       await prisma.atendimentoOS.update({
         where: { id: os.id },
-        data: { tarefaVinculadaId: tarefa.id }
+        data: { finalizadoEm, duracaoSegundos, tarefaVinculadaId: tarefa.id }
       });
 
       console.log(`[osConverter] OS ${os.numeroOS} → Tarefa "${tarefa.titulo}" (${tarefa.id})`);

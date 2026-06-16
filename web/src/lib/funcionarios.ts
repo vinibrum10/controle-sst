@@ -5,7 +5,6 @@ export interface NovoFuncionario {
   nome: string;
   funcao: string;
   email: string;
-  capacidade: number;
   foto?: string | null;
 }
 
@@ -15,6 +14,10 @@ export function listarFuncionarios() {
 
 export function criarFuncionario(dados: NovoFuncionario) {
   return apiFetch<Funcionario>("/funcionarios", { method: "POST", body: dados });
+}
+
+export function atualizarFuncionario(id: string, dados: Partial<Funcionario>) {
+  return apiFetch<Funcionario>(`/funcionarios/${id}`, { method: "PUT", body: dados });
 }
 
 export function alternarAtivoFuncionario(id: string, ativo: boolean) {
