@@ -27,6 +27,36 @@ export function currentWeekValue(): string {
   return weekFromDate(toDateInputValue(new Date()));
 }
 
+export function weekStartDate(weekCode: string): Date {
+  const [yearStr, weekStr] = weekCode.split("-W");
+  const year = Number(yearStr);
+  const week = Number(weekStr);
+  const jan4 = new Date(year, 0, 4);
+  const dow = jan4.getDay() || 7;
+  const monday = new Date(jan4);
+  monday.setDate(jan4.getDate() - dow + 1 + (week - 1) * 7);
+  return monday;
+}
+
+export function formatWeekLabel(weekCode: string): string {
+  if (!weekCode) return "";
+  const monday = weekStartDate(weekCode);
+  const weekOfMonth = Math.ceil(monday.getDate() / 7);
+  const ordinals = ["1ª", "2ª", "3ª", "4ª", "5ª"];
+  const ordinal = ordinals[weekOfMonth - 1] ?? `${weekOfMonth}ª`;
+  const monthName = new Intl.DateTimeFormat("pt-BR", { month: "long" }).format(monday);
+  const year = monday.getFullYear();
+  return `${ordinal} semana de ${monthName.charAt(0).toUpperCase() + monthName.slice(1)} de ${year}`;
+}
+
+export function weekDayDate(weekCode: string, jsDay: number): string {
+  const monday = weekStartDate(weekCode);
+  const offset = jsDay === 0 ? 6 : jsDay - 1;
+  const date = new Date(monday);
+  date.setDate(monday.getDate() + offset);
+  return toDateInputValue(date);
+}
+
 export function initials(name: string): string {
   return String(name || "?")
     .trim()

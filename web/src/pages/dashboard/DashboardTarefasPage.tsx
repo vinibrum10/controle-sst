@@ -5,7 +5,7 @@ import { StatusChart } from "../../components/dashboard/StatusChart";
 import { RankingList } from "../../components/dashboard/RankingList";
 import { Panel } from "../../components/ui/Panel";
 import { useDashboard } from "../../hooks/useDashboard";
-import { currentWeekValue } from "../../lib/format";
+import { currentWeekValue, formatWeekLabel } from "../../lib/format";
 
 export function DashboardTarefasPage() {
   const [semana, setSemana] = useState(currentWeekValue);
@@ -14,7 +14,7 @@ export function DashboardTarefasPage() {
   return (
     <div className="grid gap-6">
       <div className="flex justify-end">
-        <label className="grid w-full gap-1.5 text-[0.82rem] font-bold text-muted sm:w-auto">
+        <label className="grid w-full gap-1 text-[0.82rem] font-bold text-muted sm:w-auto">
           Semana
           <input
             type="week"
@@ -22,6 +22,7 @@ export function DashboardTarefasPage() {
             onChange={(event) => setSemana(event.target.value)}
             className="h-[40px] w-full rounded-[8px] border border-line bg-surface-soft px-2.5 text-text outline-none focus:border-teal sm:w-[160px]"
           />
+          <span className="text-[0.72rem] font-normal text-muted">{formatWeekLabel(semana)}</span>
         </label>
       </div>
 

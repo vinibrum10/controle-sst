@@ -53,21 +53,43 @@ const statusSchema = z.object({
 
 router.use(requireAuth);
 
-// Lista tarefas, com filtros opcionais por semana, responsavel, tipo e status.
+// Lista tarefas da semana + atrasadas de semanas anteriores (quando semana fornecida sem filtro de status).
 router.get("/", asyncHandler(async (req, res) => {
   const { semana, responsavelId, tipo, status } = req.query;
 
-  const where = {};
-  if (semana) where.semana = { codigo: semana };
-  if (responsavelId) where.OR = [{ responsavelId }, { apoioId: responsavelId }];
-  if (tipo) where.tipo = tipo;
-  if (status) where.status = status;
+  const filtroBase = {};
+  if (responsavelId) filtroBase.OR = [{ responsavelId }, { apoioId: responsavelId }];
+  if (tipo) filtroBase.tipo = tipo;
+  if (status) filtroBase.status = status;
 
-  const tarefas = await prisma.tarefa.findMany({
-    where,
-    include,
-    orderBy: [{ prazo: "asc" }, { criadoEm: "desc" }]
-  });
+  let tarefas;
+  if (semana && !status) {
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    const [daSemana, atrasadas] = await Promise.all([
+      prisma.tarefa.findMany({
+        where: { ...filtroBase, semana: { codigo: semana } },
+        include,
+        orderBy: [{ prazo: "asc" }, { criadoEm: "desc" }]
+      }),
+      prisma.tarefa.findMany({
+        where: {
+          ...filtroBase,
+          status: { not: "CONCLUIDA" },
+          prazo: { lt: hoje },
+          NOT: { semana: { codigo: semana } }
+        },
+        include,
+        orderBy: [{ prazo: "asc" }, { criadoEm: "desc" }]
+      })
+    ]);
+    const ids = new Set(daSemana.map((t) => t.id));
+    tarefas = [...atrasadas.filter((t) => !ids.has(t.id)), ...daSemana];
+  } else {
+    const where = { ...filtroBase };
+    if (semana) where.semana = { codigo: semana };
+    tarefas = await prisma.tarefa.findMany({ where, include, orderBy: [{ prazo: "asc" }, { criadoEm: "desc" }] });
+  }
 
   res.json(tarefas.map(serializeTarefa));
 }));
