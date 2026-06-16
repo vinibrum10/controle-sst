@@ -49,6 +49,12 @@ export function formatWeekLabel(weekCode: string): string {
   return `${ordinal} semana de ${monthName.charAt(0).toUpperCase() + monthName.slice(1)} de ${year}`;
 }
 
+export function addWeeks(weekCode: string, delta: number): string {
+  const monday = weekStartDate(weekCode);
+  monday.setDate(monday.getDate() + delta * 7);
+  return weekFromDate(toDateInputValue(monday));
+}
+
 export function weekDayDate(weekCode: string, jsDay: number): string {
   const monday = weekStartDate(weekCode);
   const offset = jsDay === 0 ? 6 : jsDay - 1;

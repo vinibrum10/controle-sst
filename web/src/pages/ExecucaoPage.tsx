@@ -1,11 +1,12 @@
 import { useMemo, useState, type DragEvent } from "react";
 import { Panel, EmptyState } from "../components/ui/Panel";
 import { TaskCard } from "../components/tarefas/TaskCard";
+import { WeekSelector } from "../components/ui/WeekSelector";
 import { useFuncionarios } from "../hooks/useFuncionarios";
 import { useTarefas } from "../hooks/useTarefas";
 import { useToast } from "../hooks/useToast";
 import { KANBAN_COLUMNS, statusLabel } from "../lib/enums";
-import { currentWeekValue, formatWeekLabel } from "../lib/format";
+import { currentWeekValue } from "../lib/format";
 import { isDone } from "../lib/tarefaHelpers";
 import type { StatusTarefa, Tarefa } from "../types/tarefa";
 
@@ -110,13 +111,11 @@ export function ExecucaoPage() {
         <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-end sm:justify-end">
           <label className="grid gap-1 text-[0.82rem] font-bold text-muted">
             Semana
-            <input
-              type="week"
+            <WeekSelector
               value={semana}
-              onChange={(event) => setSemana(event.target.value)}
-              className={`${fieldClasses} w-full sm:w-[160px]`}
+              onChange={setSemana}
+              className="w-full sm:w-[260px]"
             />
-            <span className="text-[0.72rem] font-normal text-muted">{formatWeekLabel(semana)}</span>
           </label>
           <select
             aria-label="Filtrar por responsável"
