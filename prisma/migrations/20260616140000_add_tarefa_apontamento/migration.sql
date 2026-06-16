@@ -1,22 +1,28 @@
--- Adiciona horas_realizadas à tabela tarefa
-ALTER TABLE "tarefa" ADD COLUMN "horas_realizadas" DOUBLE PRECISION NOT NULL DEFAULT 0;
+-- Adiciona horasRealizadas à tabela Tarefa
+ALTER TABLE "Tarefa" ADD COLUMN "horasRealizadas" DOUBLE PRECISION NOT NULL DEFAULT 0;
 
 -- Cria tabela de apontamentos de horas em tarefas
-CREATE TABLE "tarefa_apontamento" (
+CREATE TABLE "TarefaApontamento" (
     "id" TEXT NOT NULL,
-    "tarefa_id" TEXT NOT NULL,
-    "funcionario_id" TEXT,
-    "iniciado_em" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "finalizado_em" TIMESTAMP(3),
-    "duracao_segundos" INTEGER,
-    CONSTRAINT "tarefa_apontamento_pkey" PRIMARY KEY ("id")
+    "tarefaId" TEXT NOT NULL,
+    "funcionarioId" TEXT,
+    "iniciadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "finalizadoEm" TIMESTAMP(3),
+    "duracaoSegundos" INTEGER,
+
+    CONSTRAINT "TarefaApontamento_pkey" PRIMARY KEY ("id")
 );
 
-CREATE INDEX "tarefa_apontamento_tarefa_id_idx" ON "tarefa_apontamento"("tarefa_id");
-CREATE INDEX "tarefa_apontamento_funcionario_id_idx" ON "tarefa_apontamento"("funcionario_id");
+-- CreateIndex
+CREATE INDEX "TarefaApontamento_tarefaId_idx" ON "TarefaApontamento"("tarefaId");
 
-ALTER TABLE "tarefa_apontamento" ADD CONSTRAINT "tarefa_apontamento_tarefa_id_fkey"
-    FOREIGN KEY ("tarefa_id") REFERENCES "tarefa"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+-- CreateIndex
+CREATE INDEX "TarefaApontamento_funcionarioId_idx" ON "TarefaApontamento"("funcionarioId");
 
-ALTER TABLE "tarefa_apontamento" ADD CONSTRAINT "tarefa_apontamento_funcionario_id_fkey"
-    FOREIGN KEY ("funcionario_id") REFERENCES "funcionario"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+-- AddForeignKey
+ALTER TABLE "TarefaApontamento" ADD CONSTRAINT "TarefaApontamento_tarefaId_fkey"
+    FOREIGN KEY ("tarefaId") REFERENCES "Tarefa"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TarefaApontamento" ADD CONSTRAINT "TarefaApontamento_funcionarioId_fkey"
+    FOREIGN KEY ("funcionarioId") REFERENCES "Funcionario"("id") ON DELETE SET NULL ON UPDATE CASCADE;
