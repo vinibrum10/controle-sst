@@ -6,17 +6,17 @@ import {
   iniciarAtendimento,
   finalizarAtendimento,
   excluirAtendimento,
-  formatarDuracao,
 } from "../../lib/atendimentoOS";
 import { useToast } from "../../hooks/useToast";
 import { toDateInputValue } from "../../lib/format";
 
+const MAX_ATIVOS = 3;
+
 export function AtendimentoOSCard() {
   const { showToast } = useToast();
   const [numeroOS, setNumeroOS] = useState("");
-  const [ativo, setAtivo] = useState<AtendimentoOS | null>(null);
+  const [ativos, setAtivos] = useState<AtendimentoOS[]>([]);
   const [historico, setHistorico] = useState<AtendimentoOS[]>([]);
-  const [elapsed, setElapsed] = useState(0);
   const [carregando, setCarregando] = useState(false);
 
   const hoje = toDateInputValue(new Date());
@@ -24,33 +24,27 @@ export function AtendimentoOSCard() {
   const carregar = useCallback(async () => {
     try {
       const lista = await listarAtendimentos({ data: hoje });
-      setAtivo(lista.find((a) => !a.finalizadoEm) ?? null);
+      setAtivos(lista.filter((a) => !a.finalizadoEm));
       setHistorico(lista.filter((a) => !!a.finalizadoEm));
     } catch {
-      // ignora erros silenciosamente no carregamento inicial
+      // ignora erros no carregamento inicial
     }
   }, [hoje]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
-  useEffect(() => {
-    if (!ativo) { setElapsed(0); return; }
-    const update = () =>
-      setElapsed(Math.round((Date.now() - new Date(ativo.iniciadoEm).getTime()) / 1000));
-    update();
-    const id = setInterval(update, 1000);
-    return () => clearInterval(id);
-  }, [ativo]);
-
   async function handleIniciar() {
     if (!numeroOS.trim()) { showToast("Informe o número da OS."); return; }
-    if (ativo) { showToast("Finalize o atendimento atual antes de iniciar outro."); return; }
+    if (ativos.length >= MAX_ATIVOS) {
+      showToast(`Máximo de ${MAX_ATIVOS} OS em atendimento simultâneo.`);
+      return;
+    }
     setCarregando(true);
     try {
       const novo = await iniciarAtendimento(numeroOS.trim());
-      setAtivo(novo);
+      setAtivos((prev) => [...prev, novo]);
       setNumeroOS("");
-      showToast(`Atendimento da OS ${novo.numeroOS} iniciado.`);
+      showToast(`OS ${novo.numeroOS} iniciada.`);
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Erro ao iniciar atendimento.");
     } finally {
@@ -58,16 +52,13 @@ export function AtendimentoOSCard() {
     }
   }
 
-  async function handleFinalizar() {
-    if (!ativo) return;
+  async function handleFinalizar(id: string) {
     setCarregando(true);
     try {
-      const finalizado = await finalizarAtendimento(ativo.id);
-      setAtivo(null);
+      const finalizado = await finalizarAtendimento(id);
+      setAtivos((prev) => prev.filter((a) => a.id !== id));
       setHistorico((prev) => [finalizado, ...prev]);
-      showToast(
-        `OS ${finalizado.numeroOS} finalizada em ${formatarDuracao(finalizado.duracaoSegundos ?? 0)}.`
-      );
+      showToast(`OS ${finalizado.numeroOS} finalizada.`);
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Erro ao finalizar atendimento.");
     } finally {
@@ -85,10 +76,13 @@ export function AtendimentoOSCard() {
   }
 
   return (
-    <Panel title="Atendimento de OS Interliga" description="Registre e cronomettre o tempo de atendimento de cada OS.">
+    <Panel
+      title="Atendimento de OS Interliga"
+      description="Registre o número da OS que você está atendendo."
+    >
       <div className="grid gap-3">
-        {/* Campo + botão iniciar */}
-        {!ativo && (
+        {/* Input + Iniciar (visível enquanto houver vagas) */}
+        {ativos.length < MAX_ATIVOS && (
           <div className="flex gap-2">
             <input
               type="text"
@@ -109,26 +103,30 @@ export function AtendimentoOSCard() {
           </div>
         )}
 
-        {/* Em andamento */}
-        {ativo && (
-          <div className="flex items-center justify-between gap-3 rounded-[8px] border border-teal bg-teal-soft p-3">
-            <div className="grid gap-0.5">
-              <span className="text-[0.73rem] font-extrabold uppercase tracking-widest text-teal">
-                Em atendimento
-              </span>
-              <span className="text-[1rem] font-extrabold text-text">OS {ativo.numeroOS}</span>
-              <span className="font-mono text-[1.6rem] font-extrabold tabular-nums text-text">
-                {formatarDuracao(elapsed)}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={handleFinalizar}
-              disabled={carregando}
-              className="min-h-[40px] rounded-[8px] bg-red px-5 text-[0.88rem] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-            >
-              Finalizar
-            </button>
+        {/* OS em atendimento ativo */}
+        {ativos.length > 0 && (
+          <div className="grid gap-1.5">
+            {ativos.map((a) => (
+              <div
+                key={a.id}
+                className="flex items-center justify-between gap-3 rounded-[8px] border border-teal bg-teal-soft px-3 py-2.5"
+              >
+                <div className="grid gap-0.5">
+                  <span className="text-[0.7rem] font-extrabold uppercase tracking-widest text-teal">
+                    Em atendimento
+                  </span>
+                  <span className="font-extrabold text-text">OS {a.numeroOS}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleFinalizar(a.id)}
+                  disabled={carregando}
+                  className="min-h-[36px] rounded-[8px] bg-red px-4 text-[0.85rem] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  Finalizar
+                </button>
+              </div>
+            ))}
           </div>
         )}
 
@@ -145,10 +143,7 @@ export function AtendimentoOSCard() {
                   className="flex items-center gap-3 rounded-[6px] bg-surface-strong px-3 py-2 text-[0.85rem]"
                 >
                   <span className="font-bold text-text">OS {a.numeroOS}</span>
-                  <span className="font-mono tabular-nums text-muted">
-                    {formatarDuracao(a.duracaoSegundos ?? 0)}
-                  </span>
-                  <span className="ml-auto text-[0.78rem] text-muted">
+                  <span className="text-muted">
                     {new Date(a.iniciadoEm).toLocaleTimeString("pt-BR", {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -164,7 +159,7 @@ export function AtendimentoOSCard() {
                   <button
                     type="button"
                     onClick={() => handleExcluir(a.id)}
-                    className="text-muted hover:text-red"
+                    className="ml-auto text-muted hover:text-red"
                     aria-label="Excluir"
                   >
                     &times;

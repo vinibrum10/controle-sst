@@ -16,6 +16,7 @@ const permissoesRoutes = require("./routes/permissoes.routes");
 const notificacoesRoutes = require("./routes/notificacoes.routes");
 const auditoriaRoutes = require("./routes/auditoria.routes");
 const atendimentoOSRoutes = require("./routes/atendimentoOS.routes");
+const { converterOSAtrasadas } = require("./utils/osConverter");
 const { sistema: configuracaoSistemaRoutes, cadastros: cadastrosRoutes } = require("./routes/configuracoes.routes");
 const {
   treinamentos, inspecoes, auditorias, achados, planosAcao, rotasSeguras, anexos
@@ -76,6 +77,11 @@ app.use("/api/rota-segura/penalidades", rsPenalidades);
 app.use("/api/rota-segura/ranking", rsRanking);
 app.use("/api/rota-segura/dashboard", rsDashboard);
 app.use("/api/rota-segura/relatorios", rsRelatorios);
+
+// Converte OS atrasadas de semanas anteriores em tarefas (executa no startup).
+converterOSAtrasadas().catch((err) =>
+  console.error("[osConverter] Falha no startup:", err.message)
+);
 
 app.get("/api/health", async (req, res) => {
   try {
