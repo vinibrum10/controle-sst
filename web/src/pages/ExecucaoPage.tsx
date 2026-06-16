@@ -1,6 +1,7 @@
 import { useMemo, useState, type DragEvent } from "react";
 import { Panel, EmptyState } from "../components/ui/Panel";
 import { TaskCard } from "../components/tarefas/TaskCard";
+import { AtendimentoOSCard } from "../components/tarefas/AtendimentoOSCard";
 import { WeekSelector } from "../components/ui/WeekSelector";
 import { useFuncionarios } from "../hooks/useFuncionarios";
 import { useTarefas } from "../hooks/useTarefas";
@@ -104,95 +105,99 @@ export function ExecucaoPage() {
   }
 
   return (
-    <Panel
-      title="Execução de tarefa"
-      description="Arraste os cards entre colunas ou use os botões para atualizar o andamento."
-      headerExtra={
-        <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-end sm:justify-end">
-          <label className="grid gap-1 text-[0.82rem] font-bold text-muted">
-            Semana
-            <WeekSelector
-              value={semana}
-              onChange={setSemana}
-              className="w-full sm:w-[260px]"
-            />
-          </label>
-          <select
-            aria-label="Filtrar por responsável"
-            className={`${fieldClasses} w-full sm:w-[200px]`}
-            value={responsavelFiltro}
-            onChange={(event) => setResponsavelFiltro(event.target.value)}
-          >
-            <option value="todos">Todos os responsáveis</option>
-            {funcionarios.map((funcionario) => (
-              <option key={funcionario.id} value={funcionario.id}>
-                {funcionario.nome}
-                {!funcionario.ativo && " (inativo)"}
-              </option>
-            ))}
-          </select>
-          <select
-            aria-label="Filtrar por tipo"
-            className={`${fieldClasses} w-full sm:w-[160px]`}
-            value={tipoFiltro}
-            onChange={(event) => setTipoFiltro(event.target.value)}
-          >
-            <option value="todos">Todos os tipos</option>
-            <option value="ROTINEIRA">Rotineiras</option>
-            <option value="EVENTUAL">Eventuais</option>
-          </select>
-        </div>
-      }
-    >
-      {erro && <p className="text-red">{erro}</p>}
-
-      {carregando ? (
-        <p className="text-muted">Carregando tarefas...</p>
-      ) : (
-        <div className="mt-3.5 grid gap-3.5 lg:grid-cols-3">
-          {KANBAN_COLUMNS.map(({ status, titulo }) => (
-            <div
-              key={status}
-              data-status={status}
-              className={`flex min-h-[300px] flex-col gap-2.5 rounded-[8px] border-2 border-transparent bg-surface-strong p-3 transition-colors ${
-                dragOverStatus === status ? "border-teal bg-bg" : ""
-              }`}
-              onDragOver={(event) => {
-                event.preventDefault();
-                setDragOverStatus(status);
-              }}
-              onDragLeave={() => setDragOverStatus((current) => (current === status ? null : current))}
-              onDrop={(event) => handleDrop(event, status)}
+    <>
+      <Panel
+        title="Execução de tarefa"
+        description="Arraste os cards entre colunas ou use os botões para atualizar o andamento."
+        headerExtra={
+          <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-end sm:justify-end">
+            <label className="grid gap-1 text-[0.82rem] font-bold text-muted">
+              Semana
+              <WeekSelector
+                value={semana}
+                onChange={setSemana}
+                className="w-full sm:w-[260px]"
+              />
+            </label>
+            <select
+              aria-label="Filtrar por responsável"
+              className={`${fieldClasses} w-full sm:w-[200px]`}
+              value={responsavelFiltro}
+              onChange={(event) => setResponsavelFiltro(event.target.value)}
             >
-              <div className="flex items-center justify-between border-b border-line px-1 pb-2 text-[0.9rem] font-extrabold">
-                {titulo}
-                <span className="inline-flex min-h-[24px] items-center whitespace-nowrap rounded-full bg-surface-strong px-2 text-[0.76rem] font-extrabold text-muted">
-                  {porStatus[status].length}
-                </span>
+              <option value="todos">Todos os responsáveis</option>
+              {funcionarios.map((funcionario) => (
+                <option key={funcionario.id} value={funcionario.id}>
+                  {funcionario.nome}
+                  {!funcionario.ativo && " (inativo)"}
+                </option>
+              ))}
+            </select>
+            <select
+              aria-label="Filtrar por tipo"
+              className={`${fieldClasses} w-full sm:w-[160px]`}
+              value={tipoFiltro}
+              onChange={(event) => setTipoFiltro(event.target.value)}
+            >
+              <option value="todos">Todos os tipos</option>
+              <option value="ROTINEIRA">Rotineiras</option>
+              <option value="EVENTUAL">Eventuais</option>
+            </select>
+          </div>
+        }
+      >
+        {erro && <p className="text-red">{erro}</p>}
+
+        {carregando ? (
+          <p className="text-muted">Carregando tarefas...</p>
+        ) : (
+          <div className="mt-3.5 grid gap-3.5 lg:grid-cols-3">
+            {KANBAN_COLUMNS.map(({ status, titulo }) => (
+              <div
+                key={status}
+                data-status={status}
+                className={`flex min-h-[300px] flex-col gap-2.5 rounded-[8px] border-2 border-transparent bg-surface-strong p-3 transition-colors ${
+                  dragOverStatus === status ? "border-teal bg-bg" : ""
+                }`}
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  setDragOverStatus(status);
+                }}
+                onDragLeave={() => setDragOverStatus((current) => (current === status ? null : current))}
+                onDrop={(event) => handleDrop(event, status)}
+              >
+                <div className="flex items-center justify-between border-b border-line px-1 pb-2 text-[0.9rem] font-extrabold">
+                  {titulo}
+                  <span className="inline-flex min-h-[24px] items-center whitespace-nowrap rounded-full bg-surface-strong px-2 text-[0.76rem] font-extrabold text-muted">
+                    {porStatus[status].length}
+                  </span>
+                </div>
+                <div className="flex flex-1 flex-col gap-2.5">
+                  {porStatus[status].length === 0 ? (
+                    <EmptyState message={`Nenhuma tarefa ${statusLabel(status).toLowerCase()}.`} />
+                  ) : (
+                    porStatus[status].map((tarefa) => (
+                      <TaskCard
+                        key={tarefa.id}
+                        tarefa={tarefa}
+                        dragging={draggedTaskId === tarefa.id}
+                        onDragStart={handleDragStart}
+                        onDragEnd={handleDragEnd}
+                        onToggleProgresso={handleToggleProgresso}
+                        onToggleConcluida={handleToggleConcluida}
+                        onExcluir={handleExcluir}
+                        onSolicitarAjuda={handleSolicitarAjuda}
+                      />
+                    ))
+                  )}
+                </div>
               </div>
-              <div className="flex flex-1 flex-col gap-2.5">
-                {porStatus[status].length === 0 ? (
-                  <EmptyState message={`Nenhuma tarefa ${statusLabel(status).toLowerCase()}.`} />
-                ) : (
-                  porStatus[status].map((tarefa) => (
-                    <TaskCard
-                      key={tarefa.id}
-                      tarefa={tarefa}
-                      dragging={draggedTaskId === tarefa.id}
-                      onDragStart={handleDragStart}
-                      onDragEnd={handleDragEnd}
-                      onToggleProgresso={handleToggleProgresso}
-                      onToggleConcluida={handleToggleConcluida}
-                      onExcluir={handleExcluir}
-                      onSolicitarAjuda={handleSolicitarAjuda}
-                    />
-                  ))
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </Panel>
+            ))}
+          </div>
+        )}
+      </Panel>
+
+      <AtendimentoOSCard />
+    </>
   );
 }
