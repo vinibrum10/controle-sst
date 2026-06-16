@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Panel } from "../components/ui/Panel";
 import { Icon } from "../components/ui/IconSprite";
 import { Button } from "../components/ui/Button";
+import { WeekSelector } from "../components/ui/WeekSelector";
 import { useFuncionarios } from "../hooks/useFuncionarios";
 import { useToast } from "../hooks/useToast";
 import { criarTarefa } from "../lib/tarefas";
@@ -158,12 +159,10 @@ export function CriarTarefaPage() {
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           <label className={labelClasses}>
             Semana
-            <input
-              type="week"
-              required
-              className={fieldClasses}
+            <WeekSelector
               value={form.semana}
-              onChange={(e) => setForm((current) => ({ ...current, semana: e.target.value }))}
+              onChange={(v) => setForm((current) => ({ ...current, semana: v }))}
+              required
             />
           </label>
           <label className={labelClasses}>
