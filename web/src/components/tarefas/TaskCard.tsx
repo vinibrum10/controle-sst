@@ -1,4 +1,4 @@
-import { useEffect, useState, type DragEvent } from "react";
+import { type DragEvent } from "react";
 import { Icon } from "../ui/IconSprite";
 import { priorityLabel, routinePeriodLabel, statusLabel, typeLabel } from "../../lib/enums";
 import { formatDate } from "../../lib/format";
@@ -14,14 +14,7 @@ const iconButtonNeutral = "border-line bg-neutral-button text-text";
 const iconButtonHelp = "border-blue/25 bg-[#eef6ff] text-blue";
 const iconButtonDanger = "border-red/25 bg-red-soft text-red";
 const iconButtonSuccess = "border-green/25 bg-[#edf8f1] text-green";
-const iconButtonTimer = "border-amber/25 bg-[#fff8ec] text-amber-700";
-
-function formatTimer(seconds: number) {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-}
+const iconButtonRunning = "border-amber/25 bg-[#fff8ec] text-amber-700";
 
 interface TaskCardProps {
   tarefa: Tarefa;
@@ -49,18 +42,9 @@ export function TaskCard({
   const late = isLate(tarefa);
   const done = isDone(tarefa);
   const dueLabel = late && !done ? "Venceu" : "Prazo";
+  const emExecucao = !!tarefa.apontamentoAtivo;
 
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-
-  useEffect(() => {
-    if (!tarefa.apontamentoAtivo) { setElapsedSeconds(0); return; }
-    const calc = () => Math.max(0, Math.floor((Date.now() - new Date(tarefa.apontamentoAtivo!.iniciadoEm).getTime()) / 1000));
-    setElapsedSeconds(calc());
-    const id = setInterval(() => setElapsedSeconds(calc()), 1000);
-    return () => clearInterval(id);
-  }, [tarefa.apontamentoAtivo]);
-
-  const horasRealizadasFormatadas = tarefa.horasRealizadas > 0
+  const horasRealizadasLabel = tarefa.horasRealizadas > 0
     ? tarefa.horasRealizadas < 1
       ? `${Math.round(tarefa.horasRealizadas * 60)}min realizados`
       : `${tarefa.horasRealizadas.toFixed(1)}h realizadas`
@@ -109,8 +93,8 @@ export function TaskCard({
             {dueLabel}: {formatDate(tarefa.prazo)}
           </span>
           <span className={badgeDefault}>{tarefa.horasEstimadas}h estimadas</span>
-          {horasRealizadasFormatadas && (
-            <span className={`${badgeBase} bg-[#edf8f1] text-green`}>{horasRealizadasFormatadas}</span>
+          {horasRealizadasLabel && (
+            <span className={`${badgeBase} bg-[#edf8f1] text-green`}>{horasRealizadasLabel}</span>
           )}
           {tarefa.apoio && <span className={badgeDefault}>Apoio: {tarefa.apoio.nome}</span>}
         </div>
@@ -118,20 +102,20 @@ export function TaskCard({
       </div>
 
       <div className="grid grid-cols-2 gap-2 border-t border-line pt-3">
-        {tarefa.apontamentoAtivo ? (
+        {emExecucao ? (
           <button
             type="button"
-            title="Pausar timer"
-            className={`${iconButtonBase} ${iconButtonTimer}`}
+            title="Pausar execução"
+            className={`${iconButtonBase} ${iconButtonRunning}`}
             onClick={() => onPausar(tarefa)}
           >
             <Icon id="icon-clock" />
-            {formatTimer(elapsedSeconds)}
+            Pausar
           </button>
         ) : (
           <button
             type="button"
-            title="Iniciar timer"
+            title="Iniciar execução"
             className={`${iconButtonBase} ${iconButtonNeutral}`}
             disabled={done}
             onClick={() => onIniciar(tarefa)}
