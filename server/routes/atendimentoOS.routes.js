@@ -16,6 +16,21 @@ const iniciarSchema = z.object({
   numeroOS: z.string().trim().min(1, "Informe o número da OS.")
 });
 
+/** Retorna o funcionarioId do usuário logado. */
+async function getFuncId(userId) {
+  const usuario = await prisma.usuario.findUnique({
+    where: { id: userId },
+    select: { funcionarioId: true }
+  });
+  return usuario?.funcionarioId ?? null;
+}
+
+/** Retorna true se o usuário logado é dono da OS ou é ADMIN/GESTOR. */
+function podeOperar(existente, funcId, papel) {
+  if (papel === "ADMIN" || papel === "GESTOR") return true;
+  return existente.responsavelId !== null && existente.responsavelId === funcId;
+}
+
 router.get("/", asyncHandler(async (req, res) => {
   const { data, responsavelId, ativos } = req.query;
   const where = {};
@@ -41,11 +56,7 @@ router.get("/", asyncHandler(async (req, res) => {
 router.post("/", validateBody(iniciarSchema), asyncHandler(async (req, res) => {
   const { numeroOS } = req.body;
 
-  const usuario = await prisma.usuario.findUnique({
-    where: { id: req.user.sub },
-    select: { funcionarioId: true }
-  });
-  const funcId = usuario?.funcionarioId ?? null;
+  const funcId = await getFuncId(req.user.sub);
 
   if (funcId) {
     const ativas = await prisma.atendimentoOS.count({
@@ -74,6 +85,11 @@ router.patch("/:id/finalizar", asyncHandler(async (req, res) => {
   if (!existente) return res.status(404).json({ error: "Atendimento não encontrado." });
   if (existente.finalizadoEm) return res.status(400).json({ error: "Atendimento já finalizado." });
 
+  const funcId = await getFuncId(req.user.sub);
+  if (!podeOperar(existente, funcId, req.user.papel)) {
+    return res.status(403).json({ error: "Apenas quem abriu a OS pode finalizá-la." });
+  }
+
   const finalizadoEm = new Date();
   const duracaoSegundos = calcularDuracaoUtil(
     existente.iniciadoEm.getTime(),
@@ -91,6 +107,12 @@ router.patch("/:id/finalizar", asyncHandler(async (req, res) => {
 router.delete("/:id", asyncHandler(async (req, res) => {
   const existente = await prisma.atendimentoOS.findUnique({ where: { id: req.params.id } });
   if (!existente) return res.status(404).json({ error: "Atendimento não encontrado." });
+
+  const funcId = await getFuncId(req.user.sub);
+  if (!podeOperar(existente, funcId, req.user.papel)) {
+    return res.status(403).json({ error: "Apenas quem abriu a OS pode excluí-la." });
+  }
+
   await prisma.atendimentoOS.delete({ where: { id: req.params.id } });
   res.status(204).send();
 }));
