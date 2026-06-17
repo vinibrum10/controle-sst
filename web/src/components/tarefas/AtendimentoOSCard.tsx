@@ -19,9 +19,13 @@ interface AtendimentoOSCardProps {
   responsavelId?: string;
   /** Semana selecionada no formato AAAA-Www */
   semana: string;
+  /** Carga de tarefas da pessoa na semana (horasEstimadas) */
+  cargaTarefas?: number;
+  /** Capacidade semanal da pessoa em horas */
+  capacidade?: number;
 }
 
-export function AtendimentoOSCard({ responsavelId: responsavelIdProp, semana }: AtendimentoOSCardProps) {
+export function AtendimentoOSCard({ responsavelId: responsavelIdProp, semana, cargaTarefas, capacidade }: AtendimentoOSCardProps) {
   const { showToast } = useToast();
   const { usuario } = useAuth();
   const { funcionarios } = useFuncionarios();
@@ -123,6 +127,11 @@ export function AtendimentoOSCard({ responsavelId: responsavelIdProp, semana }: 
   // Horas consumidas em OS na semana selecionada
   const horasConsumidas = historico.reduce((sum, a) => sum + (a.duracaoSegundos ?? 0) / 3600, 0);
 
+  // Horas disponíveis = capacidade - carga de tarefas - horas em OS
+  const horasLivres = (capacidade != null && cargaTarefas != null)
+    ? Math.max(capacidade - cargaTarefas - horasConsumidas, 0)
+    : null;
+
   // Podeagir: o usuário logado pode criar/finalizar OS nesta visualização
   const podeAgir = isProprioUsuario || canManageOthers;
   const podeIniciar = podeAgir && ativos.length < MAX_ATIVOS && !pausada;
@@ -149,14 +158,21 @@ export function AtendimentoOSCard({ responsavelId: responsavelIdProp, semana }: 
               <span className="text-[0.8rem] text-muted">em OS nesta semana</span>
             </div>
           )}
-          {ativos.length < MAX_ATIVOS && (
+          {horasLivres !== null ? (
+            <div className={`flex items-center gap-1.5 rounded-[8px] px-3 py-2 ${horasLivres <= 0 ? "bg-[#ffe3e3]" : "bg-[#edf8f1]"}`}>
+              <span className={`text-[1.1rem] font-extrabold ${horasLivres <= 0 ? "text-red" : "text-green"}`}>
+                {horasLivres.toFixed(0)}h
+              </span>
+              <span className={`text-[0.8rem] ${horasLivres <= 0 ? "text-red" : "text-[#17643e]"}`}>disponíveis na semana</span>
+            </div>
+          ) : ativos.length < MAX_ATIVOS ? (
             <div className="flex items-center gap-1.5 rounded-[8px] bg-[#edf8f1] px-3 py-2">
               <span className="text-[1.1rem] font-extrabold text-green">
                 {MAX_ATIVOS - ativos.length}
               </span>
               <span className="text-[0.8rem] text-[#17643e]">vagas disponíveis</span>
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Formulário de abertura (visível para podeIniciar) */}

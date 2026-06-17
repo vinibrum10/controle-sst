@@ -6,6 +6,7 @@ import { WeekSelector } from "../components/ui/WeekSelector";
 import { useFuncionarios } from "../hooks/useFuncionarios";
 import { useTarefas } from "../hooks/useTarefas";
 import { useToast } from "../hooks/useToast";
+import { useAuth } from "../hooks/useAuth";
 import { KANBAN_COLUMNS, statusLabel } from "../lib/enums";
 import { currentWeekValue } from "../lib/format";
 import { isDone } from "../lib/tarefaHelpers";
@@ -22,9 +23,27 @@ export function ExecucaoPage() {
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverStatus, setDragOverStatus] = useState<StatusTarefa | null>(null);
 
+  const { usuario } = useAuth();
   const { funcionarios } = useFuncionarios();
   const { tarefas, carregando, erro, alterarStatus, iniciar, pausar, remover, pedirAjuda } = useTarefas(semana);
   const { showToast } = useToast();
+
+  // Funcionário cujas stats de disponibilidade serão exibidas no card de OS:
+  // filtro específico > usuário logado
+  const funcIdParaStats = responsavelFiltro !== "todos"
+    ? responsavelFiltro
+    : (usuario?.funcionarioId ?? null);
+
+  const funcParaStats = funcIdParaStats
+    ? funcionarios.find((f) => f.id === funcIdParaStats) ?? null
+    : null;
+
+  const cargaTarefas = useMemo(() => {
+    if (!funcIdParaStats) return undefined;
+    return tarefas
+      .filter((t) => t.responsavelId === funcIdParaStats || t.apoioId === funcIdParaStats)
+      .reduce((sum, t) => sum + t.horasEstimadas, 0);
+  }, [tarefas, funcIdParaStats]);
 
   const tarefasFiltradas = useMemo(() => {
     return tarefas.filter((tarefa) => {
@@ -221,6 +240,8 @@ export function ExecucaoPage() {
       <AtendimentoOSCard
         responsavelId={responsavelFiltro !== "todos" ? responsavelFiltro : undefined}
         semana={semana}
+        cargaTarefas={cargaTarefas}
+        capacidade={funcParaStats?.capacidade}
       />
     </>
   );
