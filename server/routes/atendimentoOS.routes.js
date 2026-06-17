@@ -25,14 +25,15 @@ async function getFuncId(userId) {
   return usuario?.funcionarioId ?? null;
 }
 
-/** Retorna true se o usuário logado é dono da OS ou é ADMIN/GESTOR. */
-function podeOperar(existente, funcId, papel) {
+/** Retorna true se o usuário logado pode operar a OS (criador, responsável ou ADMIN/GESTOR). */
+function podeOperar(existente, funcId, userId, papel) {
   if (papel === "ADMIN" || papel === "GESTOR") return true;
+  if (existente.criadoPorId && existente.criadoPorId === userId) return true;
   return existente.responsavelId !== null && existente.responsavelId === funcId;
 }
 
 router.get("/", asyncHandler(async (req, res) => {
-  const { data, responsavelId, ativos } = req.query;
+  const { data, responsavelId, criadoPorId, ativos } = req.query;
   const where = {};
 
   if (data) {
@@ -43,7 +44,11 @@ router.get("/", asyncHandler(async (req, res) => {
   if (ativos === "true") {
     where.finalizadoEm = null;
   }
-  if (responsavelId) where.responsavelId = responsavelId;
+  if (criadoPorId) {
+    where.criadoPorId = criadoPorId;
+  } else if (responsavelId) {
+    where.responsavelId = responsavelId;
+  }
 
   const atendimentos = await prisma.atendimentoOS.findMany({
     where,
@@ -55,12 +60,25 @@ router.get("/", asyncHandler(async (req, res) => {
 
 router.post("/", validateBody(iniciarSchema), asyncHandler(async (req, res) => {
   const { numeroOS } = req.body;
+  const userId = req.user.sub;
 
-  const funcId = await getFuncId(req.user.sub);
+  const funcId = await getFuncId(userId);
 
   if (funcId) {
     const ativas = await prisma.atendimentoOS.count({
-      where: { responsavelId: funcId, finalizadoEm: null }
+      where: {
+        finalizadoEm: null,
+        OR: [{ responsavelId: funcId }, { criadoPorId: userId }]
+      }
+    });
+    if (ativas >= MAX_OS_ATIVAS) {
+      return res.status(400).json({
+        error: `Máximo de ${MAX_OS_ATIVAS} OS em atendimento simultâneo.`
+      });
+    }
+  } else {
+    const ativas = await prisma.atendimentoOS.count({
+      where: { criadoPorId: userId, finalizadoEm: null }
     });
     if (ativas >= MAX_OS_ATIVAS) {
       return res.status(400).json({
@@ -73,6 +91,7 @@ router.post("/", validateBody(iniciarSchema), asyncHandler(async (req, res) => {
     data: {
       numeroOS,
       responsavelId: funcId,
+      criadoPorId: userId,
       iniciadoEm: new Date()
     },
     include: { responsavel: { select: { id: true, nome: true } } }
@@ -86,7 +105,7 @@ router.patch("/:id/finalizar", asyncHandler(async (req, res) => {
   if (existente.finalizadoEm) return res.status(400).json({ error: "Atendimento já finalizado." });
 
   const funcId = await getFuncId(req.user.sub);
-  if (!podeOperar(existente, funcId, req.user.papel)) {
+  if (!podeOperar(existente, funcId, req.user.sub, req.user.papel)) {
     return res.status(403).json({ error: "Apenas quem abriu a OS pode finalizá-la." });
   }
 
@@ -109,7 +128,7 @@ router.delete("/:id", asyncHandler(async (req, res) => {
   if (!existente) return res.status(404).json({ error: "Atendimento não encontrado." });
 
   const funcId = await getFuncId(req.user.sub);
-  if (!podeOperar(existente, funcId, req.user.papel)) {
+  if (!podeOperar(existente, funcId, req.user.sub, req.user.papel)) {
     return res.status(403).json({ error: "Apenas quem abriu a OS pode excluí-la." });
   }
 

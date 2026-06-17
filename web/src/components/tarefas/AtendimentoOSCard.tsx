@@ -29,24 +29,31 @@ export function AtendimentoOSCard({ responsavelId: responsavelIdProp }: Atendime
   const [pausada, setPausada] = useState(isPausadaFimDeSemana());
 
   const hoje = toDateInputValue(new Date());
+  const meuUserId = usuario?.id;
   const meuFuncId = usuario?.funcionarioId ?? undefined;
-  // Se há filtro externo, mostra OS daquele responsável; caso contrário, do usuário logado
-  const funcId = responsavelIdProp ?? meuFuncId;
-  // Só mostra botões de ação quando está vendo as próprias OS
-  const isProprioUsuario = funcId === meuFuncId;
+  // Só mostra botões de ação quando não há filtro externo ou o filtro é o próprio usuário
+  const isProprioUsuario = !responsavelIdProp || responsavelIdProp === meuFuncId;
 
   const carregar = useCallback(async () => {
     try {
+      // OS ativas: se é a própria visão usa criadoPorId; se é filtro externo usa responsavelId
+      const queryAtivas = isProprioUsuario
+        ? { criadoPorId: meuUserId, ativos: true as const }
+        : { responsavelId: responsavelIdProp, ativos: true as const };
+      const queryHist = isProprioUsuario
+        ? { criadoPorId: meuUserId, data: hoje }
+        : { responsavelId: responsavelIdProp, data: hoje };
+
       const [ativas, hist] = await Promise.all([
-        listarAtendimentos({ responsavelId: funcId, ativos: true }),
-        listarAtendimentos({ data: hoje, responsavelId: funcId }),
+        listarAtendimentos(queryAtivas),
+        listarAtendimentos(queryHist),
       ]);
       setAtivos(ativas);
       setHistorico(hist.filter((a) => !!a.finalizadoEm));
     } catch {
       // ignora erros no carregamento inicial
     }
-  }, [hoje, funcId]);
+  }, [hoje, meuUserId, meuFuncId, responsavelIdProp, isProprioUsuario]);
 
   useEffect(() => { carregar(); }, [carregar]);
 

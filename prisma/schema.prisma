@@ -356,6 +356,7 @@ model AtendimentoOS {
   numeroOS          String
   responsavelId     String?
   responsavel       Funcionario? @relation(fields: [responsavelId], references: [id])
+  criadoPorId       String?
   iniciadoEm        DateTime
   finalizadoEm      DateTime?
   duracaoSegundos   Int?
@@ -363,6 +364,7 @@ model AtendimentoOS {
   criadoEm          DateTime     @default(now())
 
   @@index([responsavelId])
+  @@index([criadoPorId])
   @@index([iniciadoEm])
 }
 

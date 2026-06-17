@@ -5,16 +5,20 @@ export interface AtendimentoOS {
   numeroOS: string;
   responsavelId: string | null;
   responsavel: { id: string; nome: string } | null;
+  criadoPorId: string | null;
   iniciadoEm: string;
   finalizadoEm: string | null;
   duracaoSegundos: number | null;
   criadoEm: string;
 }
 
-export function listarAtendimentos(params: { data?: string; responsavelId?: string; ativos?: boolean } = {}) {
+export function listarAtendimentos(
+  params: { data?: string; responsavelId?: string; criadoPorId?: string; ativos?: boolean } = {}
+) {
   const query = new URLSearchParams();
   if (params.data) query.set("data", params.data);
-  if (params.responsavelId) query.set("responsavelId", params.responsavelId);
+  if (params.criadoPorId) query.set("criadoPorId", params.criadoPorId);
+  else if (params.responsavelId) query.set("responsavelId", params.responsavelId);
   if (params.ativos) query.set("ativos", "true");
   const qs = query.toString();
   return apiFetch<AtendimentoOS[]>(`/atendimentos-os${qs ? `?${qs}` : ""}`);
