@@ -39,7 +39,8 @@ async function converterOSAtrasadas() {
 
       const tarefa = await prisma.tarefa.create({
         data: {
-          titulo: `OS Interliga: ${os.numeroOS}`,
+          titulo: `OS Interliga: ${os.numeroOS}${os.solicitante ? ` — ${os.solicitante}` : ""}`,
+          descricao: os.solicitante ? `Solicitante: ${os.solicitante}` : null,
           responsavelId: os.responsavelId,
           semanaId: semanaRecord?.id ?? null,
           prazo: hoje,

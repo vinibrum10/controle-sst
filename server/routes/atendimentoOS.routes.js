@@ -6,6 +6,7 @@ const asyncHandler = require("../utils/asyncHandler");
 const { validateBody } = require("../middleware/validate");
 const { requireAuth } = require("../middleware/auth");
 const { calcularDuracaoUtil } = require("../utils/duracaoUtil");
+const { semanaInfoFromCodigo } = require("../utils/semana");
 
 const router = express.Router();
 router.use(requireAuth);
@@ -13,7 +14,9 @@ router.use(requireAuth);
 const MAX_OS_ATIVAS = 3;
 
 const iniciarSchema = z.object({
-  numeroOS: z.string().trim().min(1, "Informe o número da OS.")
+  numeroOS: z.string().trim().min(1, "Informe o número da OS."),
+  solicitante: z.string().trim().min(1, "Informe o nome do solicitante."),
+  responsavelFuncId: z.string().optional()
 });
 
 /** Retorna o funcionarioId do usuário logado. */
@@ -33,14 +36,21 @@ function podeOperar(existente, funcId, userId, papel) {
 }
 
 router.get("/", asyncHandler(async (req, res) => {
-  const { data, responsavelId, criadoPorId, ativos } = req.query;
+  const { semana, data, responsavelId, criadoPorId, ativos } = req.query;
   const where = {};
 
-  if (data) {
+  if (semana) {
+    const info = semanaInfoFromCodigo(semana);
+    if (info) {
+      const fim = new Date(info.dataFim.getTime() + 24 * 3600 * 1000);
+      where.iniciadoEm = { gte: info.dataInicio, lt: fim };
+    }
+  } else if (data) {
     const inicio = new Date(`${data}T00:00:00`);
     const fim = new Date(`${data}T23:59:59`);
     where.iniciadoEm = { gte: inicio, lte: fim };
   }
+
   if (ativos === "true") {
     where.finalizadoEm = null;
   }
@@ -59,38 +69,35 @@ router.get("/", asyncHandler(async (req, res) => {
 }));
 
 router.post("/", validateBody(iniciarSchema), asyncHandler(async (req, res) => {
-  const { numeroOS } = req.body;
+  const { numeroOS, solicitante, responsavelFuncId } = req.body;
   const userId = req.user.sub;
+  const papel = req.user.papel;
 
-  const funcId = await getFuncId(userId);
+  const meuFuncId = await getFuncId(userId);
 
-  if (funcId) {
-    const ativas = await prisma.atendimentoOS.count({
-      where: {
-        finalizadoEm: null,
-        OR: [{ responsavelId: funcId }, { criadoPorId: userId }]
-      }
+  // ADMIN/GESTOR pode abrir OS em nome de outro técnico
+  let targetFuncId = meuFuncId;
+  if (responsavelFuncId && (papel === "ADMIN" || papel === "GESTOR")) {
+    targetFuncId = responsavelFuncId;
+  }
+
+  // Conta OS ativas para o responsável alvo
+  const filtroAtivas = targetFuncId
+    ? { finalizadoEm: null, OR: [{ responsavelId: targetFuncId }, { criadoPorId: userId }] }
+    : { criadoPorId: userId, finalizadoEm: null };
+
+  const ativas = await prisma.atendimentoOS.count({ where: filtroAtivas });
+  if (ativas >= MAX_OS_ATIVAS) {
+    return res.status(400).json({
+      error: `Máximo de ${MAX_OS_ATIVAS} OS em atendimento simultâneo.`
     });
-    if (ativas >= MAX_OS_ATIVAS) {
-      return res.status(400).json({
-        error: `Máximo de ${MAX_OS_ATIVAS} OS em atendimento simultâneo.`
-      });
-    }
-  } else {
-    const ativas = await prisma.atendimentoOS.count({
-      where: { criadoPorId: userId, finalizadoEm: null }
-    });
-    if (ativas >= MAX_OS_ATIVAS) {
-      return res.status(400).json({
-        error: `Máximo de ${MAX_OS_ATIVAS} OS em atendimento simultâneo.`
-      });
-    }
   }
 
   const atendimento = await prisma.atendimentoOS.create({
     data: {
       numeroOS,
-      responsavelId: funcId,
+      solicitante,
+      responsavelId: targetFuncId,
       criadoPorId: userId,
       iniciadoEm: new Date()
     },

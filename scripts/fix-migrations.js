@@ -11,7 +11,8 @@ const MIGRATIONS_PARA_LIMPAR = [
   "20260616140000_add_tarefa_apontamento",
   "20260616160000_fix_tarefa_apontamento",
   "20260616170000_capacidade_42_os_vinculada",
-  "20260617000000_os_criado_por"
+  "20260617000000_os_criado_por",
+  "20260617200000_os_solicitante"
 ];
 
 async function main() {

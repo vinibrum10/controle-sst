@@ -354,6 +354,7 @@ model TarefaApontamento {
 model AtendimentoOS {
   id                String       @id @default(uuid())
   numeroOS          String
+  solicitante       String?
   responsavelId     String?
   responsavel       Funcionario? @relation(fields: [responsavelId], references: [id])
   criadoPorId       String?

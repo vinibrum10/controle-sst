@@ -1,0 +1,1 @@
+ALTER TABLE "AtendimentoOS" ADD COLUMN IF NOT EXISTS "solicitante" TEXT;
