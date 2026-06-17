@@ -206,7 +206,9 @@ export function ExecucaoPage() {
         )}
       </Panel>
 
-      <AtendimentoOSCard />
+      <AtendimentoOSCard
+        responsavelId={responsavelFiltro !== "todos" ? responsavelFiltro : undefined}
+      />
     </>
   );
 }
