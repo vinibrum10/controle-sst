@@ -14,7 +14,12 @@ import { toDateInputValue } from "../../lib/format";
 
 const MAX_ATIVOS = 3;
 
-export function AtendimentoOSCard() {
+interface AtendimentoOSCardProps {
+  /** ID do funcionário filtrado; undefined = usuário logado */
+  responsavelId?: string;
+}
+
+export function AtendimentoOSCard({ responsavelId: responsavelIdProp }: AtendimentoOSCardProps) {
   const { showToast } = useToast();
   const { usuario } = useAuth();
   const [numeroOS, setNumeroOS] = useState("");
@@ -24,7 +29,11 @@ export function AtendimentoOSCard() {
   const [pausada, setPausada] = useState(isPausadaFimDeSemana());
 
   const hoje = toDateInputValue(new Date());
-  const funcId = usuario?.funcionarioId ?? undefined;
+  const meuFuncId = usuario?.funcionarioId ?? undefined;
+  // Se há filtro externo, mostra OS daquele responsável; caso contrário, do usuário logado
+  const funcId = responsavelIdProp ?? meuFuncId;
+  // Só mostra botões de ação quando está vendo as próprias OS
+  const isProprioUsuario = funcId === meuFuncId;
 
   const carregar = useCallback(async () => {
     try {
@@ -95,8 +104,8 @@ export function AtendimentoOSCard() {
       description="Registre o número da OS que você está atendendo."
     >
       <div className="grid gap-3">
-        {/* Input + Iniciar (visível enquanto houver vagas e não for fim de semana) */}
-        {ativos.length < MAX_ATIVOS && !pausada && (
+        {/* Input + Iniciar (visível apenas para o próprio usuário, enquanto houver vagas e não for fim de semana) */}
+        {isProprioUsuario && ativos.length < MAX_ATIVOS && !pausada && (
           <div className="flex gap-2">
             <input
               type="text"
@@ -142,7 +151,7 @@ export function AtendimentoOSCard() {
                   </span>
                   <span className="font-extrabold text-text">OS {a.numeroOS}</span>
                 </div>
-                {!pausada && (
+                {isProprioUsuario && !pausada && (
                   <button
                     type="button"
                     onClick={() => handleFinalizar(a.id)}
@@ -183,14 +192,16 @@ export function AtendimentoOSCard() {
                         })
                       : ""}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => handleExcluir(a.id)}
-                    className="ml-auto text-muted hover:text-red"
-                    aria-label="Excluir"
-                  >
-                    &times;
-                  </button>
+                  {isProprioUsuario && (
+                    <button
+                      type="button"
+                      onClick={() => handleExcluir(a.id)}
+                      className="ml-auto text-muted hover:text-red"
+                      aria-label="Excluir"
+                    >
+                      &times;
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
