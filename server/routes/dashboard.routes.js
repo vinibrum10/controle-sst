@@ -45,7 +45,8 @@ router.get("/", asyncHandler(async (req, res) => {
     semanaInfo
       ? prisma.atendimentoOS.findMany({
           where: {
-            finalizadoEm: { gte: semanaInfo.dataInicio, lt: fimSemana },
+            iniciadoEm: { gte: semanaInfo.dataInicio, lt: fimSemana },
+            finalizadoEm: { not: null },
             responsavelId: { not: null },
             duracaoSegundos: { not: null }
           },
