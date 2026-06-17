@@ -16,6 +16,7 @@ const fieldClasses =
 
 export function ExecucaoPage() {
   const [semana, setSemana] = useState(currentWeekValue);
+  const semanaAtual = currentWeekValue();
   const [responsavelFiltro, setResponsavelFiltro] = useState("todos");
   const [tipoFiltro, setTipoFiltro] = useState("todos");
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
@@ -119,14 +120,25 @@ export function ExecucaoPage() {
         description="Arraste os cards entre colunas ou use os botões para atualizar o andamento."
         headerExtra={
           <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-end sm:justify-end">
-            <label className="grid gap-1 text-[0.82rem] font-bold text-muted">
-              Semana
+            <div className="grid gap-1">
+              <div className="flex items-center justify-between text-[0.82rem] font-bold text-muted">
+                <span>Semana</span>
+                {semana !== semanaAtual && (
+                  <button
+                    type="button"
+                    onClick={() => setSemana(semanaAtual)}
+                    className="text-teal hover:underline"
+                  >
+                    Semana atual
+                  </button>
+                )}
+              </div>
               <WeekSelector
                 value={semana}
                 onChange={setSemana}
                 className="w-full sm:w-[260px]"
               />
-            </label>
+            </div>
             <select
               aria-label="Filtrar por responsável"
               className={`${fieldClasses} w-full sm:w-[200px]`}
@@ -208,6 +220,7 @@ export function ExecucaoPage() {
 
       <AtendimentoOSCard
         responsavelId={responsavelFiltro !== "todos" ? responsavelFiltro : undefined}
+        semana={semana}
       />
     </>
   );

@@ -3,6 +3,7 @@ import { apiFetch } from "./api";
 export interface AtendimentoOS {
   id: string;
   numeroOS: string;
+  solicitante: string | null;
   responsavelId: string | null;
   responsavel: { id: string; nome: string } | null;
   criadoPorId: string | null;
@@ -13,10 +14,11 @@ export interface AtendimentoOS {
 }
 
 export function listarAtendimentos(
-  params: { data?: string; responsavelId?: string; criadoPorId?: string; ativos?: boolean } = {}
+  params: { semana?: string; data?: string; responsavelId?: string; criadoPorId?: string; ativos?: boolean } = {}
 ) {
   const query = new URLSearchParams();
-  if (params.data) query.set("data", params.data);
+  if (params.semana) query.set("semana", params.semana);
+  else if (params.data) query.set("data", params.data);
   if (params.criadoPorId) query.set("criadoPorId", params.criadoPorId);
   else if (params.responsavelId) query.set("responsavelId", params.responsavelId);
   if (params.ativos) query.set("ativos", "true");
@@ -24,10 +26,10 @@ export function listarAtendimentos(
   return apiFetch<AtendimentoOS[]>(`/atendimentos-os${qs ? `?${qs}` : ""}`);
 }
 
-export function iniciarAtendimento(numeroOS: string) {
+export function iniciarAtendimento(numeroOS: string, solicitante: string, responsavelFuncId?: string) {
   return apiFetch<AtendimentoOS>("/atendimentos-os", {
     method: "POST",
-    body: { numeroOS }
+    body: { numeroOS, solicitante, ...(responsavelFuncId ? { responsavelFuncId } : {}) }
   });
 }
 
