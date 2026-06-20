@@ -33,20 +33,22 @@ function filterEntries(entries: NavEntry[], temPermissao: (chave: ChavePermissao
 }
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-  `flex min-h-[38px] items-center gap-3 rounded-lg px-3 text-[0.86rem] font-medium transition-colors ${
-    isActive ? "bg-white/[0.08] text-white" : "text-[#a3b7cc] hover:bg-white/[0.05] hover:text-white"
+  `flex min-h-[40px] items-center gap-2.5 rounded-[8px] px-3 text-[0.875rem] font-medium transition-all ${
+    isActive
+      ? "bg-white/[0.11] text-white font-semibold border-l-[3px] border-[#4A8FE8] pl-[9px]"
+      : "text-[#7BA7CC] hover:bg-white/[0.06] hover:text-white/90 border-l-[3px] border-transparent pl-[9px]"
   }`;
 
-const sectionLabelClass = "px-3 text-[0.66rem] font-bold uppercase tracking-[0.14em] text-[#5e7488]";
+const groupLabelClass = "px-4 text-[0.65rem] font-bold tracking-[0.12em] uppercase text-[#4A7099] mt-5 mb-1.5 flex items-center gap-2";
 
 const sectionToggleClass = (isOpen: boolean) =>
-  `flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[0.66rem] font-bold uppercase tracking-[0.14em] transition-colors ${
-    isOpen ? "text-[#a3b7cc]" : "text-[#5e7488] hover:text-[#a3b7cc]"
+  `flex w-full items-center justify-between rounded-[8px] px-3 py-2 text-[0.65rem] font-bold uppercase tracking-[0.12em] transition-colors mt-5 ${
+    isOpen ? "text-[#7BA7CC]" : "text-[#4A7099] hover:text-[#7BA7CC]"
   }`;
 
 const subGroupToggleClass = (isOpen: boolean) =>
-  `flex min-h-[38px] w-full items-center justify-between rounded-lg px-3 text-[0.86rem] font-medium transition-colors ${
-    isOpen ? "bg-white/[0.08] text-white" : "text-[#a3b7cc] hover:bg-white/[0.05] hover:text-white"
+  `flex min-h-[40px] w-full items-center justify-between rounded-[8px] px-3 text-[0.875rem] font-medium transition-all border-l-[3px] border-transparent pl-[9px] ${
+    isOpen ? "bg-white/[0.07] text-white/90" : "text-[#7BA7CC] hover:bg-white/[0.05] hover:text-white/80"
   }`;
 
 interface SidebarProps {
@@ -81,14 +83,15 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
 
   return (
     <aside
-      className={`flex h-screen flex-col gap-5 overflow-y-auto border-r border-white/[0.06] bg-sidebar p-4 text-[#dbe5ee] dark:bg-[#0a141f] ${className}`}
+      className={`flex h-screen flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden bg-sidebar dark:bg-[#060F1C] border-r border-white/[0.05] ${className}`}
       aria-label="Navegação principal"
     >
-      <div className="flex min-h-[44px] items-center gap-3 px-1">
+      {/* Logo */}
+      <div className="flex min-h-[56px] items-center gap-3 px-5 shrink-0">
         <Logo variant="light" className="min-w-0 flex-1" />
         <button
           type="button"
-          className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[#a3b7cc] transition-colors hover:bg-white/[0.06] hover:text-white lg:hidden"
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[#5A82A6] transition-colors hover:bg-white/[0.07] hover:text-white lg:hidden"
           aria-label="Fechar menu"
           title="Fechar menu"
           onClick={onNavigate}
@@ -97,7 +100,10 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
         </button>
       </div>
 
-      <nav className="grid gap-0.5 overflow-y-auto pr-0.5" aria-label="Áreas do programa">
+      <div className="mx-4 h-px bg-white/[0.07] shrink-0" />
+
+      {/* Navegação */}
+      <nav className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden px-2 py-3 grid content-start gap-0.5" aria-label="Áreas do programa">
         {visibleGroups.map((group) => {
           const isActiveGroup = containsPath(group.items, location.pathname);
 
@@ -105,7 +111,7 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
             const item = group.items[0];
             return (
               <NavLink key={group.id} to={item.path} onClick={onNavigate} className={navLinkClass}>
-                <Icon id={group.icon} className="h-[18px] w-[18px]" />
+                <Icon id={group.icon} className="h-[17px] w-[17px] shrink-0" />
                 <span className="truncate">{group.label}</span>
               </NavLink>
             );
@@ -115,7 +121,7 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
           const isOpen = isGroupOpen(group.id, group.defaultOpen, isActiveGroup);
 
           return (
-            <div key={group.id} className="mt-4 grid gap-0.5 first:mt-0">
+            <div key={group.id} className="grid gap-0.5">
               {collapsible ? (
                 <button
                   type="button"
@@ -123,11 +129,17 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
                   aria-expanded={isOpen}
                   onClick={() => toggleGroup(group.id, group.defaultOpen, isActiveGroup)}
                 >
-                  <span>{group.label}</span>
-                  <Icon id="icon-chevron" className={`h-3.5 w-3.5 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                  <span className="flex items-center gap-2">
+                    <Icon id={group.icon} className="h-[15px] w-[15px] shrink-0" />
+                    {group.label}
+                  </span>
+                  <Icon id="icon-chevron" className={`h-3 w-3 transition-transform ${isOpen ? "rotate-180" : ""}`} />
                 </button>
               ) : (
-                <div className={sectionLabelClass}>{group.label}</div>
+                <div className={groupLabelClass}>
+                  <Icon id={group.icon} className="h-[13px] w-[13px] shrink-0 opacity-70" />
+                  {group.label}
+                </div>
               )}
 
               {isOpen && (
@@ -154,6 +166,12 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
           );
         })}
       </nav>
+
+      {/* Footer */}
+      <div className="mx-4 h-px bg-white/[0.06] shrink-0" />
+      <div className="px-5 py-3 shrink-0">
+        <p className="text-[0.65rem] text-[#324E6A] font-medium tracking-wide">SGEPI · v2.0</p>
+      </div>
     </aside>
   );
 }
@@ -179,11 +197,11 @@ function NavSubGroupNav({ subGroup, location, isGroupOpen, toggleGroup, onNaviga
         onClick={() => toggleGroup(subGroup.id, subGroup.defaultOpen, isActiveSub)}
       >
         <span className="truncate">{subGroup.label}</span>
-        <Icon id="icon-chevron" className={`h-3.5 w-3.5 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+        <Icon id="icon-chevron" className={`h-3 w-3 transition-transform shrink-0 ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
       {isOpen && (
-        <div className="ml-3 grid gap-0.5 border-l border-white/[0.06] pl-3">
+        <div className="ml-3 grid gap-0.5 border-l border-white/[0.07] pl-2">
           {subGroup.items.map((item) => (
             <NavLink key={item.path} to={item.path} onClick={onNavigate} className={navLinkClass}>
               <span className="truncate">{item.label}</span>
