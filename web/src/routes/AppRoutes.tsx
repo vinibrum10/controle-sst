@@ -4,10 +4,6 @@ import { DashboardLayout } from "../components/dashboard/DashboardLayout";
 import { LoginPage } from "../pages/LoginPage";
 import { HomePage } from "../pages/HomePage";
 import { DashboardOverviewPage } from "../pages/dashboard/DashboardOverviewPage";
-import { DashboardTarefasPage } from "../pages/dashboard/DashboardTarefasPage";
-import { DashboardRotaSeguraPage } from "../pages/dashboard/DashboardRotaSeguraPage";
-import { DashboardTreinamentosPage } from "../pages/dashboard/DashboardTreinamentosPage";
-import { DashboardInspecoesPage } from "../pages/dashboard/DashboardInspecoesPage";
 import { CriarTarefaPage } from "../pages/CriarTarefaPage";
 import { ExecucaoPage } from "../pages/ExecucaoPage";
 import { FuncionariosPage } from "../pages/FuncionariosPage";
@@ -44,10 +40,7 @@ export function AppRoutes() {
         <Route path="/inicio" element={<HomePage />} />
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<DashboardOverviewPage />} />
-          <Route path="tarefas" element={<DashboardTarefasPage />} />
-          <Route path="rota-segura" element={<DashboardRotaSeguraPage />} />
-          <Route path="treinamentos" element={<DashboardTreinamentosPage />} />
-          <Route path="inspecoes" element={<DashboardInspecoesPage />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
         <Route path="/tarefas/criar" element={<CriarTarefaPage />} />
         <Route path="/tarefas/executar" element={<ExecucaoPage />} />
