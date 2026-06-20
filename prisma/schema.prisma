@@ -416,6 +416,28 @@ model Viagem {
 }
 
 // =====================================================================
+// VIAGEM
+// =====================================================================
+
+model Viagem {
+  id              String       @id @default(uuid())
+  tecnicoId       String?
+  tecnico         Funcionario? @relation(fields: [tecnicoId], references: [id])
+  criadoPorId     String?
+  origem          String
+  destino         String
+  motivo          String
+  iniciadoEm      DateTime
+  finalizadoEm    DateTime?
+  duracaoSegundos Int?
+  criadoEm        DateTime     @default(now())
+
+  @@index([tecnicoId])
+  @@index([criadoPorId])
+  @@index([iniciadoEm])
+}
+
+// =====================================================================
 // TREINAMENTOS
 // =====================================================================
 
