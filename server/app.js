@@ -16,6 +16,7 @@ const permissoesRoutes = require("./routes/permissoes.routes");
 const notificacoesRoutes = require("./routes/notificacoes.routes");
 const auditoriaRoutes = require("./routes/auditoria.routes");
 const atendimentoOSRoutes = require("./routes/atendimentoOS.routes");
+const viagensRoutes = require("./routes/viagens.routes");
 const { converterOSAtrasadas } = require("./utils/osConverter");
 const { sistema: configuracaoSistemaRoutes, cadastros: cadastrosRoutes } = require("./routes/configuracoes.routes");
 const {
@@ -55,6 +56,7 @@ app.use("/api/permissoes", permissoesRoutes);
 app.use("/api/notificacoes", notificacoesRoutes);
 app.use("/api/auditoria", auditoriaRoutes);
 app.use("/api/atendimentos-os", atendimentoOSRoutes);
+app.use("/api/viagens", viagensRoutes);
 app.use("/api/configuracoes/sistema", configuracaoSistemaRoutes);
 app.use("/api/cadastros", cadastrosRoutes);
 app.use("/api/treinamentos", treinamentos);
