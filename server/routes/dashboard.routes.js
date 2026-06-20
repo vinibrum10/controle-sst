@@ -37,7 +37,7 @@ router.get("/", asyncHandler(async (req, res) => {
     ? new Date(semanaInfo.dataFim.getTime() + 24 * 3600 * 1000)
     : null;
 
-  const [pessoas, tarefasSemana, todasTarefas, todosPedidos, osAtendimentos] = await Promise.all([
+  const [pessoas, tarefasSemana, todasTarefas, todosPedidos, osAtendimentos, viagemAtendimentos] = await Promise.all([
     prisma.funcionario.findMany({ orderBy: { nome: "asc" } }),
     tarefasDaSemana(semana),
     prisma.tarefa.findMany({ include: tarefaInclude }),
@@ -52,6 +52,17 @@ router.get("/", asyncHandler(async (req, res) => {
           },
           select: { responsavelId: true, duracaoSegundos: true }
         })
+      : Promise.resolve([]),
+    semanaInfo
+      ? prisma.viagem.findMany({
+          where: {
+            iniciadoEm: { gte: semanaInfo.dataInicio, lt: fimSemana },
+            finalizadoEm: { not: null },
+            tecnicoId: { not: null },
+            duracaoSegundos: { not: null }
+          },
+          select: { tecnicoId: true, duracaoSegundos: true }
+        })
       : Promise.resolve([])
   ]);
 
@@ -59,6 +70,11 @@ router.get("/", asyncHandler(async (req, res) => {
     osAtendimentos
       .filter((a) => a.responsavelId === funcionarioId)
       .reduce((soma, a) => soma + (a.duracaoSegundos ?? 0) / 3600, 0);
+
+  const viagemHorasPessoa = (funcionarioId) =>
+    viagemAtendimentos
+      .filter((v) => v.tecnicoId === funcionarioId)
+      .reduce((soma, v) => soma + (v.duracaoSegundos ?? 0) / 3600, 0);
 
   // ---- Cards de metricas (semana selecionada) ----
   const ativas = tarefasSemana.filter((tarefa) => !isDone(tarefa));
@@ -79,7 +95,7 @@ router.get("/", asyncHandler(async (req, res) => {
     .map((pessoa) => {
       const carga = cargaPessoa(tarefasSemana, pessoa.id);
       const realizado = Math.round(
-        (realizadoPessoa(tarefasSemana, pessoa.id) + osHorasPessoa(pessoa.id)) * 10
+        (realizadoPessoa(tarefasSemana, pessoa.id) + osHorasPessoa(pessoa.id) + viagemHorasPessoa(pessoa.id)) * 10
       ) / 10;
       return {
         funcionario: pessoa,
@@ -128,7 +144,8 @@ router.get("/", asyncHandler(async (req, res) => {
     .map((pessoa) => {
       const carga = cargaPessoa(tarefasSemana, pessoa.id);
       const os = osHorasPessoa(pessoa.id);
-      return { funcionario: pessoa, carga, livre: Math.max(pessoa.capacidade - carga - os, 0) };
+      const viagem = viagemHorasPessoa(pessoa.id);
+      return { funcionario: pessoa, carga, livre: Math.max(pessoa.capacidade - carga - os - viagem, 0) };
     })
     .sort((a, b) => (b.funcionario.capacidade - b.carga) - (a.funcionario.capacidade - a.carga));
 

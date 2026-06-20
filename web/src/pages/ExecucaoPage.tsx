@@ -2,6 +2,7 @@ import { useMemo, useState, type DragEvent } from "react";
 import { Panel, EmptyState } from "../components/ui/Panel";
 import { TaskCard } from "../components/tarefas/TaskCard";
 import { AtendimentoOSCard } from "../components/tarefas/AtendimentoOSCard";
+import { ViagemCard } from "../components/tarefas/ViagemCard";
 import { WeekSelector } from "../components/ui/WeekSelector";
 import { useFuncionarios } from "../hooks/useFuncionarios";
 import { useTarefas } from "../hooks/useTarefas";
@@ -237,12 +238,20 @@ export function ExecucaoPage() {
         )}
       </Panel>
 
-      <AtendimentoOSCard
-        responsavelId={responsavelFiltro !== "todos" ? responsavelFiltro : undefined}
-        semana={semana}
-        cargaTarefas={cargaTarefas}
-        capacidade={funcParaStats?.capacidade}
-      />
+      <div className="grid gap-4 lg:grid-cols-2">
+        <AtendimentoOSCard
+          responsavelId={responsavelFiltro !== "todos" ? responsavelFiltro : undefined}
+          semana={semana}
+          cargaTarefas={cargaTarefas}
+          capacidade={funcParaStats?.capacidade}
+        />
+        <ViagemCard
+          responsavelId={responsavelFiltro !== "todos" ? responsavelFiltro : undefined}
+          semana={semana}
+          cargaTarefas={cargaTarefas}
+          capacidade={funcParaStats?.capacidade}
+        />
+      </div>
     </>
   );
 }
