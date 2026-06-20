@@ -1,5 +1,4 @@
 import { useState, type ReactNode } from "react";
-import { Panel, EmptyState } from "../../components/ui/Panel";
 import { Icon } from "../../components/ui/IconSprite";
 import { WeekSelector } from "../../components/ui/WeekSelector";
 import { WorkloadList } from "../../components/dashboard/WorkloadList";
@@ -7,6 +6,7 @@ import { StatusChart } from "../../components/dashboard/StatusChart";
 import { PriorityActionPanel } from "../../components/dashboard/PriorityActionPanel";
 import { CriticalTasksPanel } from "../../components/dashboard/CriticalTasksPanel";
 import { UpcomingDeliveriesPanel } from "../../components/dashboard/UpcomingDeliveriesPanel";
+import { HelpRequestsPanel } from "../../components/dashboard/HelpRequestsPanel";
 import { ActiveTravelsList } from "../../components/dashboard/ActiveTravelsList";
 import { FinishedTravelsList } from "../../components/dashboard/FinishedTravelsList";
 import { TravelsByTechnicianPanel } from "../../components/dashboard/TravelsByTechnicianPanel";
@@ -14,7 +14,7 @@ import { useDashboard } from "../../hooks/useDashboard";
 import { useFuncionarios } from "../../hooks/useFuncionarios";
 import { useTarefasDetalhadas } from "../../hooks/useTarefasDetalhadas";
 import { useViagensDetalhadas } from "../../hooks/useViagensDetalhadas";
-import { currentWeekValue, formatWeekLabel } from "../../lib/format";
+import { addWeeks, currentWeekValue, formatWeekLabel } from "../../lib/format";
 
 /* ── Helpers ── */
 
@@ -114,7 +114,7 @@ export function DashboardOverviewPage() {
 
   const { funcionarios } = useFuncionarios();
   const { dashboard, carregando: carregandoDash } = useDashboard(semana);
-  const { kpis, priorityTasks, criticalTasks, upcomingToday, upcomingTomorrow, upcoming3days, carregando: carregandoTarefas } =
+  const { tarefas, kpis, priorityTasks, criticalTasks, upcomingToday, upcomingTomorrow, upcoming3days, carregando: carregandoTarefas } =
     useTarefasDetalhadas(semana, tecnicoFiltro || undefined);
   const { ativas, finalizadas, horasTotais, carregando: carregandoViagens, alertaAbertas, tecnicosEmViagem, byTecnico, topTecnico } =
     useViagensDetalhadas(semana, tecnicoFiltro || undefined);
@@ -124,10 +124,11 @@ export function DashboardOverviewPage() {
       ? dashboard.cargaPorPessoa.filter((c) => c.funcionario.id === tecnicoFiltro)
       : dashboard.cargaPorPessoa
     : [];
+  const funcionariosFiltrados = tecnicoFiltro ? funcionarios.filter((f) => f.id === tecnicoFiltro) : funcionarios;
 
   /* ── KPI tasks ── */
   const kpiTasks: MetricCardProps[] = [
-    { icon: "icon-task", value: kpis.total, label: "Total na semana", hint: "planejadas na semana", accent: "teal" },
+    { icon: "icon-task", value: kpis.total, label: "Total de tarefas da semana", hint: "planejadas na semana", accent: "teal" },
     { icon: "icon-clock", value: kpis.pendentes, label: "Pendentes", hint: "aguardando início", accent: "neutral" },
     { icon: "icon-check", value: kpis.emAndamento, label: "Em andamento", hint: "em execução pela equipe", accent: "blue" },
     { icon: "icon-check", value: kpis.concluidas, label: "Concluídas", hint: "finalizadas na semana", accent: "green" },
@@ -144,7 +145,7 @@ export function DashboardOverviewPage() {
       accent: kpis.taxaNoPrazo >= 80 ? "green" : kpis.taxaNoPrazo >= 60 ? "amber" : "red",
     },
     {
-      icon: "icon-team", value: kpis.comApoioAberto, label: "Pedidos de apoio", hint: "abertos",
+      icon: "icon-team", value: kpis.comApoioAberto, label: "Pedidos de ajuda abertos", hint: "aguardando apoio",
       accent: kpis.comApoioAberto > 0 ? "amber" : "neutral",
     },
   ];
@@ -181,15 +182,6 @@ export function DashboardOverviewPage() {
             <span className="text-[0.78rem] font-bold text-muted">Semana</span>
             <div className="flex items-center gap-2">
               <WeekSelector value={semana} onChange={setSemana} className="w-full sm:w-[280px]" />
-              {semana !== semanaAtual && (
-                <button
-                  type="button"
-                  onClick={() => setSemana(semanaAtual)}
-                  className="whitespace-nowrap rounded-[8px] border border-teal bg-teal px-3 py-1.5 text-[0.8rem] font-bold text-white transition-opacity hover:opacity-90"
-                >
-                  Semana atual
-                </button>
-              )}
             </div>
           </div>
 
@@ -208,6 +200,31 @@ export function DashboardOverviewPage() {
                 </option>
               ))}
             </select>
+          </div>
+
+          <div className="flex flex-wrap gap-2 sm:ml-auto sm:self-end">
+            <button
+              type="button"
+              onClick={() => setSemana(addWeeks(semana, -1))}
+              className="rounded-[8px] border border-line bg-surface-soft px-3 py-2 text-[0.8rem] font-bold text-text transition-colors hover:border-teal"
+            >
+              Semana anterior
+            </button>
+            <button
+              type="button"
+              onClick={() => setSemana(addWeeks(semana, 1))}
+              className="rounded-[8px] border border-line bg-surface-soft px-3 py-2 text-[0.8rem] font-bold text-text transition-colors hover:border-teal"
+            >
+              Próxima semana
+            </button>
+            <button
+              type="button"
+              onClick={() => setSemana(semanaAtual)}
+              className="rounded-[8px] border border-teal bg-teal px-3 py-2 text-[0.8rem] font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-55"
+              disabled={semana === semanaAtual}
+            >
+              Semana atual
+            </button>
           </div>
         </div>
       </header>
@@ -285,6 +302,17 @@ export function DashboardOverviewPage() {
             today={upcomingToday}
             tomorrow={upcomingTomorrow}
             in3days={upcoming3days}
+            loading={carregandoTarefas}
+          />
+        </PanelCard>
+
+        <PanelCard
+          title="Pedidos de Ajuda"
+          description="Solicitações, apoios e relação entre ajuda e atraso"
+        >
+          <HelpRequestsPanel
+            tasks={tarefas}
+            funcionarios={funcionariosFiltrados}
             loading={carregandoTarefas}
           />
         </PanelCard>

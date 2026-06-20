@@ -6,5 +6,6 @@ Thumbs.db
 netlify-pronto/
 render-public/
 node_modules/
+.pnpm-store/
 .env
 dist/
