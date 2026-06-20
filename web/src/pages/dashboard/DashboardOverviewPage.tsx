@@ -1,62 +1,79 @@
 import { useState } from "react";
-import { Panel } from "../../components/ui/Panel";
-import { SummaryCard } from "../../components/ui/SummaryCard";
-import { QuickAccessCard, type QuickAccessLink } from "../../components/home/QuickAccessCard";
+import { DashboardPanelCard, type PanelMetric } from "../../components/dashboard/DashboardPanelCard";
 import { useDashboard } from "../../hooks/useDashboard";
-import { useTreinamentosResumo } from "../../hooks/useTreinamentosResumo";
-import { useInspecoesResumo } from "../../hooks/useInspecoesResumo";
-import { useRotaSeguraResumo } from "../../hooks/useRotaSeguraResumo";
+import { useViagensResumo } from "../../hooks/useViagensResumo";
+import { useAuth } from "../../hooks/useAuth";
+import { DASHBOARD_PANELS, getPainelsVisiveis } from "../../lib/dashboardPanels";
 import { currentWeekValue } from "../../lib/format";
-
-const DASHBOARD_LINKS: QuickAccessLink[] = [
-  { to: "/dashboard/tarefas", label: "Tarefas da Equipe", description: "Plano semanal, carga por pessoa e status das tarefas.", icon: "icon-task" },
-  { to: "/dashboard/rota-segura", label: "Rota Segura", description: "Ranking, avaliações de APR e penalidades das equipes.", icon: "icon-shield" },
-  { to: "/dashboard/treinamentos", label: "Treinamentos", description: "Status, vencimentos e indicadores de treinamentos.", icon: "icon-graduation-cap" },
-  { to: "/dashboard/inspecoes", label: "Inspeções", description: "Inspeções, auditorias e achados em aberto.", icon: "icon-alert" },
-];
 
 export function DashboardOverviewPage() {
   const [semana] = useState(currentWeekValue);
-  const { dashboard, carregando: carregandoTarefas } = useDashboard(semana);
-  const { resumo: treinamentos, carregando: carregandoTreinamentos, vazio: treinamentosVazio } = useTreinamentosResumo();
-  const { resumo: inspecoes, carregando: carregandoInspecoes, vazio: inspecoesVazio } = useInspecoesResumo();
-  const { legacy: rotaSegura, rs2026, temRs2026, carregando: carregandoRotaSegura, vazio: rotaSeguraVazio } = useRotaSeguraResumo();
+  const { usuario } = useAuth();
+  const { dashboard, carregando: carregandoDashboard } = useDashboard(semana);
+  const { ativas: viagensAtivas, finalizadas: viagensFinalizadas, horasTotais: viagensHoras, carregando: carregandoViagens } = useViagensResumo(semana);
+
+  const papel = usuario?.papel ?? "COLABORADOR";
+  const paineis = getPainelsVisiveis(DASHBOARD_PANELS, papel);
+
+  function metricsAtividades(): PanelMetric[] {
+    if (!dashboard) return [];
+    const total = dashboard.metrics.tarefasAtivas + dashboard.metrics.concluidas;
+    const pendentes = (dashboard.statusChart?.pendente ?? 0);
+    const emAndamento = (dashboard.statusChart?.em_andamento ?? 0);
+    return [
+      { label: "Total na semana", value: total },
+      { label: "Pendentes", value: pendentes },
+      { label: "Em andamento", value: emAndamento },
+      { label: "Concluídas", value: dashboard.metrics.concluidas, accent: "green" as const },
+      { label: "Atrasadas", value: dashboard.metrics.vencidas, accent: dashboard.metrics.vencidas > 0 ? "red" as const : undefined },
+      { label: "Prazo em 3 dias", value: dashboard.metrics.prazoEm3Dias, accent: dashboard.metrics.prazoEm3Dias > 0 ? "amber" as const : undefined },
+    ];
+  }
+
+  function metricsViagens(): PanelMetric[] {
+    return [
+      { label: "Em deslocamento", value: viagensAtivas.length },
+      { label: "Finalizadas na semana", value: viagensFinalizadas.length, accent: "green" as const },
+      { label: "Tempo consumido", value: `${viagensHoras.toFixed(1)}h` },
+    ];
+  }
 
   return (
-    <div className="grid gap-6">
-      <Panel title="Visão geral" description="Resumo consolidado dos principais indicadores de cada área do programa.">
-        <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
-          <SummaryCard
-            label="Tarefas ativas"
-            value={carregandoTarefas || !dashboard ? "-" : dashboard.metrics.tarefasAtivas}
-            hint={carregandoTarefas || !dashboard ? "carregando..." : `${dashboard.metrics.vencidas} vencida(s)`}
-          />
-          <SummaryCard
-            label="Rota Segura"
-            value={carregandoRotaSegura ? "-" : rotaSeguraVazio ? "-" : temRs2026 && rs2026 ? rs2026.totalEquipes : rotaSegura.ativas}
-            hint={carregandoRotaSegura ? "carregando..." : rotaSeguraVazio ? "sem dados ainda" : temRs2026 ? "equipes ativas (RS 2026)" : "rotas ativas"}
-          />
-          <SummaryCard
-            label="Treinamentos realizados"
-            value={carregandoTreinamentos || treinamentosVazio ? "-" : treinamentos.realizados}
-            hint={carregandoTreinamentos ? "carregando..." : treinamentosVazio ? "sem dados ainda" : `${treinamentos.total} cadastrado(s)`}
-          />
-          <SummaryCard
-            label="Achados abertos"
-            value={carregandoInspecoes || inspecoesVazio ? "-" : inspecoes.achadosAbertos}
-            hint={carregandoInspecoes ? "carregando..." : inspecoesVazio ? "sem dados ainda" : `${inspecoes.totalInspecoes} inspeção(ões)`}
-          />
-        </div>
-      </Panel>
+    <div className="grid gap-4">
+      <div>
+        <h2 className="mb-1 text-[1.1rem] font-extrabold tracking-tight">Acompanhamento de Atividades e Viagens</h2>
+        <p className="text-[0.85rem] text-muted">Indicadores resumidos dos módulos ativos nesta semana.</p>
+      </div>
 
-      <section>
-        <h2 className="mb-3 text-[1.05rem] font-extrabold tracking-tight">Visões do dashboard</h2>
-        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
-          {DASHBOARD_LINKS.map((link) => (
-            <QuickAccessCard key={link.to} {...link} />
-          ))}
-        </div>
-      </section>
+      <div className="grid gap-4 lg:grid-cols-2">
+        {paineis.map((painel) => {
+          if (painel.id === "atividades") {
+            return (
+              <DashboardPanelCard
+                key={painel.id}
+                panel={painel}
+                metrics={metricsAtividades()}
+                loading={carregandoDashboard}
+              />
+            );
+          }
+          if (painel.id === "viagens") {
+            return (
+              <DashboardPanelCard
+                key={painel.id}
+                panel={painel}
+                metrics={metricsViagens()}
+                loading={carregandoViagens}
+              />
+            );
+          }
+          return null;
+        })}
+      </div>
+
+      {paineis.length === 0 && (
+        <p className="text-center text-muted py-8 text-[0.9rem]">Nenhum painel disponível para o seu perfil.</p>
+      )}
     </div>
   );
 }

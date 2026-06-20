@@ -2,10 +2,7 @@ import { NavLink, Outlet } from "react-router-dom";
 
 const TABS: { to: string; label: string; end?: boolean }[] = [
   { to: "/dashboard", label: "Visão Geral", end: true },
-  { to: "/dashboard/tarefas", label: "Tarefas da Equipe" },
-  { to: "/dashboard/rota-segura", label: "Rota Segura" },
-  { to: "/dashboard/treinamentos", label: "Treinamentos" },
-  { to: "/dashboard/inspecoes", label: "Inspeções" },
+  { to: "/dashboard/tarefas", label: "Atividades" },
 ];
 
 export function DashboardLayout() {

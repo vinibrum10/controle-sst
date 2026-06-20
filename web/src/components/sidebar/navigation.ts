@@ -26,6 +26,7 @@ export interface NavGroup {
   icon: string;
   defaultOpen: boolean;
   items: NavEntry[];
+  hidden?: boolean;
 }
 
 export const DEFAULT_PATH = "/inicio";
@@ -47,12 +48,12 @@ export const NAVIGATION_GROUPS: NavGroup[] = [
   },
   {
     id: "tasks",
-    label: "Gestão de Tarefas",
+    label: "Gestão de Atividades",
     icon: "icon-task",
     defaultOpen: true,
     items: [
-      { path: "/tarefas/criar", label: "Criar tarefa", title: "Criação de tarefas" },
-      { path: "/tarefas/executar", label: "Execução de tarefa", title: "Execução de tarefa" },
+      { path: "/tarefas/criar", label: "Criar atividade", title: "Criação de atividade" },
+      { path: "/tarefas/executar", label: "Execução de atividade", title: "Execução de atividade" },
     ],
   },
   {
@@ -70,6 +71,7 @@ export const NAVIGATION_GROUPS: NavGroup[] = [
     label: "Programas de SST",
     icon: "icon-check",
     defaultOpen: false,
+    hidden: true,
     items: [
       { path: "/programas/rota-segura", label: "Rota Segura", title: "Rota Segura" },
       { path: "/treinamentos", label: "Treinamentos", title: "Treinamentos" },
