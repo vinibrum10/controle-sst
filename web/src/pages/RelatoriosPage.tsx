@@ -4,21 +4,10 @@ import { Button } from "../components/ui/Button";
 import { Icon } from "../components/ui/IconSprite";
 import { SummaryCard } from "../components/ui/SummaryCard";
 import { useRelatorio } from "../hooks/useRelatorio";
-import { programaStatusLabel } from "../lib/enums";
 import { shiftDate, toDateInputValue } from "../lib/format";
-import type { ContagemPorStatus } from "../types/relatorio";
 
 const fieldClasses =
   "min-h-[40px] rounded-[8px] border border-line bg-surface-soft px-2.5 text-text outline-none transition-colors focus:border-teal focus:bg-white dark:focus:bg-surface-soft";
-
-const PROGRAMA_LABELS: Record<string, string> = {
-  treinamentos: "Treinamentos",
-  inspecoes: "Inspeções",
-  auditorias: "Auditorias",
-  achados: "Achados / Desvios",
-  planosAcao: "Planos de Ação",
-  rotasSeguras: "Rotas Seguras",
-};
 
 function csvCell(value: string | number): string {
   const text = String(value);
@@ -155,42 +144,6 @@ export function RelatoriosPage() {
         </Panel>
       )}
 
-      {relatorio && (
-        <Panel title="Programas de SST" description="Situação atual dos registros por programa.">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {Object.entries(relatorio.programasSST).map(([chave, contagem]) => (
-              <ProgramaCard key={chave} titulo={PROGRAMA_LABELS[chave] || chave} contagem={contagem} />
-            ))}
-          </div>
-        </Panel>
-      )}
     </div>
-  );
-}
-
-function ProgramaCard({ titulo, contagem }: { titulo: string; contagem: ContagemPorStatus }) {
-  const { total, ...porStatus } = contagem;
-
-  return (
-    <article className="rounded-[8px] border border-line bg-surface-soft p-3.5 dark:bg-surface">
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <strong className="text-[0.95rem]">{titulo}</strong>
-        <span className="inline-flex min-h-[24px] items-center whitespace-nowrap rounded-full bg-surface-strong px-2 text-[0.76rem] font-extrabold text-muted">
-          {total} no total
-        </span>
-      </div>
-      {total === 0 ? (
-        <p className="m-0 text-[0.85rem] text-muted">Nenhum registro.</p>
-      ) : (
-        <ul className="m-0 grid gap-1 p-0 text-[0.85rem]">
-          {Object.entries(porStatus).map(([status, valor]) => (
-            <li key={status} className="flex items-center justify-between gap-2 text-muted">
-              <span>{programaStatusLabel(status)}</span>
-              <strong className="text-text">{valor}</strong>
-            </li>
-          ))}
-        </ul>
-      )}
-    </article>
   );
 }

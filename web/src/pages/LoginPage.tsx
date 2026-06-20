@@ -39,10 +39,10 @@ const STATUS_CARDS = [
 ];
 
 const STATUS_COLORS = {
-  blue: { bg: "bg-[#EEF4FF]", border: "border-[#C3D9FF]", icon: "bg-[#244C7C]/10 text-[#244C7C]", dot: "bg-[#244C7C]" },
-  green: { bg: "bg-[#EDFBF3]", border: "border-[#C0EACF]", icon: "bg-[#24784c]/10 text-[#24784c]", dot: "bg-[#24784c]" },
-  amber: { bg: "bg-[#FFFBEE]", border: "border-[#F5DFA0]", icon: "bg-[#a76309]/10 text-[#a76309]", dot: "bg-[#a76309]" },
-  purple: { bg: "bg-[#F5F0FF]", border: "border-[#D8CFF0]", icon: "bg-[#5B4DA8]/10 text-[#5B4DA8]", dot: "bg-[#5B4DA8]" },
+  blue: { bg: "bg-white/[0.08]", border: "border-white/[0.14]", icon: "bg-white/10 text-[#4A8FE8]", dot: "bg-[#4A8FE8]" },
+  green: { bg: "bg-white/[0.08]", border: "border-white/[0.14]", icon: "bg-white/10 text-[#4CAF72]", dot: "bg-[#4CAF72]" },
+  amber: { bg: "bg-white/[0.08]", border: "border-white/[0.14]", icon: "bg-white/10 text-[#F5B942]", dot: "bg-[#F5B942]" },
+  purple: { bg: "bg-white/[0.08]", border: "border-white/[0.14]", icon: "bg-white/10 text-[#A78BFA]", dot: "bg-[#A78BFA]" },
 };
 
 /* ── Classes reutilizáveis ── */
@@ -131,22 +131,22 @@ export function LoginPage() {
           <div className="grid gap-10 lg:grid-cols-[1fr_440px] lg:items-center lg:gap-16 xl:grid-cols-[1fr_460px]">
 
             {/* ── COLUNA ESQUERDA: HERO ── */}
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-8 rounded-2xl bg-gradient-to-br from-[#0D2137] via-[#0F2742] to-[#1A3B6E] p-8 lg:p-10">
               {/* Eyebrow */}
               <div className="flex items-center gap-2">
-                <span className="h-px w-8 bg-[#244C7C]/40" aria-hidden="true" />
-                <span className="text-[0.72rem] font-bold uppercase tracking-[0.16em] text-[#244C7C]">
+                <span className="h-px w-8 bg-white/30" aria-hidden="true" />
+                <span className="text-[0.72rem] font-bold uppercase tracking-[0.16em] text-white/60">
                   Sistema de Gestão Operacional
                 </span>
               </div>
 
               {/* Título + subtítulo */}
               <div>
-                <h1 className="mb-4 text-[2rem] font-extrabold leading-[1.15] tracking-tight text-[#102033] lg:text-[2.4rem]">
+                <h1 className="mb-4 text-3xl font-black leading-[1.15] tracking-tight text-white sm:text-4xl">
                   Gestão de Atividades{" "}
-                  <span className="text-[#244C7C]">e Operações de Campo</span>
+                  <span className="text-[#4A8FE8]">e Operações de Campo</span>
                 </h1>
-                <p className="max-w-lg text-[0.97rem] leading-relaxed text-[#102033]/60">
+                <p className="max-w-lg text-[0.97rem] leading-relaxed text-white/60">
                   Planeje, execute e acompanhe atividades, OS Interliga e viagens da equipe técnica em um único ambiente.
                 </p>
               </div>
@@ -164,10 +164,10 @@ export function LoginPage() {
                         <Icon id={card.icon} className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="text-[0.72rem] font-bold leading-tight text-[#102033]/60">{card.label}</p>
+                        <p className="text-[0.72rem] font-bold leading-tight text-white/70">{card.label}</p>
                         <div className="mt-1 flex items-center gap-1.5">
                           <span className={`inline-block h-1.5 w-1.5 rounded-full ${c.dot}`} aria-hidden="true" />
-                          <span className="text-[0.65rem] font-bold uppercase tracking-wide text-[#102033]/40">ao vivo</span>
+                          <span className="text-[0.65rem] font-bold uppercase tracking-wide text-white/40">ao vivo</span>
                         </div>
                       </div>
                     </div>
@@ -374,6 +374,9 @@ export function LoginPage() {
             <HeroIllustration />
           </div>
         </div>
+        <p className="mt-5 text-center text-[0.74rem] text-[#5B6B7A]">
+          SGEPI · Gestão de Equipes e Operações · {new Date().getFullYear()}
+        </p>
       </main>
 
       {/* ── FOOTER ── */}

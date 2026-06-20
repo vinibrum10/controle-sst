@@ -9,7 +9,7 @@ import { formatLongDate } from "../../lib/format";
 import { NAV_ITEMS } from "../sidebar/navigation";
 
 const iconButtonClasses =
-  "inline-flex min-h-[42px] min-w-[42px] items-center justify-center gap-2 rounded-[8px] border border-line bg-neutral-button px-2.5 font-extrabold text-text transition-all hover:-translate-y-px hover:shadow-card-lg active:translate-y-0 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal/35 focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
+  "inline-flex min-h-[42px] min-w-[42px] items-center justify-center gap-2 rounded-[8px] border border-line bg-surface shadow-card px-2.5 font-extrabold text-text transition-all hover:-translate-y-px hover:shadow-card-lg active:translate-y-0 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal/35 focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
 
 const PAPEL_LABELS: Record<string, string> = {
   ADMIN: "Administrador",
@@ -45,7 +45,7 @@ export function Header({ onToggleSidebar }: HeaderProps) {
   const mostrarCriarTarefa = ROTAS_COM_CRIAR_TAREFA.some((rota) => location.pathname.startsWith(rota));
 
   return (
-    <header className="mb-6 flex flex-col gap-[14px] sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-6">
+    <header className="sticky top-0 z-10 bg-bg/80 backdrop-blur-md -mx-6 px-6 max-[760px]:-mx-4 max-[760px]:px-4 border-b border-line mb-0 pb-4 pt-2 flex flex-col gap-[14px] sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-6">
       <div className="flex min-w-0 items-center gap-3">
         <button
           type="button"
@@ -57,7 +57,7 @@ export function Header({ onToggleSidebar }: HeaderProps) {
           <Icon id="icon-sidebar" />
         </button>
         <div className="min-w-0">
-          <p className="m-0 mb-[5px] text-eyebrow text-teal">{today}</p>
+          <p className="m-0 mb-[5px] text-eyebrow text-teal font-semibold">{today}</p>
           <h1 className="m-0 break-words text-xl font-extrabold leading-tight tracking-tight sm:text-2xl">{pageTitle}</h1>
         </div>
       </div>
@@ -66,7 +66,7 @@ export function Header({ onToggleSidebar }: HeaderProps) {
         {usuario && <NotificationBell />}
 
         {usuario && (
-          <div className="flex min-h-[42px] min-w-0 items-center gap-2.5 rounded-[8px] border border-line bg-surface-strong px-2.5 text-[0.85rem]">
+          <div className="flex min-h-[42px] min-w-0 items-center gap-2.5 rounded-[8px] border border-line bg-surface shadow-card px-2.5 text-[0.85rem]">
             <Avatar nome={usuario.nome} size="small" />
             <div className="min-w-0 leading-tight">
               <span className="block max-w-[140px] truncate font-extrabold text-text">{usuario.nome}</span>
