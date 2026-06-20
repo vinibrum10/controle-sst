@@ -293,7 +293,9 @@ model Tarefa {
   horasRealizadas Float            @default(0)
   status          StatusTarefa     @default(PENDENTE)
   criadoEm        DateTime         @default(now())
+  atualizadoEm    DateTime         @updatedAt
   concluidaEm     DateTime?
+  criadoPorId     String?
 
   pedidosAjuda PedidoAjuda[]
   anexos       Anexo[]
@@ -325,9 +327,14 @@ model PedidoAjuda {
   status         StatusPedidoAjuda @default(ABERTO)
   criadoEm       DateTime          @default(now())
   atendidoEm     DateTime?
+  weekKey        String?
+  monthKey       String?
+  ano            Int?
 
   @@index([tarefaId])
   @@index([status])
+  @@index([weekKey])
+  @@index([monthKey])
 }
 
 // =====================================================================
@@ -343,9 +350,13 @@ model TarefaApontamento {
   iniciadoEm      DateTime     @default(now())
   finalizadoEm    DateTime?
   duracaoSegundos Int?
+  weekKey         String?
+  monthKey        String?
+  ano             Int?
 
   @@index([tarefaId])
   @@index([funcionarioId])
+  @@index([weekKey])
 }
 
 // =====================================================================
@@ -364,10 +375,16 @@ model AtendimentoOS {
   duracaoSegundos   Int?
   tarefaVinculadaId String?
   criadoEm          DateTime     @default(now())
+  atualizadoEm      DateTime     @updatedAt
+  weekKey           String?
+  monthKey          String?
+  ano               Int?
 
   @@index([responsavelId])
   @@index([criadoPorId])
   @@index([iniciadoEm])
+  @@index([weekKey])
+  @@index([monthKey])
 }
 
 // =====================================================================
@@ -386,10 +403,16 @@ model Viagem {
   finalizadoEm    DateTime?
   duracaoSegundos Int?
   criadoEm        DateTime     @default(now())
+  atualizadoEm    DateTime     @updatedAt
+  weekKey         String?
+  monthKey        String?
+  ano             Int?
 
   @@index([tecnicoId])
   @@index([criadoPorId])
   @@index([iniciadoEm])
+  @@index([weekKey])
+  @@index([monthKey])
 }
 
 // =====================================================================

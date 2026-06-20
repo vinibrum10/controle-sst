@@ -7,6 +7,8 @@ const { validateBody } = require("../middleware/validate");
 const { requireAuth } = require("../middleware/auth");
 const { calcularDuracaoUtil } = require("../utils/duracaoUtil");
 const { semanaInfoFromCodigo } = require("../utils/semana");
+const { temporalFields } = require("../utils/temporal");
+const { registrarAuditoria } = require("../utils/auditoria");
 
 const router = express.Router();
 router.use(requireAuth);
@@ -93,16 +95,27 @@ router.post("/", validateBody(iniciarSchema), asyncHandler(async (req, res) => {
     });
   }
 
+  const now = new Date();
   const atendimento = await prisma.atendimentoOS.create({
     data: {
       numeroOS,
       solicitante,
       responsavelId: targetFuncId,
       criadoPorId: userId,
-      iniciadoEm: new Date()
+      iniciadoEm: now,
+      ...temporalFields(now)
     },
     include: { responsavel: { select: { id: true, nome: true } } }
   });
+
+  registrarAuditoria({
+    usuario: req.user,
+    acao: "os_iniciada",
+    entidade: "AtendimentoOS",
+    entidadeId: atendimento.id,
+    detalhes: { numeroOS, solicitante, responsavelId: targetFuncId }
+  }).catch(() => {});
+
   res.status(201).json(atendimento);
 }));
 
@@ -127,6 +140,15 @@ router.patch("/:id/finalizar", asyncHandler(async (req, res) => {
     data: { finalizadoEm, duracaoSegundos },
     include: { responsavel: { select: { id: true, nome: true } } }
   });
+
+  registrarAuditoria({
+    usuario: req.user,
+    acao: "os_finalizada",
+    entidade: "AtendimentoOS",
+    entidadeId: atendimento.id,
+    detalhes: { duracaoSegundos }
+  }).catch(() => {});
+
   res.json(atendimento);
 }));
 

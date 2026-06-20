@@ -7,6 +7,8 @@ const { validateBody } = require("../middleware/validate");
 const { requireAuth } = require("../middleware/auth");
 const { calcularDuracaoUtil } = require("../utils/duracaoUtil");
 const { semanaInfoFromCodigo } = require("../utils/semana");
+const { temporalFields } = require("../utils/temporal");
+const { registrarAuditoria } = require("../utils/auditoria");
 
 const router = express.Router();
 router.use(requireAuth);
@@ -79,6 +81,7 @@ router.post("/", validateBody(iniciarSchema), asyncHandler(async (req, res) => {
     targetFuncId = tecnicoFuncId;
   }
 
+  const now = new Date();
   const viagem = await prisma.viagem.create({
     data: {
       origem,
@@ -86,10 +89,20 @@ router.post("/", validateBody(iniciarSchema), asyncHandler(async (req, res) => {
       motivo,
       tecnicoId: targetFuncId,
       criadoPorId: userId,
-      iniciadoEm: new Date()
+      iniciadoEm: now,
+      ...temporalFields(now)
     },
     include: { tecnico: { select: { id: true, nome: true } } }
   });
+
+  registrarAuditoria({
+    usuario: req.user,
+    acao: "viagem_iniciada",
+    entidade: "Viagem",
+    entidadeId: viagem.id,
+    detalhes: { origem, destino, motivo, tecnicoId: targetFuncId }
+  }).catch(() => {});
+
   res.status(201).json(viagem);
 }));
 
@@ -114,6 +127,15 @@ router.patch("/:id/finalizar", asyncHandler(async (req, res) => {
     data: { finalizadoEm, duracaoSegundos },
     include: { tecnico: { select: { id: true, nome: true } } }
   });
+
+  registrarAuditoria({
+    usuario: req.user,
+    acao: "viagem_finalizada",
+    entidade: "Viagem",
+    entidadeId: viagem.id,
+    detalhes: { duracaoSegundos }
+  }).catch(() => {});
+
   res.json(viagem);
 }));
 
