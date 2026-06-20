@@ -2,38 +2,57 @@ import { useState, type FormEvent } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { ApiError } from "../lib/api";
-import { Button } from "../components/ui/Button";
 import { Icon } from "../components/ui/IconSprite";
 import { Logo } from "../components/ui/Logo";
+import { BackgroundDecor } from "../components/login/BackgroundDecor";
+import { HeroIllustration } from "../components/login/HeroIllustration";
 import { DEFAULT_PATH } from "../components/sidebar/navigation";
 
-const inputClasses = "w-full min-h-[40px] px-2.5 rounded-[8px] border border-line bg-surface-soft text-text outline-none focus:border-teal";
-const labelClasses = "grid gap-1.5 text-[0.83rem] font-extrabold text-text";
+/* ── Dados estáticos ── */
 
-const DESTAQUES = [
+const QUICK_ACCESS = [
+  {
+    icon: "icon-dashboard",
+    label: "Dashboard",
+    description: "Acompanhamento de atividades e viagens",
+    route: "/dashboard",
+  },
   {
     icon: "icon-task",
-    title: "Gestão de Tarefas",
-    description: "Plano semanal, distribuição de carga por pessoa e acompanhamento do status das entregas da equipe.",
+    label: "Gestão de Atividades",
+    description: "Criar e organizar atividades da equipe",
+    route: "/tarefas/criar",
   },
   {
-    icon: "icon-shield",
-    title: "Rota Segura",
-    description: "Ranking de equipes, avaliações de APR e controle de penalidades, tudo em um só lugar.",
-  },
-  {
-    icon: "icon-graduation-cap",
-    title: "Treinamentos",
-    description: "Status, vencimentos e indicadores de treinamentos obrigatórios de toda a equipe.",
+    icon: "icon-check",
+    label: "Execução de Atividade",
+    description: "Executar atividades, OS Interliga e viagens",
+    route: "/tarefas/executar",
   },
 ];
 
-const PREVIEW_ITEMS = [
-  { icon: "icon-dashboard", label: "Dashboard", hint: "Indicadores gerais de SST" },
-  { icon: "icon-task", label: "Tarefas da Equipe", hint: "Plano semanal e status" },
-  { icon: "icon-shield", label: "Rota Segura", hint: "Ranking e avaliações de APR" },
-  { icon: "icon-graduation-cap", label: "Treinamentos", hint: "Vencimentos e indicadores" },
+const STATUS_CARDS = [
+  { icon: "icon-task", label: "Atividades da semana", color: "blue" as const },
+  { icon: "icon-check", label: "OS em andamento", color: "green" as const },
+  { icon: "icon-team", label: "Viagens em execução", color: "amber" as const },
+  { icon: "icon-dashboard", label: "Equipes em campo", color: "purple" as const },
 ];
+
+const STATUS_COLORS = {
+  blue: { bg: "bg-[#EEF4FF]", border: "border-[#C3D9FF]", icon: "bg-[#244C7C]/10 text-[#244C7C]", dot: "bg-[#244C7C]" },
+  green: { bg: "bg-[#EDFBF3]", border: "border-[#C0EACF]", icon: "bg-[#24784c]/10 text-[#24784c]", dot: "bg-[#24784c]" },
+  amber: { bg: "bg-[#FFFBEE]", border: "border-[#F5DFA0]", icon: "bg-[#a76309]/10 text-[#a76309]", dot: "bg-[#a76309]" },
+  purple: { bg: "bg-[#F5F0FF]", border: "border-[#D8CFF0]", icon: "bg-[#5B4DA8]/10 text-[#5B4DA8]", dot: "bg-[#5B4DA8]" },
+};
+
+/* ── Classes reutilizáveis ── */
+
+const inputBase =
+  "w-full min-h-[44px] rounded-xl border border-[#E2E8F0] bg-white px-3.5 text-[0.92rem] text-[#102033] outline-none transition-all placeholder:text-[#94A3B8] focus:border-[#244C7C] focus:ring-2 focus:ring-[#244C7C]/15";
+
+const labelBase = "block text-[0.8rem] font-bold text-[#102033]/70 mb-1.5";
+
+/* ── Componente principal ── */
 
 export function LoginPage() {
   const { usuario, carregando, login, register } = useAuth();
@@ -85,164 +104,283 @@ export function LoginPage() {
   }
 
   function toggleMode() {
-    setMode((current) => (current === "login" ? "register" : "login"));
+    setMode((m) => (m === "login" ? "register" : "login"));
     setError("");
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-bg text-text">
-      {/* CABEÇALHO */}
-      <header className="border-b border-line bg-surface px-4 py-4 lg:px-8">
-        <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <Logo size="lg" />
-          <span className="hidden text-eyebrow uppercase text-muted md:inline">Plataforma de Gestão de SST</span>
+    <div className="relative flex min-h-screen flex-col text-[#102033]">
+      <BackgroundDecor />
+
+      {/* ── HEADER ── */}
+      <header className="relative z-10 border-b border-[#E2E8F0]/70 bg-white/70 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 lg:px-10">
+          <Logo size="sm" />
+          <div className="hidden items-center gap-2 md:flex">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#24784c]" aria-hidden="true" />
+            <span className="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-[#60716c]">
+              Plataforma Operacional
+            </span>
+          </div>
         </div>
       </header>
 
-      <main className="flex-1">
-        {/* SEÇÃO PRINCIPAL */}
-        <section className="mx-auto grid max-w-6xl gap-10 px-4 py-12 md:grid-cols-2 md:items-center md:gap-14 lg:px-8 lg:py-20">
-          <div>
-            <h1 className="mb-3 text-display font-extrabold tracking-tight">Gestão de SST centralizada para sua equipe</h1>
-            <p className="mb-8 max-w-md text-[0.95rem] leading-relaxed text-muted">
-              Acompanhe tarefas, Rota Segura, treinamentos e inspeções em um único painel, com indicadores
-              atualizados em tempo real.
-            </p>
+      {/* ── CONTEÚDO PRINCIPAL ── */}
+      <main className="relative z-10 flex flex-1 items-center">
+        <div className="mx-auto w-full max-w-7xl px-5 py-10 lg:px-10 lg:py-16">
+          <div className="grid gap-10 lg:grid-cols-[1fr_440px] lg:items-center lg:gap-16 xl:grid-cols-[1fr_460px]">
 
-            <div className="max-w-md rounded-2xl border border-line bg-surface p-7 shadow-card-lg">
-              <h2 className="mb-1 text-[1.2rem] font-extrabold tracking-tight">
-                {mode === "login" ? "Entrar na conta" : "Criar conta"}
-              </h2>
-              <p className="mb-5 text-[0.88rem] text-muted">
-                {mode === "login" ? "Entre com seu e-mail e senha para acessar o sistema." : "Crie sua conta para acessar o sistema."}
-              </p>
+            {/* ── COLUNA ESQUERDA: HERO ── */}
+            <div className="flex flex-col gap-8">
+              {/* Eyebrow */}
+              <div className="flex items-center gap-2">
+                <span className="h-px w-8 bg-[#244C7C]/40" aria-hidden="true" />
+                <span className="text-[0.72rem] font-bold uppercase tracking-[0.16em] text-[#244C7C]">
+                  Sistema de Gestão Operacional
+                </span>
+              </div>
 
-              {mode === "login" ? (
-                <form className="grid gap-3 text-left" onSubmit={handleLogin}>
-                  <label className={labelClasses}>
-                    E-mail
-                    <input
-                      type="email"
-                      required
-                      autoComplete="email"
-                      className={inputClasses}
-                      value={loginEmail}
-                      onChange={(e) => setLoginEmail(e.target.value)}
-                    />
-                  </label>
-                  <label className={labelClasses}>
-                    Senha
-                    <input
-                      type="password"
-                      required
-                      autoComplete="current-password"
-                      className={inputClasses}
-                      value={loginSenha}
-                      onChange={(e) => setLoginSenha(e.target.value)}
-                    />
-                  </label>
-                  <Button type="submit" size="lg" full disabled={submitting}>
-                    Entrar
-                  </Button>
-                </form>
-              ) : (
-                <form className="grid gap-3 text-left" onSubmit={handleRegister}>
-                  <label className={labelClasses}>
-                    Nome
-                    <input
-                      type="text"
-                      required
-                      autoComplete="name"
-                      className={inputClasses}
-                      value={registerNome}
-                      onChange={(e) => setRegisterNome(e.target.value)}
-                    />
-                  </label>
-                  <label className={labelClasses}>
-                    E-mail
-                    <input
-                      type="email"
-                      required
-                      autoComplete="email"
-                      className={inputClasses}
-                      value={registerEmail}
-                      onChange={(e) => setRegisterEmail(e.target.value)}
-                    />
-                  </label>
-                  <label className={labelClasses}>
-                    Senha
-                    <input
-                      type="password"
-                      required
-                      minLength={6}
-                      autoComplete="new-password"
-                      className={inputClasses}
-                      value={registerSenha}
-                      onChange={(e) => setRegisterSenha(e.target.value)}
-                    />
-                  </label>
-                  <Button type="submit" size="lg" full disabled={submitting}>
-                    Criar conta
-                  </Button>
-                </form>
-              )}
+              {/* Título + subtítulo */}
+              <div>
+                <h1 className="mb-4 text-[2rem] font-extrabold leading-[1.15] tracking-tight text-[#102033] lg:text-[2.4rem]">
+                  Gestão de Atividades{" "}
+                  <span className="text-[#244C7C]">e Operações de Campo</span>
+                </h1>
+                <p className="max-w-lg text-[0.97rem] leading-relaxed text-[#102033]/60">
+                  Planeje, execute e acompanhe atividades, OS Interliga e viagens da equipe técnica em um único ambiente.
+                </p>
+              </div>
 
-              <p className="mb-0 mt-3 min-h-[1.2em] text-[0.85rem] text-red">{error}</p>
+              {/* Cards de status (estrutura pronta para dados reais) */}
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+                {STATUS_CARDS.map((card) => {
+                  const c = STATUS_COLORS[card.color];
+                  return (
+                    <div
+                      key={card.label}
+                      className={`flex flex-col gap-2 rounded-xl border ${c.border} ${c.bg} px-3.5 py-3`}
+                    >
+                      <div className={`grid h-8 w-8 place-items-center rounded-lg ${c.icon}`} aria-hidden="true">
+                        <Icon id={card.icon} className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <p className="text-[0.72rem] font-bold leading-tight text-[#102033]/60">{card.label}</p>
+                        <div className="mt-1 flex items-center gap-1.5">
+                          <span className={`inline-block h-1.5 w-1.5 rounded-full ${c.dot}`} aria-hidden="true" />
+                          <span className="text-[0.65rem] font-bold uppercase tracking-wide text-[#102033]/40">ao vivo</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
 
-              <Button type="button" variant="secondary" full onClick={toggleMode} className="mt-2">
-                {mode === "login" ? "Criar uma conta" : "Já tenho conta"}
-              </Button>
+              {/* Ilustração */}
+              <div className="hidden lg:block">
+                <HeroIllustration />
+              </div>
             </div>
-          </div>
 
-          {/* PRÉVIA DO PAINEL */}
-          <div className="rounded-2xl border border-line bg-surface-strong p-6 shadow-card-lg">
-            <div className="mb-4 flex items-center gap-2 text-eyebrow uppercase text-muted">
-              <Icon id="icon-dashboard" className="h-4 w-4" />
-              Acesso rápido
-            </div>
-            <div className="grid gap-3">
-              {PREVIEW_ITEMS.map((item) => (
-                <div key={item.label} className="flex items-center gap-3.5 rounded-xl border border-line bg-surface p-4 shadow-card">
-                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-teal-soft text-teal-strong dark:text-teal" aria-hidden="true">
-                    <Icon id={item.icon} className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <strong className="block text-[0.92rem] font-extrabold tracking-tight">{item.label}</strong>
-                    <p className="mb-0 mt-0.5 text-[0.8rem] text-muted">{item.hint}</p>
-                  </div>
+            {/* ── COLUNA DIREITA: LOGIN CARD ── */}
+            <div className="w-full">
+              <div className="rounded-2xl border border-[#E2E8F0] bg-white/90 p-7 shadow-[0_8px_40px_rgba(36,76,124,0.10)] backdrop-blur-sm sm:p-8">
+
+                {/* Cabeçalho do card */}
+                <div className="mb-6">
+                  <h2 className="text-[1.3rem] font-extrabold tracking-tight text-[#102033]">
+                    {mode === "login" ? "Entrar na plataforma" : "Criar conta"}
+                  </h2>
+                  <p className="mt-1 text-[0.85rem] text-[#102033]/55">
+                    {mode === "login"
+                      ? "Acesse com e-mail e senha cadastrados."
+                      : "Preencha os dados para criar sua conta."}
+                  </p>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
-        {/* DESTAQUES */}
-        <section className="border-t border-line bg-surface-soft px-4 py-14 lg:px-8">
-          <div className="mx-auto max-w-6xl">
-            <h2 className="mb-10 text-center text-[1.4rem] font-extrabold tracking-tight">
-              Tudo o que você precisa para gerenciar a SST
-            </h2>
-            <div className="grid gap-6 md:grid-cols-3">
-              {DESTAQUES.map((item) => (
-                <div key={item.title} className="flex flex-col items-center rounded-2xl border border-line bg-surface p-6 text-center shadow-card">
-                  <div className="mb-4 grid h-14 w-14 place-items-center rounded-full bg-teal-soft text-teal-strong dark:text-teal" aria-hidden="true">
-                    <Icon id={item.icon} className="h-6 w-6" />
-                  </div>
-                  <h3 className="mb-2 text-[1.05rem] font-extrabold tracking-tight">{item.title}</h3>
-                  <p className="mb-0 text-[0.88rem] text-muted">{item.description}</p>
+                {/* Formulário de login */}
+                {mode === "login" && (
+                  <form className="grid gap-4" onSubmit={handleLogin} noValidate>
+                    <div>
+                      <label htmlFor="login-email" className={labelBase}>E-mail</label>
+                      <input
+                        id="login-email"
+                        type="email"
+                        required
+                        autoComplete="email"
+                        placeholder="seu@email.com"
+                        className={inputBase}
+                        value={loginEmail}
+                        onChange={(e) => setLoginEmail(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="login-senha" className={labelBase}>Senha</label>
+                      <input
+                        id="login-senha"
+                        type="password"
+                        required
+                        autoComplete="current-password"
+                        placeholder="••••••••"
+                        className={inputBase}
+                        value={loginSenha}
+                        onChange={(e) => setLoginSenha(e.target.value)}
+                      />
+                    </div>
+
+                    {error && (
+                      <div className="flex items-center gap-2 rounded-xl border border-[#FED7D7] bg-[#FFF5F5] px-3.5 py-2.5" role="alert">
+                        <Icon id="icon-close" className="h-4 w-4 shrink-0 text-[#C53030]" aria-hidden="true" />
+                        <p className="text-[0.83rem] font-medium text-[#C53030]">{error}</p>
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl bg-[#244C7C] px-5 text-[0.92rem] font-extrabold text-white transition-all hover:bg-[#1f4567] focus:outline-none focus:ring-2 focus:ring-[#244C7C] focus:ring-offset-2 disabled:opacity-60"
+                    >
+                      {submitting ? (
+                        <>
+                          <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                          </svg>
+                          Entrando…
+                        </>
+                      ) : (
+                        "Entrar"
+                      )}
+                    </button>
+                  </form>
+                )}
+
+                {/* Formulário de cadastro */}
+                {mode === "register" && (
+                  <form className="grid gap-4" onSubmit={handleRegister} noValidate>
+                    <div>
+                      <label htmlFor="reg-nome" className={labelBase}>Nome</label>
+                      <input
+                        id="reg-nome"
+                        type="text"
+                        required
+                        autoComplete="name"
+                        placeholder="Seu nome completo"
+                        className={inputBase}
+                        value={registerNome}
+                        onChange={(e) => setRegisterNome(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="reg-email" className={labelBase}>E-mail</label>
+                      <input
+                        id="reg-email"
+                        type="email"
+                        required
+                        autoComplete="email"
+                        placeholder="seu@email.com"
+                        className={inputBase}
+                        value={registerEmail}
+                        onChange={(e) => setRegisterEmail(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="reg-senha" className={labelBase}>Senha</label>
+                      <input
+                        id="reg-senha"
+                        type="password"
+                        required
+                        minLength={6}
+                        autoComplete="new-password"
+                        placeholder="Mínimo 6 caracteres"
+                        className={inputBase}
+                        value={registerSenha}
+                        onChange={(e) => setRegisterSenha(e.target.value)}
+                      />
+                    </div>
+
+                    {error && (
+                      <div className="flex items-center gap-2 rounded-xl border border-[#FED7D7] bg-[#FFF5F5] px-3.5 py-2.5" role="alert">
+                        <Icon id="icon-close" className="h-4 w-4 shrink-0 text-[#C53030]" aria-hidden="true" />
+                        <p className="text-[0.83rem] font-medium text-[#C53030]">{error}</p>
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl bg-[#244C7C] px-5 text-[0.92rem] font-extrabold text-white transition-all hover:bg-[#1f4567] focus:outline-none focus:ring-2 focus:ring-[#244C7C] focus:ring-offset-2 disabled:opacity-60"
+                    >
+                      {submitting ? (
+                        <>
+                          <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                          </svg>
+                          Criando conta…
+                        </>
+                      ) : (
+                        "Criar conta"
+                      )}
+                    </button>
+                  </form>
+                )}
+
+                {/* Toggle login / criar conta */}
+                <div className="mt-4 border-t border-[#E2E8F0] pt-4 text-center">
+                  <button
+                    type="button"
+                    onClick={toggleMode}
+                    className="text-[0.85rem] font-semibold text-[#244C7C] underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-[#244C7C] focus:ring-offset-2 rounded"
+                  >
+                    {mode === "login" ? "Criar uma conta" : "Já tenho conta — Entrar"}
+                  </button>
                 </div>
-              ))}
+
+                {/* Divisor */}
+                <div className="my-5 flex items-center gap-3">
+                  <span className="flex-1 border-t border-[#E2E8F0]" aria-hidden="true" />
+                  <span className="text-[0.72rem] font-bold uppercase tracking-widest text-[#102033]/35">Acesso rápido</span>
+                  <span className="flex-1 border-t border-[#E2E8F0]" aria-hidden="true" />
+                </div>
+
+                {/* Quick access cards */}
+                <div className="grid gap-2.5">
+                  {QUICK_ACCESS.map((item) => (
+                    <div
+                      key={item.label}
+                      className="flex items-center gap-3 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-3 transition-colors hover:border-[#C3D9FF] hover:bg-[#EEF4FF]"
+                    >
+                      <div
+                        className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#244C7C]/08 text-[#244C7C]"
+                        aria-hidden="true"
+                        style={{ background: "rgba(36,76,124,0.08)" }}
+                      >
+                        <Icon id={item.icon} className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[0.85rem] font-extrabold text-[#102033]">{item.label}</p>
+                        <p className="text-[0.74rem] text-[#102033]/50">{item.description}</p>
+                      </div>
+                      <Icon id="icon-arrow-right" className="h-4 w-4 shrink-0 text-[#244C7C]/40" aria-hidden="true" />
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-        </section>
+
+          {/* Ilustração mobile (abaixo do card de login) */}
+          <div className="mt-10 flex justify-center lg:hidden">
+            <HeroIllustration />
+          </div>
+        </div>
       </main>
 
-      {/* RODAPÉ */}
-      <footer className="border-t border-line bg-surface px-4 py-6 lg:px-8">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 md:flex-row">
+      {/* ── FOOTER ── */}
+      <footer className="relative z-10 border-t border-[#E2E8F0]/70 bg-white/60 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-5 py-4 sm:flex-row lg:px-10">
           <Logo size="sm" showTagline={false} />
-          <p className="mb-0 text-[0.8rem] text-muted">
+          <p className="text-[0.75rem] text-[#102033]/40">
             © {new Date().getFullYear()} SGEPI — Sistema de Gestão de Equipes, Programas e Indicadores.
           </p>
         </div>

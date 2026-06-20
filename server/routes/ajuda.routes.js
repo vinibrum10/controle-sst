@@ -9,6 +9,8 @@ const { tarefaInclude, serializeTarefa } = require("../utils/tarefaSerializer");
 const { isDone, isLate, tarefasDaSemana, cargaPessoa } = require("../utils/metrics");
 const { enviarNotificacaoApoioAtribuido } = require("../utils/notificacoes");
 const { notificarApoioSolicitado } = require("../utils/notificacoesInApp");
+const { temporalFields } = require("../utils/temporal");
+const { registrarAuditoria } = require("../utils/auditoria");
 
 const router = express.Router();
 
@@ -100,10 +102,19 @@ router.post("/solicitar", validateBody(z.object({ tarefaId: z.string().min(1) })
         solicitanteId: tarefa.responsavelId,
         atendentePorId: escolhido.pessoa.id,
         status: "ATENDIDO",
-        atendidoEm: new Date()
+        atendidoEm: new Date(),
+        ...temporalFields(new Date())
       }
     })
   ]);
+
+  registrarAuditoria({
+    usuario: req.user,
+    acao: "pedido_ajuda_criado",
+    entidade: "PedidoAjuda",
+    entidadeId: tarefa.id,
+    detalhes: { tarefaId: tarefa.id, ajudanteId: escolhido.pessoa.id, ajudanteNome: escolhido.pessoa.nome }
+  }).catch(() => {});
 
   const resultadoNotificacao = await notificarApoioSolicitado(escolhido.pessoa.id, tarefaAtualizada);
   const notificacaoEmail = resultadoNotificacao && !resultadoNotificacao.preferencia.email

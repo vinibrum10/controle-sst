@@ -59,10 +59,13 @@ export function Sidebar({ className = "", onNavigate }: SidebarProps) {
   const { temPermissao } = usePermissoes();
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(readNavGroupState);
 
-  const visibleGroups = NAVIGATION_GROUPS.map((group) => ({
-    ...group,
-    items: filterEntries(group.items, temPermissao),
-  })).filter((group) => group.items.length > 0);
+  const visibleGroups = NAVIGATION_GROUPS
+    .filter((group) => !group.hidden)
+    .map((group) => ({
+      ...group,
+      items: filterEntries(group.items, temPermissao),
+    }))
+    .filter((group) => group.items.length > 0);
 
   useEffect(() => {
     localStorage.setItem(NAV_GROUP_STORAGE_KEY, JSON.stringify(openGroups));

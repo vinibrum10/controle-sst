@@ -9,6 +9,8 @@ const { findOrCreateSemana } = require("../utils/semana");
 const { tarefaInclude: include, serializeTarefa } = require("../utils/tarefaSerializer");
 const { enviarNotificacaoTarefaAtribuida } = require("../utils/notificacoes");
 const { notificarTarefaAtribuida } = require("../utils/notificacoesInApp");
+const { registrarAuditoria } = require("../utils/auditoria");
+const { temporalFields } = require("../utils/temporal");
 
 const router = express.Router();
 
@@ -115,10 +117,19 @@ router.post("/", validateBody(tarefaSchema), asyncHandler(async (req, res) => {
       periodoRotina: body.tipo === "ROTINEIRA" ? body.periodoRotina : null,
       semanaId: semanaRecord?.id || null,
       prazo: new Date(body.prazo),
-      status: body.status || "PENDENTE"
+      status: body.status || "PENDENTE",
+      criadoPorId: req.user.sub
     },
     include
   });
+
+  registrarAuditoria({
+    usuario: req.user,
+    acao: "tarefa_criada",
+    entidade: "Tarefa",
+    entidadeId: tarefa.id,
+    detalhes: { titulo: tarefa.titulo, responsavelId: tarefa.responsavelId, semana }
+  }).catch(() => {});
 
   const resultadoNotificacao = await notificarTarefaAtribuida(tarefa);
   const notificacaoEmail = resultadoNotificacao && !resultadoNotificacao.preferencia.email
@@ -210,12 +221,25 @@ router.patch("/:id/iniciar", asyncHandler(async (req, res) => {
     select: { funcionarioId: true }
   });
 
+  const now = new Date();
   await prisma.$transaction([
     prisma.tarefa.update({ where: { id: req.params.id }, data: { status: "EM_ANDAMENTO" } }),
     prisma.tarefaApontamento.create({
-      data: { tarefaId: req.params.id, funcionarioId: usuario?.funcionarioId || null }
+      data: {
+        tarefaId: req.params.id,
+        funcionarioId: usuario?.funcionarioId || null,
+        iniciadoEm: now,
+        ...temporalFields(now)
+      }
     })
   ]);
+
+  registrarAuditoria({
+    usuario: req.user,
+    acao: "tarefa_iniciada",
+    entidade: "Tarefa",
+    entidadeId: req.params.id
+  }).catch(() => {});
 
   const tarefa = await prisma.tarefa.findUnique({ where: { id: req.params.id }, include });
   res.json(serializeTarefa(tarefa));
@@ -245,6 +269,14 @@ router.patch("/:id/pausar", asyncHandler(async (req, res) => {
     })
   ]);
 
+  registrarAuditoria({
+    usuario: req.user,
+    acao: "tarefa_pausada",
+    entidade: "Tarefa",
+    entidadeId: req.params.id,
+    detalhes: { duracaoSegundos }
+  }).catch(() => {});
+
   const tarefa = await prisma.tarefa.findUnique({ where: { id: req.params.id }, include });
   res.json(serializeTarefa(tarefa));
 }));
@@ -254,6 +286,15 @@ router.delete("/:id", asyncHandler(async (req, res) => {
   if (!existente) return res.status(404).json({ error: "Tarefa nao encontrada." });
 
   await prisma.tarefa.delete({ where: { id: req.params.id } });
+
+  registrarAuditoria({
+    usuario: req.user,
+    acao: "tarefa_excluida",
+    entidade: "Tarefa",
+    entidadeId: req.params.id,
+    detalhes: { titulo: existente.titulo }
+  }).catch(() => {});
+
   res.status(204).send();
 }));
 
